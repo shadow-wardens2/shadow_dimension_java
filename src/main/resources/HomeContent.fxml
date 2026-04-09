@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox spacing="48" style="-fx-background-color: #050507; -fx-padding: 48 48 48 48;">
+        <!-- Header -->
+        <VBox spacing="24">
+            <TextFlow>
+                <Text style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 48px; -fx-font-weight: 900; -fx-fill: #fcf8fc;" text="THE " />
+                <Text style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 48px; -fx-font-weight: 900; -fx-fill: #8b5cf6;" text="VOID" />
+                <Text style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 48px; -fx-font-weight: 900; -fx-fill: #fcf8fc;" text="&#10;AWAKENS" />
+            </TextFlow>
+            <Label style="-fx-text-fill: #adaaae; -fx-font-size: 16px;" text="Manage your ethereal resources and monitor active rituals.&#10;Your soul affinity is currently peaking." />
+        </VBox>
+        
+        <!-- Bento Grid -->
+        <GridPane hgap="24" vgap="24">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="66.6" />
+                <ColumnConstraints percentWidth="33.4" />
+            </columnConstraints>
+            
+            <!-- Ritual Card -->
+            <VBox spacing="32" style="-fx-padding: 32;" styleClass="bento-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <VBox spacing="8">
+                    <Label styleClass="bento-title" text="Active Rituals" />
+                    <Label styleClass="bento-subtitle" text="4 concurrent processes in the Ethereal plane" />
+                </VBox>
+                <VBox spacing="24">
+                    <!-- Progress 1 -->
+                    <VBox spacing="10">
+                        <HBox alignment="CENTER_LEFT">
+                            <Pane prefHeight="8" prefWidth="8" style="-fx-background-color: #8b5cf6; -fx-background-radius: 4;" />
+                            <Label style="-fx-text-fill: #fcf8fc;" text="  Soul Binding VII" />
+                            <Pane HBox.hgrow="ALWAYS" />
+                            <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="82% Manifested" />
+                        </HBox>
+                        <Pane prefHeight="4" prefWidth="500" style="-fx-background-color: #ffffff10; -fx-background-radius: 2;">
+                            <Pane prefHeight="4" prefWidth="400" style="-fx-background-color: #8b5cf6; -fx-background-radius: 2; -fx-effect: dropshadow(three-pass-box, rgba(139, 92, 246, 0.4), 10, 0, 0, 0);" />
+                        </Pane>
+                    </VBox>
+                    <!-- Progress 2 -->
+                    <VBox spacing="10">
+                        <HBox alignment="CENTER_LEFT">
+                            <Pane prefHeight="8" prefWidth="8" style="-fx-background-color: #d6b2fc; -fx-background-radius: 4;" />
+                            <Label style="-fx-text-fill: #fcf8fc;" text="  Shadow Extraction" />
+                            <Pane HBox.hgrow="ALWAYS" />
+                            <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="45% Manifested" />
+                        </HBox>
+                        <Pane prefHeight="4" prefWidth="500" style="-fx-background-color: #ffffff10; -fx-background-radius: 2;">
+                            <Pane prefHeight="4" prefWidth="250" style="-fx-background-color: #d6b2fc; -fx-background-radius: 2;" />
+                        </Pane>
+                    </VBox>
+                </VBox>
+            </VBox>
+
+            <!-- Soul Fragments -->
+            <VBox spacing="0" style="-fx-padding: 32;" styleClass="bento-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <VBox spacing="8">
+                    <Label styleClass="bento-title" text="Soul Fragments" />
+                    <Label styleClass="bento-subtitle" text="Current essence balance" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="8" style="-fx-padding: 48 0 48 0;">
+                    <Label style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 60px; -fx-font-weight: 900; -fx-text-fill: #ffffff;" text="1,284" />
+                    <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 12px; -fx-font-weight: bold;" text="+12% VS LAST CYCLE" />
+                </VBox>
+                <Button prefWidth="600" styleClass="ghost-button" text="TRANSMUTE ESSENCE" />
+            </VBox>
+
+            <!-- Visual Detail -->
+            <VBox spacing="24" style="-fx-padding: 32;" styleClass="bento-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <Label styleClass="bento-title" text="The Abyssal Gates" />
+                <Label styleClass="bento-subtitle" text="Access to the inner sanctum will manifest in 14 cycles." wrapText="true" />
+            </VBox>
+        </GridPane>
+    </VBox>
+</ScrollPane>

@@ -3,25 +3,66 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500.0" prefWidth="700.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.MarketplaceManagementController">
-   <children>
-      <VBox alignment="CENTER" spacing="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <VBox alignment="CENTER" spacing="5">
-                <Label styleClass="headline" text="Marketplace Dashboard" />
-                <Label styleClass="subheadline" text="Select a module to manage your marketplace data" />
-            </VBox>
-            <HBox alignment="CENTER" spacing="25.0">
-               <children>
-                  <Button fx:id="btnProducts" mnemonicParsing="false" onAction="#openProducts" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Products" />
-                  <Button fx:id="btnCategories" mnemonicParsing="false" onAction="#openCategories" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Categories" />
-                  <Button fx:id="btnTypes" mnemonicParsing="false" onAction="#openTypes" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Types" />
-               </children>
+<StackPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #050507;" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.MarketplaceManagementController">
+
+    <BorderPane>
+        <!-- Navbar -->
+        <top>
+            <HBox alignment="CENTER_LEFT" prefHeight="80.0" style="-fx-background-color: rgba(5,5,7,0.8); -fx-border-width: 0 0 1 0; -fx-border-color: #1a1a24;">
+                <HBox alignment="CENTER" spacing="8" style="-fx-padding: 0 48 0 48;">
+                    <Label style="-fx-font-size: 20px; -fx-text-fill: #fcf8fc;" styleClass="headline" text="Shadow" />
+                    <Label style="-fx-font-size: 20px;" styleClass="headline" text="Dimensions" />
+                </HBox>
+                <Pane HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="40">
+                    <Label style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-width: 0 0 2 0; -fx-border-color: #8b5cf6;" text="Connect Soul" />
+                    <Label styleClass="nav-link" text="My Vault" />
+                    <Label styleClass="nav-link" text="Ethereal" />
+                    <Label styleClass="nav-link" text="Void" />
+                </HBox>
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button styleClass="glow-button" text="Connect Soul" style="-fx-translate-x: -48;"/>
             </HBox>
-         </children>
-      </VBox>
-   </children>
-</AnchorPane>
+        </top>
+
+        <!-- Sidebar -->
+        <left>
+            <VBox prefWidth="256.0" style="-fx-background-color: #050507; -fx-border-width: 0 1 0 0; -fx-border-color: #1a1a24;">
+                <VBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 24 24 40 24;">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Pane prefHeight="40" prefWidth="40" style="-fx-background-color: #19191d; -fx-background-radius: 20; -fx-border-color: rgba(139, 92, 246, 0.3); -fx-border-radius: 20;" />
+                        <VBox alignment="CENTER_LEFT">
+                            <Label style="-fx-text-fill: #ffffff; -fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-font-size: 14px;" text="Shadow Dweller" />
+                            <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold;" text="TIER: ETHEREAL" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+                <VBox spacing="8" style="-fx-padding: 0 0 0 0;">
+                    <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceSelector" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
+                </VBox>
+                <Pane VBox.vgrow="ALWAYS" />
+                <VBox style="-fx-padding: 24;">
+                    <Button prefWidth="208" styleClass="secondary-button" text="Connect Soul" />
+                </VBox>
+            </VBox>
+        </left>
+
+        <!-- Dynamic Content Router Area -->
+        <center>
+            <StackPane fx:id="contentArea" style="-fx-background-color: #050507;" />
+        </center>
+    </BorderPane>
+
+    <!-- Floating Chatbot Toggle -->
+    <StackPane alignment="BOTTOM_RIGHT" mouseTransparent="true">
+        <Button mouseTransparent="false" prefHeight="56" prefWidth="56" styleClass="chat-toggle" text="💬" style="-fx-translate-x: -32; -fx-translate-y: -32;"/>
+    </StackPane>
+
+</StackPane>
