@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="150.0" prefWidth="300.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.AjouterTypeController">
+    <children>
+        <VBox alignment="CENTER" spacing="15" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+            <Label styleClass="headline" text="Ajouter un Type" />
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label styleClass="form-label" text="Nom:" prefWidth="50" />
+                <TextField fx:id="tfNomType" promptText="Entrer le nom du type" />
+            </HBox>
+            <HBox alignment="CENTER" spacing="10">
+                <Button onAction="#handleAjouterType" styleClass="glow-button" text="Ajouter" />
+                <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>
