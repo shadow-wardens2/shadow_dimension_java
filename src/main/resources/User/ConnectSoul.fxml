@@ -9,12 +9,12 @@
 
 <AnchorPane prefHeight="600.0" prefWidth="920.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.ConnectSoulController">
     <children>
-        <VBox alignment="CENTER" spacing="22.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+        <VBox alignment="CENTER" fillWidth="false" spacing="22.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
             <children>
                 <Label styleClass="headline" text="Connect Soul" />
                 <Label styleClass="subheadline" text="Login first, or create an account if you are new" />
 
-                <VBox fx:id="loginBox" prefWidth="420.0" spacing="12.0" styleClass="panel-card">
+                <VBox fx:id="loginBox" maxWidth="540.0" prefWidth="540.0" spacing="12.0" styleClass="panel-card">
                     <children>
                         <Label styleClass="bento-title" text="Login" />
                         <Label styleClass="form-label" text="Email or Username" />
@@ -26,7 +26,7 @@
                     </children>
                 </VBox>
 
-                <VBox fx:id="signupBox" managed="false" prefWidth="420.0" spacing="12.0" styleClass="panel-card" visible="false">
+                <VBox fx:id="signupBox" managed="false" maxWidth="540.0" prefWidth="540.0" spacing="12.0" styleClass="panel-card" visible="false">
                     <children>
                         <Label styleClass="bento-title" text="Sign Up" />
                         <Label styleClass="form-label" text="Email" />
