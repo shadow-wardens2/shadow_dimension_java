@@ -11,6 +11,9 @@ public class User {
     private String country;
     private String city;
     private String bio;
+    private String roles;
+    private int isActive;
+    private int isLocked;
 
     public User() {
     }
@@ -98,5 +101,33 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
+    }
+
+    public int getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(int isActive) {
+        this.isActive = isActive;
+    }
+
+    public int getIsLocked() {
+        return isLocked;
+    }
+
+    public void setIsLocked(int isLocked) {
+        this.isLocked = isLocked;
+    }
+
+    public boolean isAdmin() {
+        return roles != null && roles.contains("ROLE_ADMIN");
     }
 }

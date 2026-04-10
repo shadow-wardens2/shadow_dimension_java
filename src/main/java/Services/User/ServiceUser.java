@@ -1,6 +1,7 @@
 package Services.User;
 
 import Entities.User.User;
+import Interfaces.InterfaceServiceUser;
 import Utils.ShadowDimensionsDB;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -12,8 +13,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ServiceUser {
+public class ServiceUser implements InterfaceServiceUser {
 
     private final Connection cnx;
 
@@ -61,7 +64,7 @@ public class ServiceUser {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
         }
 
-        String sql = "SELECT id, email, username, password, full_name, phone, country, city, bio, is_locked FROM `user` WHERE email = ? OR username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE email = ? OR username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, emailOrUsername.trim());
         ps.setString(2, emailOrUsername.trim());
@@ -85,7 +88,7 @@ public class ServiceUser {
     }
 
     public User getById(int id) throws SQLException {
-        String sql = "SELECT id, email, username, password, full_name, phone, country, city, bio FROM `user` WHERE id = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();
@@ -111,8 +114,45 @@ public class ServiceUser {
         ps.executeUpdate();
     }
 
+    public List<User> getAllUsers() throws SQLException {
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` ORDER BY id DESC";
+        Statement st = cnx.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        List<User> users = new ArrayList<>();
+
+        while (rs.next()) {
+            users.add(mapUser(rs));
+        }
+
+        return users;
+    }
+
+    public void updateUserByAdmin(User user) throws SQLException {
+        String sql = "UPDATE `user` SET email = ?, username = ?, roles = ?, full_name = ?, phone = ?, country = ?, city = ?, bio = ?, is_active = ?, is_locked = ? WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setString(1, user.getEmail());
+        ps.setString(2, user.getUsername());
+        ps.setString(3, user.getRoles());
+        ps.setString(4, user.getFullName());
+        ps.setString(5, user.getPhone());
+        ps.setString(6, user.getCountry());
+        ps.setString(7, user.getCity());
+        ps.setString(8, user.getBio());
+        ps.setInt(9, user.getIsActive());
+        ps.setInt(10, user.getIsLocked());
+        ps.setInt(11, user.getId());
+        ps.executeUpdate();
+    }
+
+    public void deleteUserById(int userId) throws SQLException {
+        String sql = "DELETE FROM `user` WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ps.setInt(1, userId);
+        ps.executeUpdate();
+    }
+
     private User findByEmail(String email) throws SQLException {
-        String sql = "SELECT id, email, username, password, full_name, phone, country, city, bio FROM `user` WHERE email = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE email = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, email);
         ResultSet rs = ps.executeQuery();
@@ -123,7 +163,7 @@ public class ServiceUser {
     }
 
     private User findByUsername(String username) throws SQLException {
-        String sql = "SELECT id, email, username, password, full_name, phone, country, city, bio FROM `user` WHERE username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, username);
         ResultSet rs = ps.executeQuery();
@@ -138,12 +178,15 @@ public class ServiceUser {
         user.setId(rs.getInt("id"));
         user.setEmail(rs.getString("email"));
         user.setUsername(rs.getString("username"));
+        user.setRoles(rs.getString("roles"));
         user.setPassword(rs.getString("password"));
         user.setFullName(rs.getString("full_name"));
         user.setPhone(rs.getString("phone"));
         user.setCountry(rs.getString("country"));
         user.setCity(rs.getString("city"));
         user.setBio(rs.getString("bio"));
+        user.setIsActive(rs.getInt("is_active"));
+        user.setIsLocked(rs.getInt("is_locked"));
         return user;
     }
 

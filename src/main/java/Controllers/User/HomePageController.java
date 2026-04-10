@@ -31,6 +31,9 @@ public class HomePageController implements PageHost {
     private Button btnBottomAuth;
 
     @FXML
+    private Button btnUserManagement;
+
+    @FXML
     public void initialize() {
         loadPage("/HomeContent.fxml");
         refreshAuthUi();
@@ -49,6 +52,14 @@ public class HomePageController implements PageHost {
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
         loadPage("/Marketplace/MarketplaceSelector.fxml");
+    }
+
+    @FXML
+    void openUserManagement(ActionEvent event) {
+        User user = SessionManager.getCurrentUser();
+        if (user != null && user.isAdmin()) {
+            loadPage("/User/ManagementUsersContent.fxml");
+        }
     }
 
     @FXML
@@ -79,10 +90,14 @@ public class HomePageController implements PageHost {
             lbUserName.setText(username);
             btnTopAuth.setText("Logout");
             btnBottomAuth.setText("Logout");
+            btnUserManagement.setVisible(user.isAdmin());
+            btnUserManagement.setManaged(user.isAdmin());
         } else {
             lbUserName.setText("Shadow Dweller");
             btnTopAuth.setText("Connect Soul");
             btnBottomAuth.setText("Connect Soul");
+            btnUserManagement.setVisible(false);
+            btnUserManagement.setManaged(false);
         }
     }
 
@@ -100,6 +115,9 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EditProfileContentController) {
                 ((EditProfileContentController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof ManagementUsersController) {
+                // no context needed yet, but this keeps room for shared host behavior later
             }
 
             contentArea.getChildren().clear();

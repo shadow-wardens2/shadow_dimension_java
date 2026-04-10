@@ -43,6 +43,7 @@
                 <VBox spacing="8" style="-fx-padding: 0 0 0 0;">
                     <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
                     <Button alignment="BASELINE_LEFT" onAction="#openVault" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    My Vault" />
+                    <Button fx:id="btnUserManagement" alignment="BASELINE_LEFT" managed="false" onAction="#openUserManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Users Management" visible="false" />
                     <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
