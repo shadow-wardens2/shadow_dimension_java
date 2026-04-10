@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #050507;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.HomePageController">
+
+    <BorderPane>
+        <top>
+            <HBox alignment="CENTER_LEFT" prefHeight="80.0" style="-fx-background-color: rgba(5,5,7,0.8); -fx-border-width: 0 0 1 0; -fx-border-color: #1a1a24;">
+                <HBox alignment="CENTER" spacing="8" style="-fx-padding: 0 48 0 48;">
+                    <Label style="-fx-font-size: 20px; -fx-text-fill: #fcf8fc;" styleClass="headline" text="Shadow" />
+                    <Label style="-fx-font-size: 20px;" styleClass="headline" text="Dimensions" />
+                </HBox>
+                <Pane HBox.hgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="40">
+                    <Label style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-width: 0 0 2 0; -fx-border-color: #8b5cf6;" text="Connect Soul" />
+                    <Label onMouseClicked="#openVault" styleClass="nav-link" text="My Vault" />
+                    <Label styleClass="nav-link" text="Ethereal" />
+                    <Label styleClass="nav-link" text="Void" />
+                </HBox>
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnTopAuth" onAction="#handleAuthAction" style="-fx-translate-x: -48;" styleClass="glow-button" text="Connect Soul" />
+            </HBox>
+        </top>
+
+        <left>
+            <VBox prefWidth="256.0" style="-fx-background-color: #050507; -fx-border-width: 0 1 0 0; -fx-border-color: #1a1a24;">
+                <VBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 24 24 40 24;">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Pane prefHeight="40" prefWidth="40" style="-fx-background-color: #19191d; -fx-background-radius: 20; -fx-border-color: rgba(139, 92, 246, 0.3); -fx-border-radius: 20;" />
+                        <VBox alignment="CENTER_LEFT">
+                            <Label fx:id="lbUserName" style="-fx-text-fill: #ffffff; -fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-font-size: 14px;" text="Shadow Dweller" />
+                            <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold;" text="TIER: ETHEREAL" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+                <VBox spacing="8" style="-fx-padding: 0 0 0 0;">
+                    <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openVault" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    My Vault" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
+                </VBox>
+                <Pane VBox.vgrow="ALWAYS" />
+                <VBox style="-fx-padding: 24;">
+                    <Button fx:id="btnBottomAuth" onAction="#handleAuthAction" prefWidth="208" styleClass="secondary-button" text="Connect Soul" />
+                </VBox>
+            </VBox>
+        </left>
+
+        <center>
+            <StackPane fx:id="contentArea" style="-fx-background-color: #050507;" />
+        </center>
+    </BorderPane>
+
+    <StackPane alignment="BOTTOM_RIGHT" mouseTransparent="true">
+        <Button mouseTransparent="false" prefHeight="56" prefWidth="56" style="-fx-translate-x: -32; -fx-translate-y: -32;" styleClass="chat-toggle" text="💬" />
+    </StackPane>
+
+</StackPane>

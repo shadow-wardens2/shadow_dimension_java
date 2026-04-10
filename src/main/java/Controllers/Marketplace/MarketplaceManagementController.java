@@ -8,7 +8,7 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 
-public class MarketplaceManagementController {
+public class MarketplaceManagementController implements PageHost {
 
     @FXML
     private StackPane contentArea;

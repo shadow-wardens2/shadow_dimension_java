@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="600.0" prefWidth="920.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.ConnectSoulController">
+    <children>
+        <VBox alignment="CENTER" spacing="22.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <children>
+                <Label styleClass="headline" text="Connect Soul" />
+                <Label styleClass="subheadline" text="Login first, or create an account if you are new" />
+
+                <VBox fx:id="loginBox" prefWidth="420.0" spacing="12.0" styleClass="panel-card">
+                    <children>
+                        <Label styleClass="bento-title" text="Login" />
+                        <Label styleClass="form-label" text="Email or Username" />
+                        <TextField fx:id="tfLoginIdentity" promptText="email@example.com or username" />
+                        <Label styleClass="form-label" text="Password" />
+                        <PasswordField fx:id="pfLoginPassword" promptText="********" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#showSignup" styleClass="secondary-button" text="Sign Up" />
+                    </children>
+                </VBox>
+
+                <VBox fx:id="signupBox" managed="false" prefWidth="420.0" spacing="12.0" styleClass="panel-card" visible="false">
+                    <children>
+                        <Label styleClass="bento-title" text="Sign Up" />
+                        <Label styleClass="form-label" text="Email" />
+                        <TextField fx:id="tfSignupEmail" promptText="email@example.com" />
+                        <Label styleClass="form-label" text="Username" />
+                        <TextField fx:id="tfSignupUsername" promptText="your username" />
+                        <Label styleClass="form-label" text="Password" />
+                        <PasswordField fx:id="pfSignupPassword" promptText="********" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleSignup" styleClass="glow-button" text="Create Account" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#showLogin" styleClass="secondary-button" text="Back to Login" />
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

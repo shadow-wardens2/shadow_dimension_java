@@ -9,10 +9,10 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/Marketplace/MarketplaceManagement.fxml"));
+                getClass().getResource("/HomePage.fxml"));
 
         Scene scene = new Scene(loader.load());
-        stage.setTitle("Gestion Produits");
+        stage.setTitle("Home");
         stage.setScene(scene);
         stage.show();
     }

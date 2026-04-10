@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="620.0" prefWidth="920.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.EditProfileController">
+    <children>
+        <VBox spacing="14.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <children>
+                        <Label styleClass="headline" text="Edit Profile" />
+                        <Label fx:id="lbWelcome" styleClass="subheadline" text="Connected as: -" />
+                    </children>
+                </HBox>
+
+                <VBox spacing="16.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
+                    <children>
+                        <GridPane hgap="14.0" vgap="12.0">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="130.0" prefWidth="130.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                                <ColumnConstraints minWidth="130.0" prefWidth="130.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+
+                            <Label styleClass="form-label" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <TextField fx:id="tfEmail" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                            <Label styleClass="form-label" text="Username" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                            <TextField fx:id="tfUsername" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                            <Label styleClass="form-label" text="Full Name" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                            <TextField fx:id="tfFullName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label styleClass="form-label" text="Phone" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                            <TextField fx:id="tfPhone" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+                            <Label styleClass="form-label" text="Country" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                            <TextField fx:id="tfCountry" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label styleClass="form-label" text="City" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                            <TextField fx:id="tfCity" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+                            <Label styleClass="form-label" text="Bio" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                            <TextArea fx:id="taBio" prefHeight="120.0" wrapText="true" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+                        </GridPane>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                            <children>
+                                <Button onAction="#handleOpenMarketplace" styleClass="secondary-button" text="Open Marketplace" />
+                                <Button onAction="#handleLogout" styleClass="secondary-button" text="Logout" />
+                                <Button onAction="#handleSaveProfile" styleClass="glow-button" text="Save Profile" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

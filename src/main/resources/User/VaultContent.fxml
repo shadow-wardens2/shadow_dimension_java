@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.VaultController">
+    <content>
+        <VBox spacing="20.0" style="-fx-background-color: #050507; -fx-padding: 32;">
+            <children>
+                <VBox spacing="8.0">
+                    <children>
+                        <Label fx:id="lbVaultTitle" styleClass="headline" text="My Vault" />
+                        <Label fx:id="lbAuthState" styleClass="subheadline" text="Soul synchronized." />
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                            <children>
+                                <Button fx:id="btnEditProfile" onAction="#handleEditProfile" styleClass="glow-button" text="Edit Profile" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <HBox spacing="16.0">
+                    <children>
+                        <VBox prefWidth="430.0" spacing="10.0" styleClass="panel-card">
+                            <children>
+                                <Label styleClass="bento-title" text="Identity" />
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints prefWidth="120.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label styleClass="form-label" text="Username" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <Label fx:id="lbUsername" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Label styleClass="form-label" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <Label fx:id="lbEmail" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Label styleClass="form-label" text="Full Name" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <Label fx:id="lbFullName" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    </children>
+                                </GridPane>
+                            </children>
+                        </VBox>
+
+                        <VBox prefWidth="430.0" spacing="10.0" styleClass="panel-card">
+                            <children>
+                                <Label styleClass="bento-title" text="Profile Details" />
+                                <GridPane hgap="10.0" vgap="10.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints prefWidth="120.0" />
+                                        <ColumnConstraints hgrow="ALWAYS" />
+                                    </columnConstraints>
+                                    <children>
+                                        <Label styleClass="form-label" text="Phone" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <Label fx:id="lbPhone" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Label styleClass="form-label" text="Country" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <Label fx:id="lbCountry" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Label styleClass="form-label" text="City" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                        <Label fx:id="lbCity" styleClass="subheadline" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <Label styleClass="form-label" text="Bio" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                        <Label fx:id="lbBio" style="-fx-text-fill: #adaaae;" text="-" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    </children>
+                                </GridPane>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

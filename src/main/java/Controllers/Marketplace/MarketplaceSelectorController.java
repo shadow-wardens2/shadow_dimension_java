@@ -5,9 +5,9 @@ import javafx.fxml.FXML;
 
 public class MarketplaceSelectorController {
 
-    private MarketplaceManagementController dashboardContext;
+    private PageHost dashboardContext;
 
-    public void setDashboardContext(MarketplaceManagementController dashboardContext) {
+    public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
