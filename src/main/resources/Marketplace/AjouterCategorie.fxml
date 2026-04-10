@@ -7,17 +7,17 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="200.0" prefWidth="350.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.AjouterCategorieController">
+<AnchorPane prefHeight="258.0" prefWidth="350.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.AjouterCategorieController">
     <children>
         <VBox alignment="CENTER" spacing="15" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
             <Label styleClass="headline" text="Ajouter une Catégorie" />
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label styleClass="form-label" text="Nom de la catégorie:" prefWidth="120" />
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label prefWidth="120" styleClass="form-label" text="Nom de la catégorie:" />
                 <TextField fx:id="tfNomCategorie" promptText="Entrer le nom" />
             </HBox>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label styleClass="form-label" text="Description:" prefWidth="120" />
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label prefWidth="120" styleClass="form-label" text="Description:" />
                 <TextField fx:id="tfDescription" promptText="Entrer la description" />
             </HBox>
 
