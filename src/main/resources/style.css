@@ -46,6 +46,21 @@
     -fx-background-color: rgba(139, 92, 246, 0.1);
 }
 
+.icon-button {
+    -fx-background-color: #0e0e11;
+    -fx-text-fill: #ba9eff;
+    -fx-border-color: rgba(139, 92, 246, 0.3);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 6 10;
+    -fx-cursor: hand;
+}
+
+.icon-button:hover {
+    -fx-border-color: #8b5cf6;
+}
+
 .table-view {
     -fx-background-color: transparent;
     -fx-border-color: transparent;

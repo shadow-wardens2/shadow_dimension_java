@@ -14,6 +14,7 @@ public class User {
     private String roles;
     private int isActive;
     private int isLocked;
+    private String lastPresence;
 
     public User() {
     }
@@ -127,7 +128,53 @@ public class User {
         this.isLocked = isLocked;
     }
 
+    public String getLastPresence() {
+        return lastPresence;
+    }
+
+    public void setLastPresence(String lastPresence) {
+        this.lastPresence = lastPresence;
+    }
+
+    public String getUserIdentity() {
+        String u = (username == null || username.isBlank()) ? "-" : username;
+        String e = (email == null || email.isBlank()) ? "-" : email;
+        return u + "\n" + e;
+    }
+
+    public String getRank() {
+        String role = extractPrimaryRole();
+        if (role.startsWith("ROLE_")) {
+            return role.substring(5);
+        }
+        return role;
+    }
+
+    public String getStatus() {
+        if (isLocked == 1) {
+            return "LOCKED";
+        }
+        return isActive == 1 ? "ACTIVE" : "INACTIVE";
+    }
+
+    public String extractPrimaryRole() {
+        if (roles == null || roles.isBlank()) {
+            return "ROLE_USER";
+        }
+
+        String cleaned = roles.replace("[", "")
+                .replace("]", "")
+                .replace("\"", "")
+                .trim();
+
+        if (cleaned.contains(",")) {
+            return cleaned.split(",")[0].trim();
+        }
+
+        return cleaned.isBlank() ? "ROLE_USER" : cleaned;
+    }
+
     public boolean isAdmin() {
-        return roles != null && roles.contains("ROLE_ADMIN");
+        return extractPrimaryRole().equals("ROLE_ADMIN") || (roles != null && roles.contains("ROLE_ADMIN"));
     }
 }

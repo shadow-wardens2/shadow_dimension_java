@@ -13,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +66,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
         }
 
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE email = ? OR username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE email = ? OR username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, emailOrUsername.trim());
         ps.setString(2, emailOrUsername.trim());
@@ -88,7 +90,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public User getById(int id) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE id = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();
@@ -115,7 +117,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public List<User> getAllUsers() throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` ORDER BY id DESC";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` ORDER BY id DESC";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         List<User> users = new ArrayList<>();
@@ -152,7 +154,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByEmail(String email) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE email = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE email = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, email);
         ResultSet rs = ps.executeQuery();
@@ -163,7 +165,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByUsername(String username) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, is_active, is_locked FROM `user` WHERE username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, username);
         ResultSet rs = ps.executeQuery();
@@ -185,6 +187,12 @@ public class ServiceUser implements InterfaceServiceUser {
         user.setCountry(rs.getString("country"));
         user.setCity(rs.getString("city"));
         user.setBio(rs.getString("bio"));
+        Timestamp createdAt = rs.getTimestamp("created_at");
+        if (createdAt != null) {
+            user.setLastPresence(createdAt.toLocalDateTime().toLocalDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+        } else {
+            user.setLastPresence("-");
+        }
         user.setIsActive(rs.getInt("is_active"));
         user.setIsLocked(rs.getInt("is_locked"));
         return user;

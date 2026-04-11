@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -25,6 +26,12 @@ public class ConnectSoulController {
     private PasswordField pfLoginPassword;
 
     @FXML
+    private TextField tfLoginPasswordVisible;
+
+    @FXML
+    private Button btnToggleLoginPassword;
+
+    @FXML
     private TextField tfSignupEmail;
 
     @FXML
@@ -34,17 +41,25 @@ public class ConnectSoulController {
     private PasswordField pfSignupPassword;
 
     @FXML
+    private TextField tfSignupPasswordVisible;
+
+    @FXML
+    private Button btnToggleSignupPassword;
+
+    @FXML
     private VBox loginBox;
 
     @FXML
     private VBox signupBox;
 
     private final ServiceUser serviceUser = new ServiceUser();
+    private boolean loginPasswordVisible;
+    private boolean signupPasswordVisible;
 
     @FXML
     private void handleLogin() {
         try {
-            User user = serviceUser.login(tfLoginIdentity.getText(), pfLoginPassword.getText());
+            User user = serviceUser.login(tfLoginIdentity.getText(), getLoginPassword());
             if (user == null) {
                 showAlert(Alert.AlertType.ERROR, "Erreur", "Identifiants invalides.");
                 return;
@@ -62,7 +77,7 @@ public class ConnectSoulController {
     @FXML
     private void handleSignup() {
         try {
-            User user = serviceUser.signup(tfSignupEmail.getText(), tfSignupUsername.getText(), pfSignupPassword.getText());
+            User user = serviceUser.signup(tfSignupEmail.getText(), tfSignupUsername.getText(), getSignupPassword());
             SessionManager.setCurrentUser(user);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Compte cree avec succes.");
             openHomePage();
@@ -87,6 +102,52 @@ public class ConnectSoulController {
         signupBox.setManaged(false);
         loginBox.setVisible(true);
         loginBox.setManaged(true);
+    }
+
+    @FXML
+    private void toggleLoginPasswordVisibility() {
+        loginPasswordVisible = !loginPasswordVisible;
+        if (loginPasswordVisible) {
+            tfLoginPasswordVisible.setText(pfLoginPassword.getText());
+        } else {
+            pfLoginPassword.setText(tfLoginPasswordVisible.getText());
+        }
+        applyLoginPasswordVisibility();
+    }
+
+    @FXML
+    private void toggleSignupPasswordVisibility() {
+        signupPasswordVisible = !signupPasswordVisible;
+        if (signupPasswordVisible) {
+            tfSignupPasswordVisible.setText(pfSignupPassword.getText());
+        } else {
+            pfSignupPassword.setText(tfSignupPasswordVisible.getText());
+        }
+        applySignupPasswordVisibility();
+    }
+
+    private void applyLoginPasswordVisibility() {
+        pfLoginPassword.setVisible(!loginPasswordVisible);
+        pfLoginPassword.setManaged(!loginPasswordVisible);
+        tfLoginPasswordVisible.setVisible(loginPasswordVisible);
+        tfLoginPasswordVisible.setManaged(loginPasswordVisible);
+        btnToggleLoginPassword.setText(loginPasswordVisible ? "🙈" : "👁");
+    }
+
+    private void applySignupPasswordVisibility() {
+        pfSignupPassword.setVisible(!signupPasswordVisible);
+        pfSignupPassword.setManaged(!signupPasswordVisible);
+        tfSignupPasswordVisible.setVisible(signupPasswordVisible);
+        tfSignupPasswordVisible.setManaged(signupPasswordVisible);
+        btnToggleSignupPassword.setText(signupPasswordVisible ? "🙈" : "👁");
+    }
+
+    private String getLoginPassword() {
+        return loginPasswordVisible ? tfLoginPasswordVisible.getText() : pfLoginPassword.getText();
+    }
+
+    private String getSignupPassword() {
+        return signupPasswordVisible ? tfSignupPasswordVisible.getText() : pfSignupPassword.getText();
     }
 
     private void openHomePage() throws IOException {

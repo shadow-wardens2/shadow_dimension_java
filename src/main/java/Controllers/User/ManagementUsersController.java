@@ -6,15 +6,21 @@ import Utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Optional;
 
 public class ManagementUsersController {
 
@@ -25,73 +31,100 @@ public class ManagementUsersController {
     private TableColumn<User, Integer> colId;
 
     @FXML
-    private TableColumn<User, String> colUsername;
+    private TableColumn<User, String> colUserIdentity;
 
     @FXML
-    private TableColumn<User, String> colEmail;
+    private TableColumn<User, String> colRank;
 
     @FXML
-    private TableColumn<User, String> colRoles;
+    private TableColumn<User, String> colStatus;
 
     @FXML
-    private TableColumn<User, Integer> colActive;
+    private TableColumn<User, String> colLastPresence;
 
     @FXML
-    private TableColumn<User, Integer> colLocked;
+    private TableColumn<User, Void> colActions;
 
     @FXML
-    private TextField tfEmail;
+    private TextField tfSearch;
 
     @FXML
-    private TextField tfUsername;
-
-    @FXML
-    private TextField tfRoles;
-
-    @FXML
-    private TextField tfFullName;
-
-    @FXML
-    private TextField tfPhone;
-
-    @FXML
-    private TextField tfCountry;
-
-    @FXML
-    private TextField tfCity;
-
-    @FXML
-    private TextArea taBio;
-
-    @FXML
-    private CheckBox cbActive;
-
-    @FXML
-    private CheckBox cbLocked;
+    private Button btnSortId;
 
     private final ServiceUser serviceUser = new ServiceUser();
-    private final ObservableList<User> users = FXCollections.observableArrayList();
+    private final ObservableList<User> masterUsers = FXCollections.observableArrayList();
+    private final ObservableList<User> displayedUsers = FXCollections.observableArrayList();
+    private boolean idAscending = false;
 
     @FXML
     public void initialize() {
-        User current = SessionManager.getCurrentUser();
-        if (current == null || !current.isAdmin()) {
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null || !currentUser.isAdmin()) {
             showAlert(Alert.AlertType.WARNING, "Access denied", "Only admins can manage users.");
             return;
         }
 
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colUsername.setCellValueFactory(new PropertyValueFactory<>("username"));
-        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
-        colRoles.setCellValueFactory(new PropertyValueFactory<>("roles"));
-        colActive.setCellValueFactory(new PropertyValueFactory<>("isActive"));
-        colLocked.setCellValueFactory(new PropertyValueFactory<>("isLocked"));
+        colUserIdentity.setCellValueFactory(new PropertyValueFactory<>("userIdentity"));
+        colRank.setCellValueFactory(new PropertyValueFactory<>("rank"));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        colLastPresence.setCellValueFactory(new PropertyValueFactory<>("lastPresence"));
 
-        usersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, selected) -> {
-            if (selected != null) {
-                fillForm(selected);
+        colUserIdentity.setCellFactory(param -> new TableCell<>() {
+                private final Label identityLabel = new Label();
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                        identityLabel.setText(item);
+                        identityLabel.setStyle("-fx-text-fill: #e8e3f5; -fx-font-size: 15px; -fx-font-weight: 600;");
+                        setGraphic(identityLabel);
+                }
             }
         });
+
+        colActions.setCellFactory(param -> new TableCell<>() {
+            private final Button btnEditRank = new Button("Edit Rank");
+            private final Button btnLock = new Button("Lock/Unlock");
+            private final Button btnDelete = new Button("Delete");
+            private final HBox pane = new HBox(8, btnEditRank, btnLock, btnDelete);
+
+            {
+                btnEditRank.getStyleClass().add("secondary-button");
+                btnLock.getStyleClass().add("secondary-button");
+                btnDelete.getStyleClass().add("delete-button");
+
+                btnEditRank.setOnAction(event -> {
+                    User selected = getTableView().getItems().get(getIndex());
+                    handleEditRank(selected);
+                });
+
+                btnLock.setOnAction(event -> {
+                    User selected = getTableView().getItems().get(getIndex());
+                    handleToggleLock(selected);
+                });
+
+                btnDelete.setOnAction(event -> {
+                    User selected = getTableView().getItems().get(getIndex());
+                    handleDeleteUser(selected);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(pane);
+                }
+            }
+        });
+
+        tfSearch.textProperty().addListener((obs, oldValue, newValue) -> applyFiltersAndSort());
 
         loadUsers();
     }
@@ -102,44 +135,65 @@ public class ManagementUsersController {
     }
 
     @FXML
-    private void handleSaveUser() {
-        User selected = usersTable.getSelectionModel().getSelectedItem();
+    private void handleToggleSortById() {
+        idAscending = !idAscending;
+        btnSortId.setText(idAscending ? "ID ASC" : "ID DESC");
+        applyFiltersAndSort();
+    }
+
+    private void handleEditRank(User selected) {
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Selection", "Select a user first.");
             return;
         }
 
-        try {
-            selected.setEmail(tfEmail.getText().trim());
-            selected.setUsername(tfUsername.getText().trim());
-            selected.setRoles(normalizeRoles(tfRoles.getText().trim()));
-            selected.setFullName(tfFullName.getText().trim());
-            selected.setPhone(tfPhone.getText().trim());
-            selected.setCountry(tfCountry.getText().trim());
-            selected.setCity(tfCity.getText().trim());
-            selected.setBio(taBio.getText().trim());
-            selected.setIsActive(cbActive.isSelected() ? 1 : 0);
-            selected.setIsLocked(cbLocked.isSelected() ? 1 : 0);
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(selected.getRank(), Arrays.asList("USER", "ADMIN", "CREATOR"));
+        dialog.setTitle("Edit Rank");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Choose rank:");
 
+        Optional<String> result = dialog.showAndWait();
+        if (result.isEmpty()) {
+            return;
+        }
+
+        String roleToken = "ROLE_" + result.get();
+        try {
+            selected.setRoles(normalizeRoles(roleToken));
             serviceUser.updateUserByAdmin(selected);
+            applyFiltersAndSort();
 
             User current = SessionManager.getCurrentUser();
             if (current != null && current.getId() == selected.getId()) {
-                SessionManager.setCurrentUser(selected);
+                current.setRoles(selected.getRoles());
+                SessionManager.setCurrentUser(current);
             }
-
-            showAlert(Alert.AlertType.INFORMATION, "Success", "User updated.");
-            loadUsers();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
         }
     }
 
-    @FXML
-    private void handleDeleteUser() {
-        User selected = usersTable.getSelectionModel().getSelectedItem();
+    private void handleToggleLock(User selected) {
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Selection", "Select a user first.");
+            return;
+        }
+
+        try {
+            selected.setIsLocked(selected.getIsLocked() == 1 ? 0 : 1);
+            serviceUser.updateUserByAdmin(selected);
+            applyFiltersAndSort();
+
+            User current = SessionManager.getCurrentUser();
+            if (current != null && current.getId() == selected.getId()) {
+                current.setIsLocked(selected.getIsLocked());
+                SessionManager.setCurrentUser(current);
+            }
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
+        }
+    }
+
+    private void handleDeleteUser(User selected) {
+        if (selected == null) {
             return;
         }
 
@@ -151,8 +205,6 @@ public class ManagementUsersController {
 
         try {
             serviceUser.deleteUserById(selected.getId());
-            showAlert(Alert.AlertType.INFORMATION, "Success", "User deleted.");
-            clearForm();
             loadUsers();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
@@ -160,43 +212,35 @@ public class ManagementUsersController {
     }
 
     private void loadUsers() {
-        users.clear();
+        masterUsers.clear();
         try {
-            users.addAll(serviceUser.getAllUsers());
-            usersTable.setItems(users);
+            masterUsers.addAll(serviceUser.getAllUsers());
+            applyFiltersAndSort();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
         }
     }
 
-    private void fillForm(User user) {
-        tfEmail.setText(valueOrEmpty(user.getEmail()));
-        tfUsername.setText(valueOrEmpty(user.getUsername()));
-        tfRoles.setText(valueOrEmpty(user.getRoles()));
-        tfFullName.setText(valueOrEmpty(user.getFullName()));
-        tfPhone.setText(valueOrEmpty(user.getPhone()));
-        tfCountry.setText(valueOrEmpty(user.getCountry()));
-        tfCity.setText(valueOrEmpty(user.getCity()));
-        taBio.setText(valueOrEmpty(user.getBio()));
-        cbActive.setSelected(user.getIsActive() == 1);
-        cbLocked.setSelected(user.getIsLocked() == 1);
-    }
+    private void applyFiltersAndSort() {
+        String search = tfSearch.getText() == null ? "" : tfSearch.getText().trim().toLowerCase();
 
-    private void clearForm() {
-        tfEmail.clear();
-        tfUsername.clear();
-        tfRoles.clear();
-        tfFullName.clear();
-        tfPhone.clear();
-        tfCountry.clear();
-        tfCity.clear();
-        taBio.clear();
-        cbActive.setSelected(false);
-        cbLocked.setSelected(false);
-    }
+        displayedUsers.clear();
+        for (User user : masterUsers) {
+            String name = safe(user.getUsername()).toLowerCase();
+            String email = safe(user.getEmail()).toLowerCase();
+            String rank = safe(user.getRank()).toLowerCase();
+            String id = String.valueOf(user.getId());
 
-    private String valueOrEmpty(String value) {
-        return value == null ? "" : value;
+            if (search.isBlank() || name.contains(search) || email.contains(search) || rank.contains(search) || id.contains(search)) {
+                displayedUsers.add(user);
+            }
+        }
+
+        displayedUsers.sort(idAscending
+                ? Comparator.comparingInt(User::getId)
+                : Comparator.comparingInt(User::getId).reversed());
+
+        usersTable.setItems(displayedUsers);
     }
 
     private String normalizeRoles(String rawRoles) {
@@ -210,6 +254,10 @@ public class ManagementUsersController {
 
         // Allows quick input like ROLE_ADMIN while still storing valid JSON.
         return "[\"" + rawRoles.replace("\"", "") + "\"]";
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
