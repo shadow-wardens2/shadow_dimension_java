@@ -210,7 +210,15 @@ public class ServiceUser implements InterfaceServiceUser {
         }
 
         if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
-            return BCrypt.checkpw(plainPassword, storedPassword);
+            // jBCrypt expects $2a$/$2b$. Legacy PHP exports often use $2y$.
+            String normalized = storedPassword.startsWith("$2y$")
+                    ? "$2a$" + storedPassword.substring(4)
+                    : storedPassword;
+            try {
+                return BCrypt.checkpw(plainPassword, normalized);
+            } catch (IllegalArgumentException ex) {
+                return false;
+            }
         }
 
         // Compatibility fallback for previously inserted SHA-256 passwords.
