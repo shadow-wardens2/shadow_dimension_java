@@ -2,9 +2,6 @@ package Services.event;
 
 import Entities.event.Category;
 import Entities.event.Event;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.net.URI;
@@ -47,27 +44,20 @@ public class EventAiAssistantService {
             return "I could not load event data right now: " + e.getMessage();
         }
 
-        JsonObject payload = new JsonObject();
-        payload.addProperty("model", MODEL);
-        payload.addProperty("temperature", 0.35);
+        String systemPrompt = "You are the Shadow Dimensions event oracle assistant. "
+            + "Use only the provided data context. "
+            + "If data is missing, say so clearly. "
+            + "Give concise, useful answers with short suggestions when relevant.";
 
-        JsonArray messages = new JsonArray();
+        String userPrompt = "DATA CONTEXT:\n" + context + "\n\nUSER QUESTION:\n" + question;
 
-        JsonObject systemMessage = new JsonObject();
-        systemMessage.addProperty("role", "system");
-        systemMessage.addProperty("content",
-                "You are the Shadow Dimensions event oracle assistant. "
-                        + "Use only the provided data context. "
-                        + "If data is missing, say so clearly. "
-                        + "Give concise, useful answers with short suggestions when relevant.");
-        messages.add(systemMessage);
-
-        JsonObject contextMessage = new JsonObject();
-        contextMessage.addProperty("role", "user");
-        contextMessage.addProperty("content", "DATA CONTEXT:\n" + context + "\n\nUSER QUESTION:\n" + question);
-        messages.add(contextMessage);
-
-        payload.add("messages", messages);
+        String payload = "{" +
+            "\"model\":\"" + escapeJson(MODEL) + "\"," +
+            "\"temperature\":0.35," +
+            "\"messages\":[" +
+            "{\"role\":\"system\",\"content\":\"" + escapeJson(systemPrompt) + "\"}," +
+            "{\"role\":\"user\",\"content\":\"" + escapeJson(userPrompt) + "\"}" +
+            "]}";
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(OPENROUTER_URL))
@@ -76,7 +66,7 @@ public class EventAiAssistantService {
                 .header("Content-Type", "application/json")
                 .header("HTTP-Referer", "https://shadowdimensions.local")
                 .header("X-Title", "ShadowDimensions Event Assistant")
-                .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build();
 
         try {
@@ -85,19 +75,11 @@ public class EventAiAssistantService {
                 return "AI service error (" + response.statusCode() + "). Please verify your OpenRouter key and model access.";
             }
 
-            JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
-            JsonArray choices = root.getAsJsonArray("choices");
-            if (choices == null || choices.size() == 0) {
+            String content = extractAssistantContent(response.body());
+            if (content == null || content.isBlank()) {
                 return "No response was returned by the AI service.";
             }
-
-            JsonObject first = choices.get(0).getAsJsonObject();
-            JsonObject message = first.getAsJsonObject("message");
-            if (message == null || !message.has("content")) {
-                return "AI response format was unexpected.";
-            }
-
-            return message.get("content").getAsString();
+            return content;
         } catch (IOException | InterruptedException e) {
             return "Failed to call AI service: " + e.getMessage();
         }
@@ -176,5 +158,66 @@ public class EventAiAssistantService {
 
     private String formatTimestamp(Timestamp ts, SimpleDateFormat formatter) {
         return ts == null ? "N/A" : formatter.format(ts);
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
+
+    private String extractAssistantContent(String json) {
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+
+        String marker = "\"content\"";
+        int markerIndex = json.indexOf(marker);
+        if (markerIndex < 0) {
+            return null;
+        }
+
+        int colonIndex = json.indexOf(':', markerIndex + marker.length());
+        if (colonIndex < 0) {
+            return null;
+        }
+
+        int firstQuote = json.indexOf('"', colonIndex + 1);
+        if (firstQuote < 0) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        boolean escaped = false;
+        for (int i = firstQuote + 1; i < json.length(); i++) {
+            char ch = json.charAt(i);
+            if (escaped) {
+                switch (ch) {
+                    case 'n' -> sb.append('\n');
+                    case 'r' -> sb.append('\r');
+                    case 't' -> sb.append('\t');
+                    case '"' -> sb.append('"');
+                    case '\\' -> sb.append('\\');
+                    default -> sb.append(ch);
+                }
+                escaped = false;
+                continue;
+            }
+            if (ch == '\\') {
+                escaped = true;
+                continue;
+            }
+            if (ch == '"') {
+                break;
+            }
+            sb.append(ch);
+        }
+        return sb.toString().trim();
     }
 }
