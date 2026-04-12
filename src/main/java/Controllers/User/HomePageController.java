@@ -35,6 +35,9 @@ public class HomePageController implements PageHost {
     private Button btnUserManagement;
 
     @FXML
+    private Button btnUserStatistics;
+
+    @FXML
     public void initialize() {
         loadPage("/HomeContent.fxml");
         refreshAuthUi();
@@ -69,6 +72,14 @@ public class HomePageController implements PageHost {
     }
 
     @FXML
+    void openUserStatistics(ActionEvent event) {
+        User user = SessionManager.getCurrentUser();
+        if (user != null && user.isAdmin()) {
+            loadPage("/User/UserStatisticsContent.fxml");
+        }
+    }
+
+    @FXML
     void handleAuthAction(ActionEvent event) {
         if (SessionManager.isLoggedIn()) {
             SessionManager.clear();
@@ -98,12 +109,16 @@ public class HomePageController implements PageHost {
             btnBottomAuth.setText("Logout");
             btnUserManagement.setVisible(user.isAdmin());
             btnUserManagement.setManaged(user.isAdmin());
+            btnUserStatistics.setVisible(user.isAdmin());
+            btnUserStatistics.setManaged(user.isAdmin());
         } else {
             lbUserName.setText("Shadow Dweller");
             btnTopAuth.setText("Connect Soul");
             btnBottomAuth.setText("Connect Soul");
             btnUserManagement.setVisible(false);
             btnUserManagement.setManaged(false);
+            btnUserStatistics.setVisible(false);
+            btnUserStatistics.setManaged(false);
         }
     }
 

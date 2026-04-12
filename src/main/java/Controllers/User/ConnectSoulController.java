@@ -150,6 +150,15 @@ public class ConnectSoulController {
         return signupPasswordVisible ? tfSignupPasswordVisible.getText() : pfSignupPassword.getText();
     }
 
+    @FXML
+    private void handleBackHome() {
+        try {
+            openHomePage();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+        }
+    }
+
     private void openHomePage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomePage.fxml"));
         Parent root = loader.load();

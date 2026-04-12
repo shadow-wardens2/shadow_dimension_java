@@ -52,6 +52,8 @@
                         <Button maxWidth="1.7976931348623157E308" onAction="#showLogin" styleClass="secondary-button" text="Back to Login" />
                     </children>
                 </VBox>
+
+                <Button maxWidth="260.0" onAction="#handleBackHome" styleClass="secondary-button" text="Back to Home" />
             </children>
         </VBox>
     </children>
