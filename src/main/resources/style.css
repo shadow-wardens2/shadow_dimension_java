@@ -75,6 +75,11 @@
     -fx-border-color: transparent;
 }
 
+.table-view .filler {
+    -fx-background-color: #0e0e11;
+    -fx-border-color: transparent;
+}
+
 .table-view .column-header .label {
     -fx-text-fill: #d6b2fc;
     -fx-font-weight: bold;
