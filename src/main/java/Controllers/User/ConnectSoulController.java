@@ -41,6 +41,9 @@ public class ConnectSoulController {
     private PasswordField pfSignupPassword;
 
     @FXML
+    private PasswordField pfSignupConfirmPassword;
+
+    @FXML
     private TextField tfSignupPasswordVisible;
 
     @FXML
@@ -77,7 +80,21 @@ public class ConnectSoulController {
     @FXML
     private void handleSignup() {
         try {
-            User user = serviceUser.signup(tfSignupEmail.getText(), tfSignupUsername.getText(), getSignupPassword());
+            String password = getSignupPassword();
+            String confirmPassword = pfSignupConfirmPassword.getText();
+
+            if (!password.equals(confirmPassword)) {
+                showAlert(Alert.AlertType.WARNING, "Attention", "Le mot de passe et sa confirmation ne correspondent pas.");
+                return;
+            }
+
+            String policyError = passwordPolicyMessage(password);
+            if (!policyError.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Mot de passe invalide", policyError);
+                return;
+            }
+
+            User user = serviceUser.signup(tfSignupEmail.getText(), tfSignupUsername.getText(), password);
             SessionManager.setCurrentUser(user);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Compte cree avec succes.");
             openHomePage();
@@ -148,6 +165,35 @@ public class ConnectSoulController {
 
     private String getSignupPassword() {
         return signupPasswordVisible ? tfSignupPasswordVisible.getText() : pfSignupPassword.getText();
+    }
+
+    private String passwordPolicyMessage(String password) {
+        if (password == null || password.isBlank()) {
+            return "Le mot de passe est obligatoire.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (password.length() < 8) {
+            sb.append("- 8 caracteres minimum\n");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            sb.append("- Au moins une lettre majuscule\n");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            sb.append("- Au moins une lettre minuscule\n");
+        }
+        if (!password.matches(".*\\d.*")) {
+            sb.append("- Au moins un chiffre\n");
+        }
+        if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            sb.append("- Au moins un caractere special\n");
+        }
+
+        if (sb.length() == 0) {
+            return "";
+        }
+
+        return "Le mot de passe doit respecter:\n" + sb;
     }
 
     @FXML
