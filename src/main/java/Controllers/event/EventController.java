@@ -228,6 +228,22 @@ public class EventController implements Initializable {
     }
 
     @FXML
+    private void handleOpenChatbot() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EventChatbot.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Event Oracle");
+            stage.setScene(new Scene(root, 760, 300));
+            stage.setResizable(true);
+            stage.show();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ouvrir le chatbot: " + e.getMessage());
+        }
+    }
+
+    @FXML
     void handleAddEvent(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/AddEvent.fxml"));

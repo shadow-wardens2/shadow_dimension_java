@@ -19,6 +19,7 @@
                <children>
                   <Label styleClass="headline" text="Events Management" />
                   <Pane HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#handleOpenChatbot" styleClass="icon-button" text="Event Oracle" />
                   <Button mnemonicParsing="false" onAction="#handleExportPdf" styleClass="secondary-button" text="Export PDF" />
                   <Button mnemonicParsing="false" onAction="#handleAddEvent" styleClass="glow-button" text="+ Add Event" />
                </children>
@@ -31,7 +32,7 @@
                   <Pane HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
-            <TableView fx:id="eventTable" prefHeight="500.0" prefWidth="1060.0" styleClass="table-view" VBox.vgrow="ALWAYS">
+                  <TableView fx:id="eventTable" prefHeight="500.0" prefWidth="1060.0" styleClass="table-view" VBox.vgrow="ALWAYS">
               <columns>
                 <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
                 <TableColumn fx:id="colTitle" prefWidth="130.0" text="Title" />
