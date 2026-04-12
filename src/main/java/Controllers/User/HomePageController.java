@@ -2,6 +2,7 @@ package Controllers.User;
 
 import Controllers.Marketplace.MarketplaceSelectorController;
 import Controllers.Marketplace.PageHost;
+import Controllers.event.EventSelectorController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -52,6 +53,11 @@ public class HomePageController implements PageHost {
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
         loadPage("/Marketplace/MarketplaceSelector.fxml");
+    }
+
+    @FXML
+    void openEventManagement(ActionEvent event) {
+        loadPage("/event/EventSelector.fxml");
     }
 
     @FXML
@@ -109,6 +115,9 @@ public class HomePageController implements PageHost {
             Object controller = loader.getController();
             if (controller instanceof MarketplaceSelectorController) {
                 ((MarketplaceSelectorController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof EventSelectorController) {
+                ((EventSelectorController) controller).setDashboardContext(this);
             }
             if (controller instanceof VaultController) {
                 ((VaultController) controller).setDashboardContext(this);

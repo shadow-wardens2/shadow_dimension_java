@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -11,7 +12,7 @@
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 
-<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.HomeContentController">
     <VBox spacing="48" style="-fx-background-color: #050507; -fx-padding: 48 48 48 48;">
         <!-- Header -->
         <VBox spacing="24">
@@ -81,6 +82,13 @@
             <VBox spacing="24" style="-fx-padding: 32;" styleClass="bento-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
                 <Label styleClass="bento-title" text="The Abyssal Gates" />
                 <Label styleClass="bento-subtitle" text="Access to the inner sanctum will manifest in 14 cycles." wrapText="true" />
+            </VBox>
+
+            <!-- Events by Category Chart -->
+            <VBox spacing="16" style="-fx-padding: 24;" styleClass="bento-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label styleClass="bento-title" text="Events by Category" />
+                <Label styleClass="bento-subtitle" text="Live distribution from event records" />
+                <PieChart fx:id="eventsByCategoryChart" legendSide="BOTTOM" prefHeight="320.0" prefWidth="360.0" style="-fx-pie-label-visible: true;" />
             </VBox>
         </GridPane>
     </VBox>
