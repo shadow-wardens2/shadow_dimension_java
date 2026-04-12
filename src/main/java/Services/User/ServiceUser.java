@@ -31,6 +31,8 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Tous les champs sont obligatoires.");
         }
 
+        validatePasswordPolicy(plainPassword);
+
         if (findByEmail(email) != null) {
             throw new IllegalArgumentException("Cet email existe deja.");
         }
@@ -231,5 +233,29 @@ public class ServiceUser implements InterfaceServiceUser {
 
         // Compatibility fallback for previously inserted SHA-256 passwords.
         return storedPassword.equals(hashPassword(plainPassword));
+    }
+
+    private void validatePasswordPolicy(String password) {
+        StringBuilder sb = new StringBuilder();
+
+        if (password.length() < 8) {
+            sb.append("- 8 caracteres minimum\n");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            sb.append("- Au moins une lettre majuscule\n");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            sb.append("- Au moins une lettre minuscule\n");
+        }
+        if (!password.matches(".*\\d.*")) {
+            sb.append("- Au moins un chiffre\n");
+        }
+        if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            sb.append("- Au moins un caractere special\n");
+        }
+
+        if (sb.length() > 0) {
+            throw new IllegalArgumentException("Le mot de passe doit respecter:\n" + sb);
+        }
     }
 }
