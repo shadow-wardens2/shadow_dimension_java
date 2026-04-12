@@ -15,6 +15,7 @@
             <children>
                 <TextField fx:id="tfSearch" prefWidth="640.0" promptText="Search by name, role or ID..." />
                 <Pane HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleExportPdf" styleClass="secondary-button" text="Export PDF" />
                 <Button fx:id="btnSortId" onAction="#handleToggleSortById" styleClass="secondary-button" text="ID DESC" />
                 <Button onAction="#handleRefresh" styleClass="secondary-button" text="Refresh" />
             </children>
