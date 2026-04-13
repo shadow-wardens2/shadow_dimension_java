@@ -24,20 +24,33 @@ public class AjouterCategorieController {
     private void ajouterCategorie() {
         String nom = tfNomCategorie.getText().trim();
         String description = tfDescription.getText() != null ? tfDescription.getText().trim() : "";
+
         if (nom.isEmpty()) {
-            showAlert("Erreur", "Le nom de la catégorie ne peut pas être vide !");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie ne peut pas être vide !");
+            return;
+        }
+
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie doit avoir plus de 3 caractères !");
             return;
         }
 
         try {
-            Categorie c = new Categorie(0, nom, description); // assuming ID is auto-generated
+            // Duplicate Check
+            for (Categorie existing : serviceCategorie.getAll()) {
+                if (existing.getNom().equalsIgnoreCase(nom)) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Cette catégorie existe déjà !");
+                    return;
+                }
+            }
+
+            Categorie c = new Categorie(0, nom, description);
             serviceCategorie.add(c);
-            showAlert("Succès", "Catégorie ajoutée avec succès !");
+            Utils.ValidationUtils.showSuccess("Succès", "Catégorie ajoutée avec succès !");
             javafx.stage.Stage stage = (javafx.stage.Stage) tfNomCategorie.getScene().getWindow();
             stage.close();
         } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ajouter la catégorie.");
+            Utils.ValidationUtils.showAlert("Erreur", "Impossible d'ajouter la catégorie : " + e.getMessage());
         }
     }
 
@@ -47,11 +60,5 @@ public class AjouterCategorieController {
         stage.close();
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+
 }

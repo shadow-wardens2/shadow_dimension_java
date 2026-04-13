@@ -102,6 +102,10 @@ public class EditProfileController {
 
     @FXML
     private void handleOpenMarketplace() {
+        if (!SessionManager.isLoggedIn()) {
+            showAlert(Alert.AlertType.ERROR, "Accès Refusé", "Vous devez être connecté pour accéder au Marketplace.");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/MarketplaceManagement.fxml"));
             Parent root = loader.load();

@@ -1,6 +1,9 @@
 package Controllers.User;
 
 import Controllers.Marketplace.MarketplaceSelectorController;
+import Controllers.Marketplace.ManagementCategorieController;
+import Controllers.Marketplace.ManagementProduitController;
+import Controllers.Marketplace.ManagementTypeController;
 import Controllers.Marketplace.PageHost;
 import Entities.User.User;
 import Utils.SessionManager;
@@ -51,6 +54,10 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
+        if (!SessionManager.isLoggedIn()) {
+            handleAuthAction(null);
+            return;
+        }
         loadPage("/Marketplace/MarketplaceSelector.fxml");
     }
 
@@ -109,6 +116,12 @@ public class HomePageController implements PageHost {
             Object controller = loader.getController();
             if (controller instanceof MarketplaceSelectorController) {
                 ((MarketplaceSelectorController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementCategorieController) {
+                ((ManagementCategorieController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementProduitController) {
+                ((ManagementProduitController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementTypeController) {
+                ((ManagementTypeController) controller).setDashboardContext(this);
             }
             if (controller instanceof VaultController) {
                 ((VaultController) controller).setDashboardContext(this);
