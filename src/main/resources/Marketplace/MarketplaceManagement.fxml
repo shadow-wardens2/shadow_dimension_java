@@ -27,7 +27,7 @@
                     <Label styleClass="nav-link" text="Void" />
                 </HBox>
                 <Pane HBox.hgrow="ALWAYS" />
-                <Button styleClass="glow-button" text="Connect Soul" style="-fx-translate-x: -48;"/>
+                <Button fx:id="btnTopAuth" onAction="#handleAuthAction" styleClass="glow-button" text="Connect Soul" style="-fx-translate-x: -48;"/>
             </HBox>
         </top>
 
@@ -38,18 +38,19 @@
                     <HBox alignment="CENTER_LEFT" spacing="12">
                         <Pane prefHeight="40" prefWidth="40" style="-fx-background-color: #19191d; -fx-background-radius: 20; -fx-border-color: rgba(139, 92, 246, 0.3); -fx-border-radius: 20;" />
                         <VBox alignment="CENTER_LEFT">
-                            <Label style="-fx-text-fill: #ffffff; -fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-font-size: 14px;" text="Shadow Dweller" />
-                            <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold;" text="TIER: ETHEREAL" />
+                            <Label fx:id="lbUserName" style="-fx-text-fill: #ffffff; -fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-font-size: 14px;" text="Shadow Dimension Member" />
+                            <Label fx:id="lbUserTier" style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold;" text="Avada Kedavra" />
                         </VBox>
                     </HBox>
                 </VBox>
                 <VBox spacing="8" style="-fx-padding: 0 0 0 0;">
                     <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
                     <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceSelector" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#handleDownloadReport" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Download Report" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">
-                    <Button prefWidth="208" styleClass="secondary-button" text="Connect Soul" />
+                    <Button fx:id="btnBottomAuth" onAction="#handleAuthAction" prefWidth="208" styleClass="secondary-button" text="Connect Soul" />
                 </VBox>
             </VBox>
         </left>

@@ -14,7 +14,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -37,8 +39,23 @@ public class ManagementTypeController implements Initializable {
     @FXML
     private TableView<Type> typeTable;
 
+    @FXML
+    private TextField searchField;
+
     private ServiceType serviceType = new ServiceType();
     private ObservableList<Type> observableTypes = FXCollections.observableArrayList();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -112,7 +129,28 @@ public class ManagementTypeController implements Initializable {
         observableTypes.clear();
         try {
             observableTypes.addAll(serviceType.getAll());
-            typeTable.setItems(observableTypes);
+            
+            FilteredList<Type> filteredData = new FilteredList<>(observableTypes, t -> true);
+            
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(type -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    
+                    String lowerCaseFilter = newValue.toLowerCase();
+                    
+                    if (type.getNom().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (String.valueOf(type.getId()).contains(lowerCaseFilter)) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+            });
+            
+            typeTable.setItems(filteredData);
         } catch (SQLException e) {
             e.printStackTrace();
         }

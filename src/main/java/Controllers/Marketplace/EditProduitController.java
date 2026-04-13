@@ -76,18 +76,56 @@ public class EditProduitController {
 
     @FXML
     private void sauvegarder() {
-        try {
-            String nom = tfNom.getText();
-            String desc = tfDescription.getText();
-            double prix = Double.parseDouble(tfPrix.getText());
-            int stock = Integer.parseInt(tfStock.getText());
-            Categorie cat = cbCategorie.getValue();
-            Type type = cbType.getValue();
-            String image = tfImage.getText();
+        String nom = tfNom.getText().trim();
+        String desc = tfDescription.getText().trim();
+        String prixStr = tfPrix.getText().trim();
+        String stockStr = tfStock.getText().trim();
+        Categorie cat = cbCategorie.getValue();
+        Type type = cbType.getValue();
+        String image = tfImage.getText().trim();
 
-            if (nom.isEmpty() || desc.isEmpty() || cat == null || type == null) {
-                showAlert("Erreur", "Tous les champs doivent être remplis !");
-                return;
+        // Validation - Required fields
+        if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty() || cat == null || type == null) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Tous les champs obligatoires (*) doivent être remplis !");
+            return;
+        }
+
+        // Validation - Name length
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le nom du produit doit avoir plus de 3 caractères !");
+            return;
+        }
+
+        // Validation - Numeric Price
+        if (!Utils.ValidationUtils.isNumeric(prixStr)) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix doit être un nombre valide (ex: 10.5) !");
+            return;
+        }
+        double prix = Double.parseDouble(prixStr);
+        if (prix < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix ne peut pas être négatif !");
+            return;
+        }
+
+        // Validation - Numeric Stock
+        if (!Utils.ValidationUtils.isInteger(stockStr)) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock doit être un nombre entier !");
+            return;
+        }
+        int stock = Integer.parseInt(stockStr);
+        if (stock < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock ne peut pas être négatif !");
+            return;
+        }
+
+        try {
+            // Duplicate Check (excluding current product)
+            List<Produit> existingProduits = serviceProduit.getAll();
+            for (Produit existing : existingProduits) {
+                if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != produit.getId()) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Un autre produit porte déjà ce nom !");
+                    return;
+                }
             }
 
             produit.setNom(nom);
@@ -99,13 +137,10 @@ public class EditProduitController {
             produit.setImage(image);
 
             serviceProduit.update(produit);
-            showAlert("Succès", "Produit mis à jour avec succès !");
+            Utils.ValidationUtils.showSuccess("Succès", "Produit mis à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
-        } catch (NumberFormatException e) {
-            showAlert("Erreur", "Prix et Stock doivent être des nombres valide !");
+            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
         }
     }
 
@@ -119,11 +154,5 @@ public class EditProduitController {
         stage.close();
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+
 }

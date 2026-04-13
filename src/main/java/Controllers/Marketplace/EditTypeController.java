@@ -26,19 +26,30 @@ public class EditTypeController {
     private void sauvegarder() {
         String nom = tfNom.getText().trim();
         if (nom.isEmpty()) {
-            showAlert("Erreur", "Le nom ne peut pas être vide.");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom ne peut pas être vide.");
             return;
         }
 
-        type.setNom(nom);
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type doit avoir plus de 3 caractères !");
+            return;
+        }
 
         try {
+            // Duplicate Check
+            for (Type existing : serviceType.getAll()) {
+                if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != type.getId()) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Un autre type porte déjà ce nom !");
+                    return;
+                }
+            }
+
+            type.setNom(nom);
             serviceType.update(type);
-            showAlert("Succès", "Type mis à jour avec succès !");
+            Utils.ValidationUtils.showSuccess("Succès", "Type mis à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
+            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
         }
     }
 
@@ -52,11 +63,5 @@ public class EditTypeController {
         stage.close();
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+
 }

@@ -14,7 +14,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -40,8 +42,23 @@ public class ManagementCategorieController implements Initializable {
     @FXML
     private TableView<Categorie> categorieTable;
 
+    @FXML
+    private TextField searchField;
+
     private ServiceCategorie serviceCategorie = new ServiceCategorie();
     private ObservableList<Categorie> observableCategories = FXCollections.observableArrayList();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -116,7 +133,30 @@ public class ManagementCategorieController implements Initializable {
         observableCategories.clear();
         try {
             observableCategories.addAll(serviceCategorie.getAll());
-            categorieTable.setItems(observableCategories);
+            
+            FilteredList<Categorie> filteredData = new FilteredList<>(observableCategories, c -> true);
+            
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(categorie -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        return true;
+                    }
+                    
+                    String lowerCaseFilter = newValue.toLowerCase();
+                    
+                    if (categorie.getNom().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (categorie.getDescription() != null && categorie.getDescription().toLowerCase().contains(lowerCaseFilter)) {
+                        return true;
+                    } else if (String.valueOf(categorie.getId()).contains(lowerCaseFilter)) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+            });
+            
+            categorieTable.setItems(filteredData);
         } catch (SQLException e) {
             e.printStackTrace();
         }

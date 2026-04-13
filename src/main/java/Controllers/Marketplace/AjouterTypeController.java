@@ -23,21 +23,31 @@ public class AjouterTypeController {
         String nom = tfNomType.getText().trim();
 
         if (nom.isEmpty()) {
-            showAlert("Erreur", "Le nom du type ne peut pas être vide.");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type ne peut pas être vide.");
             return;
         }
 
-        Type type = new Type();
-        type.setNom(nom);
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type doit avoir plus de 3 caractères !");
+            return;
+        }
 
         try {
+            // Duplicate Check
+            for (Type existing : ((Services.Marketplace.ServiceType)typeService).getAll()) {
+                if (existing.getNom().equalsIgnoreCase(nom)) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Ce type existe déjà !");
+                    return;
+                }
+            }
+
+            Type type = new Type();
             typeService.add(type);
-            showAlert("Succès", "Type ajouté avec succès !");
-            // Close the window
+            Utils.ValidationUtils.showSuccess("Succès", "Type ajouté avec succès !");
             Stage stage = (Stage) tfNomType.getScene().getWindow();
             stage.close();
         } catch (SQLException e) {
-            showAlert("Erreur SQL", e.getMessage());
+            Utils.ValidationUtils.showAlert("Erreur SQL", e.getMessage());
         }
     }
 
@@ -49,11 +59,5 @@ public class AjouterTypeController {
     }
 
     // Helper method to show alert
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
+
 }

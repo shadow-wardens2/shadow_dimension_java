@@ -11,10 +11,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import java.util.Comparator;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -52,8 +57,26 @@ public class ManagementProduitController implements Initializable {
     @FXML
     private TableView<Produit> productsTable;
 
+    @FXML
+    private TextField searchField;
+
+    @FXML
+    private ComboBox<String> sortComboBox;
+
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ObservableList<Produit> observableProducts = FXCollections.observableArrayList();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
+
+    @FXML
+    void goBack(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -65,7 +88,12 @@ public class ManagementProduitController implements Initializable {
         colCatId.setCellValueFactory(new PropertyValueFactory<>("categorieId"));
         colTypeId.setCellValueFactory(new PropertyValueFactory<>("typeId"));
 
-        loadProducts();
+        setupTable();
+
+        // Populate sort options
+        sortComboBox.getItems().addAll("Default (ID)", "Name (A-Z)", "Price: Low to High", "Price: High to Low", "Stock: High to Low");
+        sortComboBox.setValue("Default (ID)");
+        sortComboBox.setOnAction(e -> applySortAndFilter());
 
         // Custom action cell
         colActions.setCellFactory(param -> new TableCell<Produit, Integer>() {
@@ -129,11 +157,53 @@ public class ManagementProduitController implements Initializable {
         });
     }
 
-    private void loadProducts() {
-        observableProducts.clear();
+    private FilteredList<Produit> filteredData;
+    private SortedList<Produit> sortedData;
+
+    private void setupTable() {
         try {
-            observableProducts.addAll(serviceProduit.getAll());
-            productsTable.setItems(observableProducts);
+            observableProducts.setAll(serviceProduit.getAll());
+            
+            filteredData = new FilteredList<>(observableProducts, p -> true);
+            sortedData = new SortedList<>(filteredData);
+            
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> applySortAndFilter());
+            
+            productsTable.setItems(sortedData);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void applySortAndFilter() {
+        String filter = searchField.getText();
+        filteredData.setPredicate(produit -> {
+            if (filter == null || filter.isEmpty()) return true;
+            String lower = filter.toLowerCase();
+            return produit.getNom().toLowerCase().contains(lower) || 
+                   (produit.getDescription() != null && produit.getDescription().toLowerCase().contains(lower)) ||
+                   String.valueOf(produit.getId()).contains(lower);
+        });
+
+        String sortOption = sortComboBox.getValue();
+        if (sortOption == null) return;
+
+        Comparator<Produit> comparator = switch (sortOption) {
+            case "Name (A-Z)" -> Comparator.comparing(Produit::getNom, String.CASE_INSENSITIVE_ORDER);
+            case "Price: Low to High" -> Comparator.comparingDouble(Produit::getPrix);
+            case "Price: High to Low" -> Comparator.comparingDouble(Produit::getPrix).reversed();
+            case "Stock: High to Low" -> Comparator.comparingInt(Produit::getStock).reversed();
+            default -> Comparator.comparingInt(Produit::getId);
+        };
+
+        sortedData.setComparator(comparator);
+    }
+
+    private void loadProducts() {
+        try {
+            observableProducts.setAll(serviceProduit.getAll());
+            // Since setupTable already bound the table to sortedData (which follows observableProducts),
+            // simply updating observableProducts will refresh the view automatically.
         } catch (SQLException e) {
             e.printStackTrace();
         }
