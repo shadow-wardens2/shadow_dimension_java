@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="40.0" stylesheets="@../style.css" style="-fx-background-color: #050507;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.TutorialsSelectorController">
+    <VBox alignment="CENTER" spacing="10">
+        <Label styleClass="headline" text="Tutorials Protocol" />
+        <Label styleClass="subheadline" text="Select the knowledge module you wish to configure" />
+    </VBox>
+    
+    <VBox spacing="20" alignment="CENTER">
+        <HBox alignment="CENTER" spacing="25.0">
+            <Button mnemonicParsing="false" onAction="#handleFormations" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Formations" />
+            <Button mnemonicParsing="false" onAction="#handleJeux" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Jeux" />
+            <Button mnemonicParsing="false" onAction="#handleLecons" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Leçons" />
+        </HBox>
+        <HBox alignment="CENTER" spacing="25.0">
+            <Button mnemonicParsing="false" onAction="#handleQuizzes" prefHeight="70.0" prefWidth="250.0" styleClass="secondary-button" text="Manage Quizzes &amp; Tests" />
+        </HBox>
+    </VBox>
+</VBox>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="300.0" prefWidth="400.0" stylesheets="@../style.css" styleClass="root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.EditQuestionController">
+    <children>
+        <VBox alignment="CENTER" spacing="15" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+            <Label styleClass="headline" text="Editer la Question" />
+            <VBox spacing="15" styleClass="panel-card">
+                <HBox alignment="TOP_LEFT" spacing="10">
+                    <Label styleClass="form-label" text="Texte:" prefWidth="80" />
+                    <TextArea fx:id="taTexte" prefHeight="60.0" promptText="Saisissez la question..." HBox.hgrow="ALWAYS" />
+                </HBox>
+            </VBox>
+            <HBox alignment="CENTER" spacing="10">
+                <Button onAction="#sauvegarder" styleClass="glow-button" text="Enregistrer" />
+                <Button onAction="#annuler" styleClass="secondary-button" text="Annuler" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

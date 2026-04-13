@@ -46,6 +46,7 @@
                     <Button fx:id="btnUserManagement" alignment="BASELINE_LEFT" managed="false" onAction="#openUserManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Users Management" visible="false" />
                     <Button fx:id="btnUserStatistics" alignment="BASELINE_LEFT" managed="false" onAction="#openUserStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Users Statistics" visible="false" />
                     <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openTutorialsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Tutorials Management" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">

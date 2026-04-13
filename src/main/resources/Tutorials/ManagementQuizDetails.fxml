@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="500.0" prefWidth="900.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.ManagementQuizDetailsController">
+   <children>
+      <VBox spacing="25.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+               <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="&lt; Back" />
+               <Label fx:id="lbQuizTitle" styleClass="headline" text="Configuring details for Quiz" />
+            </HBox>
+            <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+                <!-- COLONNE QUESTION -->
+                <VBox spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="400.0">
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label styleClass="headline" text="Questions" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnAddQuestion" mnemonicParsing="false" onAction="#handleAddQuestion" styleClass="glow-button" text="+ Question" />
+                    </HBox>
+                    <TextField fx:id="questionSearchField" promptText="🔍  Rechercher une question..." styleClass="search-field" />
+                    <TableView fx:id="questionTable" prefHeight="320.0" VBox.vgrow="ALWAYS" styleClass="table-view tuto-table">
+                      <columns>
+                        <TableColumn fx:id="colQuestionId" prefWidth="40.0" text="ID" />
+                        <TableColumn fx:id="colQuestionTexte" prefWidth="250.0" text="Question" />
+                        <TableColumn fx:id="colQuestionActions" prefWidth="120.0" text="Actions" />
+                      </columns>
+                    </TableView>
+                </VBox>
+
+                <!-- COLONNE OPTION -->
+                <VBox spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="400.0">
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label styleClass="headline" text="Options" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnAddOption" mnemonicParsing="false" onAction="#handleAddOption" styleClass="glow-button" text="+ Option" />
+                    </HBox>
+                    <TextField fx:id="optionSearchField" promptText="🔍  Rechercher une option..." styleClass="search-field" />
+                    <TableView fx:id="optionTable" prefHeight="320.0" VBox.vgrow="ALWAYS" styleClass="table-view tuto-table">
+                      <columns>
+                        <TableColumn fx:id="colOptionId" prefWidth="40.0" text="ID" />
+                        <TableColumn fx:id="colOptionTexte" prefWidth="200.0" text="Option" />
+                        <TableColumn fx:id="colOptionEstCorrecte" prefWidth="60.0" text="Vrai?" />
+                        <TableColumn fx:id="colOptionActions" prefWidth="120.0" text="Actions" />
+                      </columns>
+                    </TableView>
+                </VBox>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

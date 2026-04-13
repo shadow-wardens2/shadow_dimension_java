@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="650.0" prefWidth="500.0" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.AjouterLeconController">
+    <children>
+        <VBox alignment="CENTER" spacing="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+            <Label styleClass="headline" text="Ajouter une Leçon" />
+            
+            <VBox spacing="10" styleClass="panel-card">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Titre :" />
+                    <TextField fx:id="tfTitre" promptText="Entrez le titre" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="TOP_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Contenu :" />
+                    <TextArea fx:id="taContenu" prefHeight="80.0" promptText="Entrez le contenu détaillé..." HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Ordre :" />
+                    <TextField fx:id="tfOrdre" promptText="Ex: 1" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Formation :" />
+                    <ComboBox fx:id="cbFormation" promptText="Sélectionnez..." HBox.hgrow="ALWAYS" />
+                </HBox>
+                
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Image URL :" />
+                    <TextField fx:id="tfImage" promptText="Optionnel" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Video URL :" />
+                    <TextField fx:id="tfVideoUrl" promptText="Optionnel" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Durée de vidéo :" />
+                    <TextField fx:id="tfVideoDuration" promptText="Optionnel" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Document URL :" />
+                    <TextField fx:id="tfDocumentUrl" promptText="Optionnel" HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label prefWidth="130" styleClass="form-label" text="Miniature Video :" />
+                    <TextField fx:id="tfVideoThumbnail" promptText="Optionnel" HBox.hgrow="ALWAYS" />
+                </HBox>
+            </VBox>
+
+            <HBox alignment="CENTER" spacing="15">
+                <Button fx:id="btnAjouter" onAction="#ajouterLecon" styleClass="glow-button" text="Ajouter" />
+                <Button fx:id="btnAnnuler" onAction="#annuler" styleClass="secondary-button" text="Annuler" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

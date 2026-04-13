@@ -58,6 +58,11 @@ public class HomePageController implements PageHost {
     }
 
     @FXML
+    void openTutorialsManagement(ActionEvent event) {
+        loadPage("/Tutorials/TutorialsSelector.fxml");
+    }
+
+    @FXML
     void openUserManagement(ActionEvent event) {
         User user = SessionManager.getCurrentUser();
         if (user != null && user.isAdmin()) {
@@ -97,7 +102,8 @@ public class HomePageController implements PageHost {
     private void refreshAuthUi() {
         if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
-            String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller" : user.getUsername();
+            String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
+                    : user.getUsername();
             lbUserName.setText(username);
             btnTopAuth.setText("Logout");
             btnBottomAuth.setText("Logout");
@@ -125,6 +131,9 @@ public class HomePageController implements PageHost {
             if (controller instanceof MarketplaceSelectorController) {
                 ((MarketplaceSelectorController) controller).setDashboardContext(this);
             }
+            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
+                ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
+            }
             if (controller instanceof VaultController) {
                 ((VaultController) controller).setDashboardContext(this);
             }
@@ -133,6 +142,21 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof ManagementUsersController) {
                 // no context needed yet, but this keeps room for shared host behavior later
+            }
+            if (controller instanceof Controllers.Tutorials.ManagementQuizController) {
+                ((Controllers.Tutorials.ManagementQuizController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Tutorials.ManagementQuizDetailsController) {
+                ((Controllers.Tutorials.ManagementQuizDetailsController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Tutorials.ManagementFormationController) {
+                ((Controllers.Tutorials.ManagementFormationController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Tutorials.ManagementJeuController) {
+                ((Controllers.Tutorials.ManagementJeuController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Tutorials.ManagementLeconController) {
+                ((Controllers.Tutorials.ManagementLeconController) controller).setDashboardContext(this);
             }
 
             contentArea.getChildren().clear();
