@@ -1,7 +1,11 @@
 package Controllers.User;
 
 import Controllers.Marketplace.MarketplaceSelectorController;
+import Controllers.Marketplace.ManagementCategorieController;
+import Controllers.Marketplace.ManagementProduitController;
+import Controllers.Marketplace.ManagementTypeController;
 import Controllers.Marketplace.PageHost;
+import Controllers.event.EventSelectorController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -54,12 +58,21 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
+        if (!SessionManager.isLoggedIn()) {
+            handleAuthAction(null);
+            return;
+        }
         loadPage("/Marketplace/MarketplaceSelector.fxml");
     }
 
     @FXML
     void openTutorialsManagement(ActionEvent event) {
         loadPage("/Tutorials/TutorialsSelector.fxml");
+    }
+
+    @FXML
+    void openEventManagement(ActionEvent event) {
+        loadPage("/event/EventSelector.fxml");
     }
 
     @FXML
@@ -130,6 +143,18 @@ public class HomePageController implements PageHost {
             Object controller = loader.getController();
             if (controller instanceof MarketplaceSelectorController) {
                 ((MarketplaceSelectorController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementCategorieController) {
+                ((ManagementCategorieController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementProduitController) {
+                ((ManagementProduitController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementTypeController) {
+                ((ManagementTypeController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof EventSelectorController) {
+                ((EventSelectorController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
+                ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
             }
             if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);

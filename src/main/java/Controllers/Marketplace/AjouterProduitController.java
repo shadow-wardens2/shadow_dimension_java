@@ -44,28 +44,64 @@ public class AjouterProduitController {
 
     @FXML
     private void handleAjouter() {
-        try {
-            String nom = tfNom.getText();
-            String desc = tfDescription.getText();
-            double prix = Double.parseDouble(tfPrix.getText());
-            int stock = Integer.parseInt(tfStock.getText());
-            Categorie cat = cbCategorie.getValue();
-            Type type = cbType.getValue();
-            String image = tfImage.getText();
+        String nom = tfNom.getText().trim();
+        String desc = tfDescription.getText().trim();
+        String prixStr = tfPrix.getText().trim();
+        String stockStr = tfStock.getText().trim();
+        Categorie cat = cbCategorie.getValue();
+        Type type = cbType.getValue();
+        String image = tfImage.getText().trim();
 
-            if (nom.isEmpty() || desc.isEmpty() || cat == null || type == null) {
-                System.out.println("Tous les champs doivent être remplis !");
-                return;
+        // Validation - Required fields
+        if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty() || cat == null || type == null) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Tous les champs doivent être remplis !");
+            return;
+        }
+
+        // Validation - Name length
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le nom du produit doit avoir plus de 3 caractères !");
+            return;
+        }
+
+        // Validation - Numeric Price
+        if (!Utils.ValidationUtils.isNumeric(prixStr)) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix doit être un nombre valide (ex: 10.5) !");
+            return;
+        }
+        double prix = Double.parseDouble(prixStr);
+        if (prix < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix ne peut pas être négatif !");
+            return;
+        }
+
+        // Validation - Numeric Stock
+        if (!Utils.ValidationUtils.isInteger(stockStr)) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock doit être un nombre entier !");
+            return;
+        }
+        int stock = Integer.parseInt(stockStr);
+        if (stock < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock ne peut pas être négatif !");
+            return;
+        }
+
+        try {
+            // Duplicate Check
+            List<Produit> existingProduits = sp.getAll();
+            for (Produit existing : existingProduits) {
+                if (existing.getNom().equalsIgnoreCase(nom)) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Un produit avec ce nom existe déjà !");
+                    return;
+                }
             }
 
             Produit p = new Produit(0, nom, desc, prix, stock, cat.getId(), type.getId(), image);
             sp.add(p);
-            System.out.println("Produit ajouté avec succès !");
+            Utils.ValidationUtils.showSuccess("Succès", "Produit ajouté avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (NumberFormatException e) {
-            System.out.println("Prix et Stock doivent être des nombres !");
+            Utils.ValidationUtils.showAlert("Erreur SQL", "Une erreur est survenue lors de l'ajout : " + e.getMessage());
         }
     }
 

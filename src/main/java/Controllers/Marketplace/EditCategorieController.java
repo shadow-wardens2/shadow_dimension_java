@@ -31,20 +31,32 @@ public class EditCategorieController {
         String description = tfDescription.getText() != null ? tfDescription.getText().trim() : "";
 
         if (nom.isEmpty()) {
-            showAlert("Erreur", "Le nom ne peut pas être vide.");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom ne peut pas être vide.");
             return;
         }
 
-        categorie.setNom(nom);
-        categorie.setDescription(description);
+        if (nom.length() <= 3) {
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie doit avoir plus de 3 caractères !");
+            return;
+        }
 
         try {
+            // Duplicate Check
+            for (Categorie existing : serviceCategorie.getAll()) {
+                if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != categorie.getId()) {
+                    Utils.ValidationUtils.showAlert("Doublon", "Une autre catégorie porte déjà ce nom !");
+                    return;
+                }
+            }
+
+            categorie.setNom(nom);
+            categorie.setDescription(description);
+
             serviceCategorie.update(categorie);
-            showAlert("Succès", "Catégorie mise à jour avec succès !");
+            Utils.ValidationUtils.showSuccess("Succès", "Catégorie mise à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
+            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
         }
     }
 
@@ -58,11 +70,5 @@ public class EditCategorieController {
         stage.close();
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
+
 }

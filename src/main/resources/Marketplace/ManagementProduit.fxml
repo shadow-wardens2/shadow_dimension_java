@@ -2,9 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -17,7 +19,10 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                <children>
+                  <Button mnemonicParsing="false" onAction="#goBack" styleClass="secondary-button" text="&lt; Back" />
                   <Label styleClass="headline" text="Products Management" />
+                  <TextField fx:id="searchField" prefWidth="250.0" promptText="Search products..." styleClass="search-field" />
+                  <ComboBox fx:id="sortComboBox" prefWidth="180.0" promptText="Sort By..." styleClass="combo-box" />
                   <Pane HBox.hgrow="ALWAYS" />
                   <Button mnemonicParsing="false" onAction="#handleAddProduct" styleClass="glow-button" text="+ Add New" />
                </children>

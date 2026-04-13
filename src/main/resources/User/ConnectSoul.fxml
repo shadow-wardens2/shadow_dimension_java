@@ -48,6 +48,8 @@
                                 <Button fx:id="btnToggleSignupPassword" onAction="#toggleSignupPasswordVisibility" styleClass="icon-button" text="👁" />
                             </children>
                         </HBox>
+                        <Label styleClass="form-label" text="Confirm Password" />
+                        <PasswordField fx:id="pfSignupConfirmPassword" promptText="********" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#handleSignup" styleClass="glow-button" text="Create Account" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#showLogin" styleClass="secondary-button" text="Back to Login" />
                     </children>
