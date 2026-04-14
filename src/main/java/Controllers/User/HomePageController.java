@@ -22,6 +22,7 @@ import java.io.IOException;
 
 public class HomePageController implements PageHost {
 
+
     @FXML
     private StackPane contentArea;
 
@@ -63,6 +64,11 @@ public class HomePageController implements PageHost {
             return;
         }
         loadPage("/Marketplace/MarketplaceSelector.fxml");
+    }
+
+    @FXML
+    void openMarketplaceStatistics(ActionEvent event) {
+        loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
     }
 
     @FXML
@@ -190,4 +196,11 @@ public class HomePageController implements PageHost {
             e.printStackTrace();
         }
     }
+
+    @Override
+
+    public void refreshStatistics() {
+        // Implementation for refreshing statistics if needed
+    }
 }
+

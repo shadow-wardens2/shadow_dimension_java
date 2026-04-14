@@ -59,6 +59,13 @@ public class MarketplaceSelectorController {
         }
     }
 
+    @FXML
+    void handleStatistics(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
+        }
+    }
+
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

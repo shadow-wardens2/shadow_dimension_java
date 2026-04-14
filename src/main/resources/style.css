@@ -464,3 +464,71 @@
     -fx-border-color: rgba(139, 92, 246, 0.3);
     border-color: rgba(139, 92, 246, 0.3);
 }
+
+/* === CHARTS === */
+.chart {
+    -fx-padding: 10;
+    -fx-background-color: transparent;
+}
+
+.chart-content {
+    -fx-padding: 10;
+}
+
+.chart-title {
+    -fx-text-fill: #ba9eff;
+    -fx-font-family: 'Cinzel', serif;
+    -fx-font-size: 18px;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-legend-item {
+    -fx-text-fill: #adaaae;
+}
+
+.axis {
+    -fx-tick-label-fill: #adaaae;
+    -fx-tick-length: 5;
+    -fx-minor-tick-length: 3;
+}
+
+.axis-label {
+    -fx-text-fill: #8b5cf6;
+    -fx-font-weight: bold;
+}
+
+/* Pie Chart Colors */
+.data0.chart-pie { -fx-pie-color: #8b5cf6; } /* Purple */
+.data1.chart-pie { -fx-pie-color: #d6b2fc; } /* Light Purple */
+.data2.chart-pie { -fx-pie-color: #ba9eff; } /* Lavender */
+.data3.chart-pie { -fx-pie-color: #4c1d95; } /* Dark Purple */
+.data4.chart-pie { -fx-pie-color: #1e1b4b; } /* Deep Indigo */
+
+.chart-pie-label {
+    -fx-fill: #ffffff;
+    -fx-font-size: 11px;
+}
+
+/* Bar Chart Colors */
+.chart-bar {
+    -fx-bar-fill: #8b5cf6;
+    -fx-background-radius: 4 4 0 0;
+}
+
+.default-color0.chart-bar { -fx-bar-fill: linear-gradient(to top, #4c1d95, #8b5cf6); }
+.default-color1.chart-bar { -fx-bar-fill: linear-gradient(to top, #1e1b4b, #ba9eff); }
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines {
+    -fx-stroke: rgba(139, 92, 246, 0.1);
+}
+
+.chart-horizontal-grid-lines {
+    -fx-stroke: rgba(139, 92, 246, 0.1);
+}
