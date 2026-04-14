@@ -25,14 +25,12 @@
                   <Button mnemonicParsing="false" onAction="#handleAddCategorie" styleClass="glow-button" text="+ Add New" />
                </children>
             </HBox>
-            <TableView fx:id="categorieTable" prefHeight="400.0" prefWidth="560.0" VBox.vgrow="ALWAYS" styleClass="table-view">
-              <columns>
-                <TableColumn fx:id="colId" prefWidth="80.0" text="ID" />
-                <TableColumn fx:id="colNom" prefWidth="180.0" text="Name" />
-                <TableColumn fx:id="colDescription" prefWidth="200.0" text="Description" />
-                <TableColumn fx:id="colActions" prefWidth="150.0" text="Actions" />
-              </columns>
-            </TableView>
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+               <content>
+                  <FlowPane fx:id="categoriesContainer" hgap="20.0" vgap="20.0" style="-fx-padding: 10;">
+                  </FlowPane>
+               </content>
+            </ScrollPane>
          </children>
       </VBox>
    </children>

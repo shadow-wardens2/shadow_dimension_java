@@ -11,11 +11,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -31,31 +29,7 @@ import java.util.ResourceBundle;
 public class ManagementProduitController implements Initializable {
 
     @FXML
-    private TableColumn<Produit, Integer> colActions;
-
-    @FXML
-    private TableColumn<Produit, Integer> colCatId;
-
-    @FXML
-    private TableColumn<Produit, String> colDescription;
-
-    @FXML
-    private TableColumn<Produit, Integer> colId;
-
-    @FXML
-    private TableColumn<Produit, String> colNom;
-
-    @FXML
-    private TableColumn<Produit, Double> colPrix;
-
-    @FXML
-    private TableColumn<Produit, Integer> colStock;
-
-    @FXML
-    private TableColumn<Produit, Integer> colTypeId;
-
-    @FXML
-    private TableView<Produit> productsTable;
+    private FlowPane productsContainer;
 
     @FXML
     private TextField searchField;
@@ -80,87 +54,72 @@ public class ManagementProduitController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        colPrix.setCellValueFactory(new PropertyValueFactory<>("prix"));
-        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-        colCatId.setCellValueFactory(new PropertyValueFactory<>("categorieId"));
-        colTypeId.setCellValueFactory(new PropertyValueFactory<>("typeId"));
-
-        setupTable();
+        setupData();
 
         // Populate sort options
         sortComboBox.getItems().addAll("Default (ID)", "Name (A-Z)", "Price: Low to High", "Price: High to Low", "Stock: High to Low");
         sortComboBox.setValue("Default (ID)");
         sortComboBox.setOnAction(e -> applySortAndFilter());
+    }
 
-        // Custom action cell
-        colActions.setCellFactory(param -> new TableCell<Produit, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
+    private void displayProducts(Iterable<Produit> products) {
+        productsContainer.getChildren().clear();
+        for (Produit p : products) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/ProductCard.fxml"));
+                Parent card = loader.load();
+                ProductCardController controller = loader.getController();
 
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnDelete.setOnAction(event -> {
-                    Produit p = getTableView().getItems().get(getIndex());
-                    try {
-                        serviceProduit.delete(p);
-                        loadProducts(); // refresh table
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.INFORMATION);
-                        alert.setTitle("Succès");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Produit supprimé avec succès.");
-                        alert.showAndWait();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.ERROR);
-                        alert.setTitle("Erreur");
-                        alert.setHeaderText("Impossible de supprimer");
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
-                    }
-                });
-
-                btnUpdate.setOnAction(event -> {
-                    Produit p = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditProduit.fxml"));
-                        javafx.scene.Parent root = loader.load();
-                        EditProduitController controller = loader.getController();
-                        controller.setProduit(p);
-                        Stage stage = new Stage();
-                        stage.setTitle("Editer Produit");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadProducts();
-                    } catch (java.io.IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                controller.setProduit(p, () -> handleEditProduct(p), () -> handleDeleteProduct(p));
+                productsContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+    }
 
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
-            }
-        });
+    private void handleEditProduct(Produit p) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditProduit.fxml"));
+            Parent root = loader.load();
+            EditProduitController controller = loader.getController();
+            controller.setProduit(p);
+            Stage stage = new Stage();
+            stage.setTitle("Editer Produit");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            loadProducts();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleDeleteProduct(Produit p) {
+        try {
+            serviceProduit.delete(p);
+            loadProducts();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Succès");
+            alert.setHeaderText(null);
+            alert.setContentText("Produit supprimé avec succès.");
+            alert.showAndWait();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible de supprimer");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
     }
 
     private FilteredList<Produit> filteredData;
     private SortedList<Produit> sortedData;
 
-    private void setupTable() {
+    private void setupData() {
         try {
             observableProducts.setAll(serviceProduit.getAll());
             
@@ -169,7 +128,7 @@ public class ManagementProduitController implements Initializable {
             
             searchField.textProperty().addListener((obs, oldVal, newVal) -> applySortAndFilter());
             
-            productsTable.setItems(sortedData);
+            displayProducts(sortedData);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -197,13 +156,13 @@ public class ManagementProduitController implements Initializable {
         };
 
         sortedData.setComparator(comparator);
+        displayProducts(sortedData);
     }
 
     private void loadProducts() {
         try {
             observableProducts.setAll(serviceProduit.getAll());
-            // Since setupTable already bound the table to sortedData (which follows observableProducts),
-            // simply updating observableProducts will refresh the view automatically.
+            displayProducts(sortedData);
         } catch (SQLException e) {
             e.printStackTrace();
         }

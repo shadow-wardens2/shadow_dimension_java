@@ -10,10 +10,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.transformation.FilteredList;
@@ -28,16 +27,7 @@ import java.util.ResourceBundle;
 public class ManagementTypeController implements Initializable {
 
     @FXML
-    private TableColumn<Type, Integer> colActions;
-
-    @FXML
-    private TableColumn<Type, Integer> colId;
-
-    @FXML
-    private TableColumn<Type, String> colNom;
-
-    @FXML
-    private TableView<Type> typeTable;
+    private FlowPane typesContainer;
 
     @FXML
     private TextField searchField;
@@ -59,98 +49,86 @@ public class ManagementTypeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        setupData();
+    }
 
-        loadTypes();
+    private void setupData() {
+        try {
+            observableTypes.setAll(serviceType.getAll());
+            FilteredList<Type> filteredData = new FilteredList<>(observableTypes, t -> true);
 
-        colActions.setCellFactory(param -> new TableCell<Type, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
-
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnDelete.setOnAction(event -> {
-                    Type t = getTableView().getItems().get(getIndex());
-                    try {
-                        serviceType.delete(t);
-                        loadTypes();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.INFORMATION);
-                        alert.setTitle("Succès");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Type supprimé avec succès.");
-                        alert.showAndWait();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.ERROR);
-                        alert.setTitle("Erreur");
-                        alert.setHeaderText("Impossible de supprimer");
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
-                    }
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filteredData.setPredicate(type -> {
+                    if (newValue == null || newValue.isEmpty()) return true;
+                    String lower = newValue.toLowerCase();
+                    return type.getNom().toLowerCase().contains(lower) ||
+                           String.valueOf(type.getId()).contains(lower);
                 });
+                displayTypes(filteredData);
+            });
 
-                btnUpdate.setOnAction(event -> {
-                    Type t = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditType.fxml"));
-                        javafx.scene.Parent root = loader.load();
-                        EditTypeController controller = loader.getController();
-                        controller.setType(t);
-                        Stage stage = new Stage();
-                        stage.setTitle("Editer Type");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadTypes();
-                    } catch (java.io.IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
+            displayTypes(filteredData);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
+    private void displayTypes(Iterable<Type> types) {
+        typesContainer.getChildren().clear();
+        for (Type t : types) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/TypeCard.fxml"));
+                Parent card = loader.load();
+                TypeCardController controller = loader.getController();
+                controller.setType(t, () -> handleEditType(t), () -> handleDeleteType(t));
+                typesContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
+        }
+    }
+
+    private void handleEditType(Type t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditType.fxml"));
+            Parent root = loader.load();
+            EditTypeController controller = loader.getController();
+            controller.setType(t);
+            Stage stage = new Stage();
+            stage.setTitle("Editer Type");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            loadTypes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleDeleteType(Type t) {
+        try {
+            serviceType.delete(t);
+            loadTypes();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Succès");
+            alert.setHeaderText(null);
+            alert.setContentText("Type supprimé avec succès.");
+            alert.showAndWait();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible de supprimer");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     private void loadTypes() {
-        observableTypes.clear();
         try {
-            observableTypes.addAll(serviceType.getAll());
-            
-            FilteredList<Type> filteredData = new FilteredList<>(observableTypes, t -> true);
-            
-            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-                filteredData.setPredicate(type -> {
-                    if (newValue == null || newValue.isEmpty()) {
-                        return true;
-                    }
-                    
-                    String lowerCaseFilter = newValue.toLowerCase();
-                    
-                    if (type.getNom().toLowerCase().contains(lowerCaseFilter)) {
-                        return true;
-                    } else if (String.valueOf(type.getId()).contains(lowerCaseFilter)) {
-                        return true;
-                    }
-                    
-                    return false;
-                });
-            });
-            
-            typeTable.setItems(filteredData);
+            observableTypes.setAll(serviceType.getAll());
+            setupData();
         } catch (SQLException e) {
             e.printStackTrace();
         }
