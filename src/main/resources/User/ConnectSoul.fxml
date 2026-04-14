@@ -29,6 +29,7 @@
                             </children>
                         </HBox>
                         <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleGoogleAuth" styleClass="secondary-button" text="Continue with Google" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#showSignup" styleClass="secondary-button" text="Sign Up" />
                     </children>
                 </VBox>
@@ -38,8 +39,10 @@
                         <Label styleClass="bento-title" text="Sign Up" />
                         <Label styleClass="form-label" text="Email" />
                         <TextField fx:id="tfSignupEmail" promptText="email@example.com" />
+                        <Label fx:id="lblSignupEmailError" managed="false" styleClass="validation-error" visible="false" />
                         <Label styleClass="form-label" text="Username" />
                         <TextField fx:id="tfSignupUsername" promptText="your username" />
+                        <Label fx:id="lblSignupUsernameError" managed="false" styleClass="validation-error" visible="false" />
                         <Label styleClass="form-label" text="Password" />
                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                             <children>
@@ -48,9 +51,12 @@
                                 <Button fx:id="btnToggleSignupPassword" onAction="#toggleSignupPasswordVisibility" styleClass="icon-button" text="👁" />
                             </children>
                         </HBox>
+                        <Label fx:id="lblSignupPasswordError" managed="false" styleClass="validation-error" visible="false" />
                         <Label styleClass="form-label" text="Confirm Password" />
                         <PasswordField fx:id="pfSignupConfirmPassword" promptText="********" />
+                        <Label fx:id="lblSignupConfirmPasswordError" managed="false" styleClass="validation-error" visible="false" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#handleSignup" styleClass="glow-button" text="Create Account" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleGoogleAuth" styleClass="secondary-button" text="Continue with Google" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#showLogin" styleClass="secondary-button" text="Back to Login" />
                     </children>
                 </VBox>
