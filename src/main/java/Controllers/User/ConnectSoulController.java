@@ -37,6 +37,12 @@ public class ConnectSoulController {
     private Button btnToggleLoginPassword;
 
     @FXML
+    private Label lblLoginIdentityError;
+
+    @FXML
+    private Label lblLoginPasswordError;
+
+    @FXML
     private TextField tfSignupEmail;
 
     @FXML
@@ -79,6 +85,10 @@ public class ConnectSoulController {
 
     @FXML
     public void initialize() {
+        tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
+        pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+        tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+
         tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
         tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
         pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
@@ -89,9 +99,29 @@ public class ConnectSoulController {
     @FXML
     private void handleLogin() {
         try {
-            User user = serviceUser.login(tfLoginIdentity.getText(), getLoginPassword());
+            clearLoginInlineErrors();
+
+            String identity = tfLoginIdentity.getText() == null ? "" : tfLoginIdentity.getText().trim();
+            String password = getLoginPassword();
+            boolean hasInputError = false;
+
+            if (identity.isBlank()) {
+                setInlineError(lblLoginIdentityError, "Email/Username obligatoire");
+                hasInputError = true;
+            }
+
+            if (password == null || password.isBlank()) {
+                setInlineError(lblLoginPasswordError, "Mot de passe obligatoire");
+                hasInputError = true;
+            }
+
+            if (hasInputError) {
+                return;
+            }
+
+            User user = serviceUser.login(identity, password);
             if (user == null) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Identifiants invalides.");
+                setInlineError(lblLoginIdentityError, "Identifiants invalides");
                 return;
             }
 
@@ -100,7 +130,13 @@ public class ConnectSoulController {
         } catch (SQLException | IOException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Attention", e.getMessage());
+            String msg = e.getMessage() == null ? "Erreur de validation." : e.getMessage();
+            String lower = msg.toLowerCase();
+            if (lower.contains("mot de passe") || lower.contains("password") || lower.contains("obligatoire")) {
+                setInlineError(lblLoginPasswordError, msg);
+            } else {
+                setInlineError(lblLoginIdentityError, msg);
+            }
         }
     }
 
@@ -293,6 +329,11 @@ public class ConnectSoulController {
         setInlineError(lblSignupUsernameError, "");
         setInlineError(lblSignupPasswordError, "");
         setInlineError(lblSignupConfirmPasswordError, "");
+    }
+
+    private void clearLoginInlineErrors() {
+        setInlineError(lblLoginIdentityError, "");
+        setInlineError(lblLoginPasswordError, "");
     }
 
     private void setInlineError(Label label, String message) {

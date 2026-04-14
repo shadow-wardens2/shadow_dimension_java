@@ -20,6 +20,7 @@
                         <Label styleClass="bento-title" text="Login" />
                         <Label styleClass="form-label" text="Email or Username" />
                         <TextField fx:id="tfLoginIdentity" promptText="email@example.com or username" />
+                        <Label fx:id="lblLoginIdentityError" managed="false" styleClass="validation-error" visible="false" />
                         <Label styleClass="form-label" text="Password" />
                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                             <children>
@@ -28,6 +29,7 @@
                                 <Button fx:id="btnToggleLoginPassword" onAction="#toggleLoginPasswordVisibility" styleClass="icon-button" text="👁" />
                             </children>
                         </HBox>
+                        <Label fx:id="lblLoginPasswordError" managed="false" styleClass="validation-error" visible="false" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#handleGoogleAuth" styleClass="secondary-button" text="Continue with Google" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#showSignup" styleClass="secondary-button" text="Sign Up" />
