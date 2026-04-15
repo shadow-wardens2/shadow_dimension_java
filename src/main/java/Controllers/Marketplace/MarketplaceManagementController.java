@@ -121,7 +121,7 @@ public class MarketplaceManagementController implements PageHost {
     }
 
     // Helper method to swap out the center FXML content dynamically
-    public void loadPage(String fxmlPath) {
+    public Object loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -143,8 +143,10 @@ public class MarketplaceManagementController implements PageHost {
 
             contentArea.getChildren().clear();
             contentArea.getChildren().add(root);
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox spacing="24" style="-fx-background-color: #050507; -fx-padding: 32;" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.AjouterArtworkController">
+    <Text fx:id="titleText" style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 28px; -fx-font-weight: bold; -fx-fill: #ba9eff;" text="ADD NEW ARTWORK" />
+
+    <GridPane hgap="16" vgap="16">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        
+        <Label styleClass="form-label" text="Title:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="txtTitle" promptText="Artwork Title" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextArea fx:id="txtDescription" promptText="Detailed description" styleClass="text-area" prefRowCount="4" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label styleClass="form-label" text="Price:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="txtPrice" promptText="Price of the artwork" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label styleClass="form-label" text="Image URL:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <TextField fx:id="txtImage" promptText="http://... image link" styleClass="text-field" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <Label styleClass="form-label" text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <ComboBox fx:id="comboStatus" promptText="Select Status" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="9999" />
+
+        <Label styleClass="form-label" text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <ComboBox fx:id="comboCategory" promptText="Select Category" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="9999" />
+    </GridPane>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <Button onAction="#handleCancel" styleClass="secondary-button" text="Cancel" />
+        <Button fx:id="btnSave" onAction="#handleSave" styleClass="glow-button" text="Save Artwork" />
+    </HBox>
+</VBox>

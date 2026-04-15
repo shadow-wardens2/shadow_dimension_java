@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Rectangle?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.DetailArtworkController">
+    <VBox spacing="40" style="-fx-background-color: #050507; -fx-padding: 48;">
+        <!-- Back Button & Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button onAction="#handleBack" styleClass="secondary-button" text="← Back to Gallery" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox spacing="12">
+                <Button onAction="#handleEdit" styleClass="glow-button" text="Edit Artwork" />
+                <Button onAction="#handleDelete" styleClass="delete-button" text="Delete" />
+            </HBox>
+        </HBox>
+
+        <HBox spacing="48">
+            <!-- Image Section -->
+            <VBox spacing="16" alignment="TOP_CENTER">
+                 <StackPane styleClass="bento-card" style="-fx-padding: 4; -fx-background-radius: 24; -fx-border-radius: 24;">
+                    <ImageView fx:id="artworkImage" fitHeight="500.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true">
+                        <clip>
+                            <javafx.scene.shape.Rectangle arcHeight="40" arcWidth="40" height="500" width="500" />
+                        </clip>
+                    </ImageView>
+                </StackPane>
+                <Label fx:id="statusBadge" styleClass="artwork-status-badge" text="AVAILABLE" />
+            </VBox>
+
+            <!-- Info Section -->
+            <VBox spacing="32" HBox.hgrow="ALWAYS">
+                <VBox spacing="8">
+                    <Label fx:id="categoryLabel" style="-fx-text-fill: #8b5cf6; -fx-font-size: 16px; -fx-font-weight: bold;" text="DIGITAL ART" />
+                    <Text fx:id="titleText" style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 48px; -fx-font-weight: 900; -fx-fill: #ffffff;" text="Artwork Title" wrappingWidth="500" />
+                </VBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Text fx:id="priceText" style="-fx-font-size: 36px; -fx-font-weight: 900; -fx-fill: #ffffff;" text="450.00 DT" />
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+                    <VBox>
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="ARTWORK ID" />
+                        <Label fx:id="idLabel" style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="#12345" />
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="12">
+                    <Label style="-fx-text-fill: #ffffff; -fx-font-size: 18px; -fx-font-weight: bold;" text="Description" />
+                    <Label fx:id="descriptionLabel" style="-fx-text-fill: #adaaae; -fx-font-size: 16px; -fx-line-spacing: 1.5;" text="Full description text goes here. This can be quite long and should be easy to read with proper spacing and font choices." wrapText="true" maxWidth="600" />
+                </VBox>
+
+                <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+                
+                <GridPane hgap="40" vgap="16">
+                    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="CREATION DATE" />
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="April 15, 2024" />
+                    </VBox>
+                    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="ARTIST" />
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="Verified Artist" />
+                    </VBox>
+                </GridPane>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>

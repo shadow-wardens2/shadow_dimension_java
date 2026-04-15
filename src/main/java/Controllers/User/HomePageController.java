@@ -57,6 +57,11 @@ public class HomePageController implements PageHost {
     }
 
     @FXML
+    void openArtworksManagement(ActionEvent event) {
+        loadPage("/Artworks/ListerArtworks.fxml");
+    }
+
+    @FXML
     void openMarketplaceManagement(ActionEvent event) {
         if (!SessionManager.isLoggedIn()) {
             handleAuthAction(null);
@@ -135,7 +140,7 @@ public class HomePageController implements PageHost {
         }
     }
 
-    public void loadPage(String fxmlPath) {
+    public Object loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -184,10 +189,25 @@ public class HomePageController implements PageHost {
                 ((Controllers.Tutorials.ManagementLeconController) controller).setDashboardContext(this);
             }
 
+            if (controller instanceof Controllers.Artworks.ListerArtworksController) {
+                ((Controllers.Artworks.ListerArtworksController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterArtworkController) {
+                ((Controllers.Artworks.AjouterArtworkController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterCategoryController) {
+                ((Controllers.Artworks.AjouterCategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.ListerCategoriesController) {
+                ((Controllers.Artworks.ListerCategoriesController) controller).setDashboardContext(this);
+            }
+
             contentArea.getChildren().clear();
             contentArea.getChildren().add(root);
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 }
