@@ -63,6 +63,46 @@ public class ConnectSoulController {
     private void handleLogin() {
         try {
             User user = serviceUser.login(tfLoginIdentity.getText(), getLoginPassword());
+    public void initialize() {
+        // Clear login validation messages as the user types.
+        tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
+        pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+        tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+
+        // Clear signup validation messages as the user corrects each field.
+        tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
+        tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
+        pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        tfSignupPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        pfSignupConfirmPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
+    }
+
+    @FXML
+    private void handleLogin() {
+        try {
+            // Login validation is shown inline, not via popup.
+            clearLoginInlineErrors();
+
+            String identity = tfLoginIdentity.getText() == null ? "" : tfLoginIdentity.getText().trim();
+            String password = getLoginPassword();
+            boolean hasInputError = false;
+
+            if (identity.isBlank()) {
+                setInlineError(lblLoginIdentityError, "Email/Username obligatoire");
+                hasInputError = true;
+            }
+
+            if (password == null || password.isBlank()) {
+                setInlineError(lblLoginPasswordError, "Mot de passe obligatoire");
+                hasInputError = true;
+            }
+
+            if (hasInputError) {
+                return;
+            }
+
+            // Delegate credential verification to service layer after local checks pass.
+            User user = serviceUser.login(identity, password);
             if (user == null) {
                 showAlert(Alert.AlertType.ERROR, "Erreur", "Identifiants invalides.");
                 return;
@@ -80,9 +120,15 @@ public class ConnectSoulController {
     @FXML
     private void handleSignup() {
         try {
+            // Signup validation is split in 2 layers: local input checks first, business checks second.
+            clearSignupInlineErrors();
+
+            String email = tfSignupEmail.getText() == null ? "" : tfSignupEmail.getText().trim();
+            String username = tfSignupUsername.getText() == null ? "" : tfSignupUsername.getText().trim();
             String password = getSignupPassword();
             String confirmPassword = pfSignupConfirmPassword.getText();
 
+            // Cross-field validation: confirm password must match password.
             if (!password.equals(confirmPassword)) {
                 showAlert(Alert.AlertType.WARNING, "Attention", "Le mot de passe et sa confirmation ne correspondent pas.");
                 return;
@@ -172,6 +218,7 @@ public class ConnectSoulController {
             return "Le mot de passe est obligatoire.";
         }
 
+        // Returns all unmet password rules in one message for better user guidance.
         StringBuilder sb = new StringBuilder();
         if (password.length() < 8) {
             sb.append("- 8 caracteres minimum\n");
@@ -194,6 +241,88 @@ public class ConnectSoulController {
         }
 
         return "Le mot de passe doit respecter:\n" + sb;
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    }
+
+    private void clearSignupInlineErrors() {
+        setInlineError(lblSignupEmailError, "");
+        setInlineError(lblSignupUsernameError, "");
+        setInlineError(lblSignupPasswordError, "");
+        setInlineError(lblSignupConfirmPasswordError, "");
+    }
+
+    private void clearLoginInlineErrors() {
+        setInlineError(lblLoginIdentityError, "");
+        setInlineError(lblLoginPasswordError, "");
+    }
+
+    private void setInlineError(Label label, String message) {
+        if (label == null) {
+            return;
+        }
+        // Show/hide error labels dynamically to keep layout compact when there is no error.
+        boolean show = message != null && !message.isBlank();
+        label.setText(show ? message : "");
+        label.setVisible(show);
+        label.setManaged(show);
+    }
+
+    private void startVerificationDialog(String email) {
+        while (true) {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Verification Email");
+            dialog.setHeaderText("Entrez le code recu sur: " + email);
+
+            TextField codeInput = new TextField();
+            codeInput.setPromptText("6-digit code");
+            dialog.getDialogPane().setContent(codeInput);
+
+            ButtonType verifyType = new ButtonType("Verify");
+            ButtonType resendType = new ButtonType("Resend Code");
+            dialog.getDialogPane().getButtonTypes().setAll(verifyType, resendType, ButtonType.CANCEL);
+
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
+                return;
+            }
+
+            try {
+                if (result.get() == resendType) {
+                    serviceUser.resendVerificationCode(email);
+                    showAlert(Alert.AlertType.INFORMATION, "Verification", "Un nouveau code a ete envoye.");
+                    continue;
+                }
+
+                String code = codeInput.getText();
+                if (code == null || code.isBlank()) {
+                    showAlert(Alert.AlertType.WARNING, "Verification", "Veuillez entrer le code de verification.");
+                    continue;
+                }
+
+                boolean verified = serviceUser.verifyEmailCode(email, code);
+                if (!verified) {
+                    showAlert(Alert.AlertType.WARNING, "Verification", "Code invalide ou expire.");
+                    continue;
+                }
+
+                showAlert(Alert.AlertType.INFORMATION, "Verification", "Email verifie. Vous pouvez maintenant vous connecter.");
+                tfLoginIdentity.setText(email);
+                showLogin();
+                return;
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
+                return;
+            } catch (IllegalArgumentException e) {
+                showAlert(Alert.AlertType.WARNING, "Attention", e.getMessage());
+                return;
+            } catch (RuntimeException e) {
+                showAlert(Alert.AlertType.ERROR, "Email", e.getMessage());
+                return;
+            }
+        }
     }
 
     @FXML
