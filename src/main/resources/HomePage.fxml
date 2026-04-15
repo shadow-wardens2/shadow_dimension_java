@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #050507;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.HomePageController">
+<StackPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #050507;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.HomePageController">
 
     <BorderPane>
         <top>
@@ -37,13 +37,12 @@
                 </VBox>
                 <VBox spacing="8" style="-fx-padding: 0 0 0 0;">
                     <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
-                    <Button fx:id="btnVault" alignment="BASELINE_LEFT" onAction="#openVault" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    My Vault" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openVault" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    My Vault" />
                     <Button fx:id="btnUserManagement" alignment="BASELINE_LEFT" managed="false" onAction="#openUserManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Users Management" visible="false" />
                     <Button fx:id="btnUserStatistics" alignment="BASELINE_LEFT" managed="false" onAction="#openUserStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Users Statistics" visible="false" />
-                    <Button fx:id="btnMarketplaceManagement" alignment="BASELINE_LEFT" onAction="#openMarketplaceManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
-                    <Button fx:id="btnMarketplaceStatistics" alignment="BASELINE_LEFT" onAction="#openMarketplaceStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Statistics" />
-                    <Button fx:id="btnTutorialsManagement" alignment="BASELINE_LEFT" onAction="#openTutorialsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Tutorials Management" />
-                    <Button fx:id="btnEventManagement" alignment="BASELINE_LEFT" onAction="#openEventManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Event Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openTutorialsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Tutorials Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openEventManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Event Management" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">

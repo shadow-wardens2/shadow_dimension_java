@@ -4,7 +4,6 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -15,64 +14,49 @@
 
 <AnchorPane prefHeight="640.0" prefWidth="700.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.AddEventController">
     <children>
-        <ScrollPane fitToWidth="true" styleClass="users-scroll" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
-            <content>
-                <VBox spacing="18.0" style="-fx-padding: 0 4 0 0;">
-                    <children>
-                        <Label styleClass="headline" text="Ajouter un Event" />
+        <VBox spacing="18.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <children>
+                <Label styleClass="headline" text="Ajouter un Event" />
 
-                    <GridPane hgap="10" vgap="12">
+                <GridPane hgap="10" vgap="12">
                     <Label styleClass="form-label" text="Title:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                     <TextField fx:id="tfTitle" promptText="Event title" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                    <Label fx:id="lblTitleError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                    <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                    <TextArea fx:id="taDescription" prefRowCount="3" promptText="Event description" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                    <Label fx:id="lblDescriptionError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <TextArea fx:id="taDescription" prefRowCount="3" promptText="Event description" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                    <Label styleClass="form-label" text="Location:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                    <TextField fx:id="tfLocation" promptText="Event location" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                    <Label fx:id="lblLocationError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                    <Label styleClass="form-label" text="Location:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <TextField fx:id="tfLocation" promptText="Event location" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                    <Label styleClass="form-label" text="Start Date:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                    <DatePicker fx:id="dpStartDate" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                    <Label fx:id="lblStartDateError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                    <Label styleClass="form-label" text="Start Date:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                    <DatePicker fx:id="dpStartDate" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                    <Label styleClass="form-label" text="End Date:" GridPane.columnIndex="0" GridPane.rowIndex="8" />
-                    <DatePicker fx:id="dpEndDate" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                    <Label fx:id="lblEndDateError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                    <Label styleClass="form-label" text="End Date:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                    <DatePicker fx:id="dpEndDate" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                    <Label styleClass="form-label" text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="10" />
-                    <ComboBox fx:id="cbCategory" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                    <Label fx:id="lblCategoryError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                    <Label styleClass="form-label" text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                    <ComboBox fx:id="cbCategory" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-                    <Label styleClass="form-label" text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="12" />
-                    <ComboBox fx:id="cbStatus" GridPane.columnIndex="1" GridPane.rowIndex="12" />
-                    <Label fx:id="lblStatusError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+                    <Label styleClass="form-label" text="Status:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                    <ComboBox fx:id="cbStatus" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
-                    <Label styleClass="form-label" text="Location Type:" GridPane.columnIndex="0" GridPane.rowIndex="14" />
-                    <ComboBox fx:id="cbLocationType" GridPane.columnIndex="1" GridPane.rowIndex="14" />
-                    <Label fx:id="lblLocationTypeError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="15" />
+                    <Label styleClass="form-label" text="Location Type:" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                    <ComboBox fx:id="cbLocationType" GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
-                    <Label styleClass="form-label" text="Capacity:" GridPane.columnIndex="0" GridPane.rowIndex="16" />
-                    <TextField fx:id="tfCapacity" promptText="Capacity > 0" GridPane.columnIndex="1" GridPane.rowIndex="16" />
-                    <Label fx:id="lblCapacityError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="17" />
+                    <Label styleClass="form-label" text="Capacity:" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+                    <TextField fx:id="tfCapacity" promptText="Capacity > 0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 
-                    <Label styleClass="form-label" text="Image URL:" GridPane.columnIndex="0" GridPane.rowIndex="18" />
-                    <TextField fx:id="tfImage" promptText="https://example.com/image.png" GridPane.columnIndex="1" GridPane.rowIndex="18" />
-                    <Label fx:id="lblImageError" managed="false" styleClass="validation-error" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="19" />
-                        </GridPane>
-                        <Label fx:id="lblFormError" managed="false" styleClass="validation-error" visible="false" />
+                    <Label styleClass="form-label" text="Image URL:" GridPane.columnIndex="0" GridPane.rowIndex="9" />
+                    <TextField fx:id="tfImage" promptText="https://example.com/image.png" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                </GridPane>
 
-                        <Pane VBox.vgrow="ALWAYS" />
+                <Pane VBox.vgrow="ALWAYS" />
 
-                        <HBox alignment="CENTER_RIGHT" spacing="10">
-                            <Button onAction="#handleAjouter" styleClass="glow-button" text="Ajouter" />
-                            <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />
-                        </HBox>
-                    </children>
-                </VBox>
-            </content>
-        </ScrollPane>
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <Button onAction="#handleAjouter" styleClass="glow-button" text="Ajouter" />
+                    <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />
+                </HBox>
+            </children>
+        </VBox>
     </children>
 </AnchorPane>

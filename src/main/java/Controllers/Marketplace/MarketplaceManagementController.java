@@ -33,7 +33,6 @@ import java.sql.SQLException;
 
 public class MarketplaceManagementController implements PageHost {
 
-
     @FXML
     private StackPane contentArea;
 
@@ -140,8 +139,6 @@ public class MarketplaceManagementController implements PageHost {
                 ((ManagementProduitController) controller).setDashboardContext(this);
             } else if (controller instanceof ManagementTypeController) {
                 ((ManagementTypeController) controller).setDashboardContext(this);
-            } else if (controller instanceof MarketplaceStatisticsController) {
-                ((MarketplaceStatisticsController) controller).setDashboardContext(this);
             }
 
             contentArea.getChildren().clear();
@@ -170,16 +167,4 @@ public class MarketplaceManagementController implements PageHost {
             }
         }
     }
-
-    @Override
-    public void refreshStatistics() {
-        // Implementation for refreshing statistics if needed
-    }
-
-    @FXML
-    void openStatistics(ActionEvent event) {
-        loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
-    }
 }
-
-

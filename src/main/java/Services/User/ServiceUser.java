@@ -14,22 +14,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.UUID;
 
 public class ServiceUser implements InterfaceServiceUser {
 
     private final Connection cnx;
-    private final EmailService emailService = new EmailService();
 
     public ServiceUser() {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
-        ensureVerificationTable();
     }
 
     public User signup(String email, String username, String plainPassword) throws SQLException {
@@ -54,35 +48,19 @@ public class ServiceUser implements InterfaceServiceUser {
         ps.setString(3, "[\"ROLE_USER\"]");
         ps.setString(4, BCrypt.hashpw(plainPassword, BCrypt.gensalt()));
         ps.setInt(5, 1);
-        ps.setInt(6, 0);
+        ps.setInt(6, 1);
         ps.setInt(7, 0);
         ps.setInt(8, 0);
         ps.setInt(9, 0);
         ps.setInt(10, 0);
         ps.executeUpdate();
 
-        User createdUser;
         ResultSet keys = ps.getGeneratedKeys();
         if (keys.next()) {
-            createdUser = getById(keys.getInt(1));
-        } else {
-            createdUser = findByEmail(email.trim());
+            return getById(keys.getInt(1));
         }
 
-        if (createdUser == null) {
-            throw new IllegalStateException("Impossible de recuperer l'utilisateur cree.");
-        }
-
-        try {
-            sendVerificationCode(createdUser);
-        } catch (RuntimeException ex) {
-            throw new IllegalArgumentException(
-                    "Compte cree mais email de verification non envoye. Verifiez MAIL_* et SMTP, puis utilisez Resend Code. Détail: " + ex.getMessage(),
-                    ex
-            );
-        }
-
-        return createdUser;
+        return findByEmail(email.trim());
     }
 
     public User login(String emailOrUsername, String plainPassword) throws SQLException {
@@ -90,7 +68,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
         }
 
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ? OR username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE email = ? OR username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, emailOrUsername.trim());
         ps.setString(2, emailOrUsername.trim());
@@ -105,11 +83,6 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Ce compte est verrouille.");
         }
 
-        int isVerified = rs.getInt("is_verified");
-        if (isVerified == 0) {
-            throw new IllegalArgumentException("Email non verifie. Entrez le code recu par mail.");
-        }
-
         String storedPassword = rs.getString("password");
         if (!isPasswordValid(plainPassword, storedPassword)) {
             return null;
@@ -118,121 +91,8 @@ public class ServiceUser implements InterfaceServiceUser {
         return mapUser(rs);
     }
 
-    public User loginOrSignupWithGoogle(String googleId, String email, String fullName) throws SQLException {
-        if (googleId == null || googleId.isBlank() || email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Google id et email sont obligatoires.");
-        }
-
-        User byGoogle = findByGoogleId(googleId.trim());
-        if (byGoogle != null) {
-            if (byGoogle.getIsLocked() == 1) {
-                throw new IllegalArgumentException("Ce compte est verrouille.");
-            }
-            return byGoogle;
-        }
-
-        User byEmail = findByEmail(email.trim());
-        if (byEmail != null) {
-            if (byEmail.getIsLocked() == 1) {
-                throw new IllegalArgumentException("Ce compte est verrouille.");
-            }
-
-            String updateSql = "UPDATE `user` SET google_id = ?, full_name = COALESCE(NULLIF(full_name, ''), ?) WHERE id = ?";
-            PreparedStatement updatePs = cnx.prepareStatement(updateSql);
-            updatePs.setString(1, googleId.trim());
-            updatePs.setString(2, fullName == null ? "" : fullName.trim());
-            updatePs.setInt(3, byEmail.getId());
-            updatePs.executeUpdate();
-
-            return getById(byEmail.getId());
-        }
-
-        String username = generateUniqueUsernameFromEmail(email);
-        String sql = "INSERT INTO `user` (email, username, roles, password, google_id, full_name, is_active, is_verified, created_at, accessibility_mode, onboarding_completed, bad_comment_count, is_locked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)";
-        PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, email.trim());
-        ps.setString(2, username);
-        ps.setString(3, "[\"ROLE_USER\"]");
-        ps.setString(4, BCrypt.hashpw(UUID.randomUUID().toString(), BCrypt.gensalt()));
-        ps.setString(5, googleId.trim());
-        ps.setString(6, fullName == null ? "" : fullName.trim());
-        ps.setInt(7, 1);
-        ps.setInt(8, 1);
-        ps.setInt(9, 0);
-        ps.setInt(10, 0);
-        ps.setInt(11, 0);
-        ps.setInt(12, 0);
-        ps.executeUpdate();
-
-        ResultSet keys = ps.getGeneratedKeys();
-        if (keys.next()) {
-            return getById(keys.getInt(1));
-        }
-
-        return findByEmail(email.trim());
-    }
-
-    public void resendVerificationCode(String email) throws SQLException {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email obligatoire.");
-        }
-
-        User user = findByEmail(email.trim());
-        if (user == null) {
-            throw new IllegalArgumentException("Aucun utilisateur trouve pour cet email.");
-        }
-
-        if (user.getIsVerified() == 1) {
-            throw new IllegalArgumentException("Cet email est deja verifie.");
-        }
-
-        sendVerificationCode(user);
-    }
-
-    public boolean verifyEmailCode(String email, String code) throws SQLException {
-        if (email == null || email.isBlank() || code == null || code.isBlank()) {
-            throw new IllegalArgumentException("Email et code sont obligatoires.");
-        }
-
-        User user = findByEmail(email.trim());
-        if (user == null) {
-            throw new IllegalArgumentException("Aucun utilisateur trouve pour cet email.");
-        }
-
-        String sql = "SELECT id, expires_at, consumed FROM user_verification_codes WHERE user_id = ? AND code = ? ORDER BY id DESC LIMIT 1";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setInt(1, user.getId());
-        ps.setString(2, code.trim());
-        ResultSet rs = ps.executeQuery();
-
-        if (!rs.next()) {
-            return false;
-        }
-
-        if (rs.getInt("consumed") == 1) {
-            return false;
-        }
-
-        Timestamp expiresAt = rs.getTimestamp("expires_at");
-        if (expiresAt == null || expiresAt.toLocalDateTime().isBefore(LocalDateTime.now())) {
-            return false;
-        }
-
-        int verificationId = rs.getInt("id");
-
-        PreparedStatement consumePs = cnx.prepareStatement("UPDATE user_verification_codes SET consumed = 1 WHERE id = ?");
-        consumePs.setInt(1, verificationId);
-        consumePs.executeUpdate();
-
-        PreparedStatement verifyUserPs = cnx.prepareStatement("UPDATE `user` SET is_verified = 1 WHERE id = ?");
-        verifyUserPs.setInt(1, user.getId());
-        verifyUserPs.executeUpdate();
-
-        return true;
-    }
-
     public User getById(int id) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE id = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
         ResultSet rs = ps.executeQuery();
@@ -259,7 +119,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public List<User> getAllUsers() throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` ORDER BY id DESC";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` ORDER BY id DESC";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         List<User> users = new ArrayList<>();
@@ -296,7 +156,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByEmail(String email) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE email = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, email);
         ResultSet rs = ps.executeQuery();
@@ -307,7 +167,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByUsername(String username) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, username);
         ResultSet rs = ps.executeQuery();
@@ -315,34 +175,6 @@ public class ServiceUser implements InterfaceServiceUser {
             return mapUser(rs);
         }
         return null;
-    }
-
-    private User findByGoogleId(String googleId) throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE google_id = ?";
-        PreparedStatement ps = cnx.prepareStatement(sql);
-        ps.setString(1, googleId);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return mapUser(rs);
-        }
-        return null;
-    }
-
-    private String generateUniqueUsernameFromEmail(String email) throws SQLException {
-        String localPart = email.split("@", 2)[0].toLowerCase(Locale.ROOT);
-        String base = localPart.replaceAll("[^a-z0-9._-]", "");
-        if (base.isBlank()) {
-            base = "soul";
-        }
-
-        String candidate = base;
-        int suffix = 1;
-        while (findByUsername(candidate) != null) {
-            candidate = base + suffix;
-            suffix++;
-        }
-
-        return candidate;
     }
 
     private User mapUser(ResultSet rs) throws SQLException {
@@ -365,43 +197,7 @@ public class ServiceUser implements InterfaceServiceUser {
         }
         user.setIsActive(rs.getInt("is_active"));
         user.setIsLocked(rs.getInt("is_locked"));
-        user.setIsVerified(rs.getInt("is_verified"));
         return user;
-    }
-
-    private void sendVerificationCode(User user) throws SQLException {
-        String code = String.format("%06d", new Random().nextInt(1_000_000));
-        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(10));
-
-        PreparedStatement invalidatePs = cnx.prepareStatement("UPDATE user_verification_codes SET consumed = 1 WHERE user_id = ? AND consumed = 0");
-        invalidatePs.setInt(1, user.getId());
-        invalidatePs.executeUpdate();
-
-        PreparedStatement insertPs = cnx.prepareStatement("INSERT INTO user_verification_codes (user_id, code, expires_at, consumed) VALUES (?, ?, ?, 0)");
-        insertPs.setInt(1, user.getId());
-        insertPs.setString(2, code);
-        insertPs.setTimestamp(3, expiresAt);
-        insertPs.executeUpdate();
-
-        emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
-    }
-
-    private void ensureVerificationTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS user_verification_codes ("
-                + "id INT AUTO_INCREMENT PRIMARY KEY, "
-                + "user_id INT NOT NULL, "
-                + "code VARCHAR(10) NOT NULL, "
-                + "expires_at DATETIME NOT NULL, "
-                + "consumed TINYINT(1) NOT NULL DEFAULT 0, "
-                + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                + "INDEX idx_user_verif_user_id (user_id), "
-                + "CONSTRAINT fk_user_verif_user FOREIGN KEY (user_id) REFERENCES `user`(id) ON DELETE CASCADE"
-                + ")";
-        try (Statement st = cnx.createStatement()) {
-            st.execute(sql);
-        } catch (SQLException ignored) {
-            // Keep startup resilient; verification methods throw clear errors if table access fails.
-        }
     }
 
     private String hashPassword(String value) {

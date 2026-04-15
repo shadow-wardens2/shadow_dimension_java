@@ -6,8 +6,8 @@ import Services.Tutorials.ServiceFormation;
 import Services.Tutorials.ServiceQuiz;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -25,6 +25,9 @@ public class AjouterQuizController {
     @FXML
     private ComboBox<Formation> cbFormation;
 
+    @FXML
+    private Label lbError;
+
     private ServiceQuiz serviceQuiz;
     private ServiceFormation serviceFormation;
 
@@ -35,43 +38,42 @@ public class AjouterQuizController {
 
     @FXML
     public void initialize() {
+        lbError.setText("");
         try {
             List<Formation> formations = serviceFormation.getAll();
             cbFormation.setItems(FXCollections.observableArrayList(formations));
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les formations.");
+            lbError.setText("Erreur: Impossible de charger les formations.");
         }
     }
 
     @FXML
     private void ajouterQuiz() {
         String titre = tfTitre.getText().trim();
+        String ordreStr = tfOrdre.getText().trim();
         Formation formation = cbFormation.getSelectionModel().getSelectedItem();
 
-        String ordreStr = tfOrdre.getText().trim();
-        int ordre;
-        try {
-            ordre = Integer.parseInt(ordreStr);
-        } catch (NumberFormatException ex) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "L'ordre doit être un nombre valide.");
+        if (titre.isEmpty() || ordreStr.isEmpty() || formation == null) {
+            lbError.setText("Erreur: Tous les champs sont obligatoires !");
             return;
         }
 
-        if (titre.isEmpty() || formation == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Le titre et la formation sont obligatoires !");
+        int ordre;
+        try {
+            ordre = Integer.parseInt(ordreStr);
+        } catch (NumberFormatException e) {
+            lbError.setText("Erreur: L'ordre doit être un nombre.");
             return;
         }
 
         try {
             Quiz quiz = new Quiz(0, titre, ordre, formation);
             serviceQuiz.add(quiz);
-
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Le quiz a été ajouté avec succès !");
             fermerFenetre();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ajouter le quiz.");
+            lbError.setText("Erreur: Impossible d'ajouter le quiz.");
         }
     }
 
@@ -83,13 +85,5 @@ public class AjouterQuizController {
     private void fermerFenetre() {
         Stage stage = (Stage) tfTitre.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

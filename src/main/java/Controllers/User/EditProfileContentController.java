@@ -66,21 +66,20 @@ public class EditProfileContentController {
         }
 
         try {
-            user.setEmail(keepExistingIfBlank(user.getEmail(), tfEmail.getText()));
-            user.setUsername(keepExistingIfBlank(user.getUsername(), tfUsername.getText()));
-            user.setFullName(keepExistingIfBlank(user.getFullName(), tfFullName.getText()));
-            user.setPhone(keepExistingIfBlank(user.getPhone(), tfPhone.getText()));
-            user.setCountry(keepExistingIfBlank(user.getCountry(), tfCountry.getText()));
-            user.setCity(keepExistingIfBlank(user.getCity(), tfCity.getText()));
-            user.setBio(keepExistingIfBlank(user.getBio(), taBio.getText()));
+            user.setEmail(tfEmail.getText().trim());
+            user.setUsername(tfUsername.getText().trim());
+            user.setFullName(tfFullName.getText().trim());
+            user.setPhone(tfPhone.getText().trim());
+            user.setCountry(tfCountry.getText().trim());
+            user.setCity(tfCity.getText().trim());
+            user.setBio(taBio.getText().trim());
 
             serviceUser.updateProfile(user);
             SessionManager.setCurrentUser(user);
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "Profil mis a jour.");
 
             if (dashboardContext != null) {
                 dashboardContext.loadPage("/User/VaultContent.fxml");
-            } else {
-                showAlert(Alert.AlertType.INFORMATION, "Succes", "Profil mis a jour.");
             }
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
@@ -99,17 +98,10 @@ public class EditProfileContentController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(msg);
-        alert.show();
+        alert.showAndWait();
     }
 
     private String valueOrEmpty(String value) {
         return value == null ? "" : value;
-    }
-
-    private String keepExistingIfBlank(String existingValue, String inputValue) {
-        if (inputValue == null || inputValue.isBlank()) {
-            return existingValue;
-        }
-        return inputValue.trim();
     }
 }

@@ -1,20 +1,17 @@
 package Controllers.event;
 
-import Controllers.Marketplace.PageHost;
 import Entities.event.Category;
 import Services.event.CategoryService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Map;
 
 public class AddCategoryController {
 
@@ -26,55 +23,32 @@ public class AddCategoryController {
     private ComboBox<String> cbTypeTarification;
     @FXML
     private TextField tfPrix;
-    @FXML
-    private Label lblNomError;
-    @FXML
-    private Label lblDescriptionError;
-    @FXML
-    private Label lblTarificationError;
-    @FXML
-    private Label lblPrixError;
 
     private final CategoryService categoryService = new CategoryService();
-    private PageHost dashboardContext;
-
-    public void setDashboardContext(PageHost dashboardContext) {
-        this.dashboardContext = dashboardContext;
-    }
 
     @FXML
     public void initialize() {
         cbTypeTarification.setItems(FXCollections.observableArrayList("FREE", "PAID"));
         cbTypeTarification.valueProperty().addListener((obs, oldVal, newVal) -> {
-            setInlineError(lblTarificationError, "");
             if ("FREE".equals(newVal)) {
                 tfPrix.clear();
                 tfPrix.setDisable(true);
-                setInlineError(lblPrixError, "");
             } else {
                 tfPrix.setDisable(false);
             }
         });
-
-        tfNom.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblNomError, ""));
-        taDescription.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblDescriptionError, ""));
-        tfPrix.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblPrixError, ""));
     }
 
     @FXML
     private void handleAjouter() {
-        clearInlineErrors();
-
-        Category category = buildAndValidateCategory();
-        if (category == null) {
-            return;
-        }
-
         try {
+            Category category = buildAndValidateCategory();
             category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             categoryService.add(category);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie ajoutee avec succes.");
-            navigateBackToCategoryList();
+            closeWindow();
+        } catch (IllegalArgumentException e) {
+            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         }
@@ -82,49 +56,52 @@ public class AddCategoryController {
 
     @FXML
     private void handleAnnuler() {
-        navigateBackToCategoryList();
+        closeWindow();
     }
 
     private Category buildAndValidateCategory() {
-        CategoryFormValidator.Result validation = CategoryFormValidator.validate(
-                tfNom.getText(),
-                taDescription.getText(),
-                cbTypeTarification.getValue(),
-                tfPrix.getText()
-        );
+        String nom = tfNom.getText() != null ? tfNom.getText().trim() : "";
+        String description = taDescription.getText() != null ? taDescription.getText().trim() : "";
+        String tarification = cbTypeTarification.getValue();
 
-        if (!validation.isValid()) {
-            applyValidationErrors(validation.getErrors());
-            return null;
+        if (nom.isEmpty()) {
+            throw new IllegalArgumentException("Le nom est obligatoire.");
+        }
+        if (description.isEmpty()) {
+            throw new IllegalArgumentException("La description est obligatoire.");
+        }
+        if (tarification == null || tarification.isBlank()) {
+            throw new IllegalArgumentException("Le type de tarification est obligatoire.");
+        }
+
+        Double prix = null;
+        if ("PAID".equals(tarification)) {
+            String prixText = tfPrix.getText() != null ? tfPrix.getText().trim() : "";
+            if (prixText.isEmpty()) {
+                throw new IllegalArgumentException("Le prix est obligatoire pour une categorie payante.");
+            }
+            try {
+                prix = Double.parseDouble(prixText);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Le prix doit etre un nombre valide.");
+            }
+            if (prix <= 0) {
+                throw new IllegalArgumentException("Le prix doit etre superieur a 0.");
+            }
         }
 
         Category category = new Category();
-        category.setNom(validation.getNom());
-        category.setDescription(validation.getDescription());
-        category.setTypeTarification(validation.getTarification());
-        category.setPrix(validation.getPrix());
+        category.setNom(nom);
+        category.setDescription(description);
+        category.setTypeTarification(tarification);
+        category.setPrix(prix);
         category.setCreatorType(null);
         return category;
-    }
-
-    private void applyValidationErrors(Map<String, String> errors) {
-        setInlineError(lblNomError, errors.get(CategoryFormValidator.FIELD_NOM));
-        setInlineError(lblDescriptionError, errors.get(CategoryFormValidator.FIELD_DESCRIPTION));
-        setInlineError(lblTarificationError, errors.get(CategoryFormValidator.FIELD_TARIFICATION));
-        setInlineError(lblPrixError, errors.get(CategoryFormValidator.FIELD_PRIX));
     }
 
     private void closeWindow() {
         Stage stage = (Stage) tfNom.getScene().getWindow();
         stage.close();
-    }
-
-    private void navigateBackToCategoryList() {
-        if (dashboardContext != null) {
-            dashboardContext.loadPage("/event/CategoryView.fxml");
-            return;
-        }
-        closeWindow();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
@@ -133,22 +110,5 @@ public class AddCategoryController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    private void clearInlineErrors() {
-        setInlineError(lblNomError, "");
-        setInlineError(lblDescriptionError, "");
-        setInlineError(lblTarificationError, "");
-        setInlineError(lblPrixError, "");
-    }
-
-    private void setInlineError(Label label, String message) {
-        if (label == null) {
-            return;
-        }
-        boolean show = message != null && !message.isBlank();
-        label.setText(show ? message : "");
-        label.setVisible(show);
-        label.setManaged(show);
     }
 }

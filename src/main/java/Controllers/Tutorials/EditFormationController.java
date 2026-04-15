@@ -1,95 +1,107 @@
 package Controllers.Tutorials;
 
 import Entities.Tutorials.Formation;
+import Entities.Tutorials.Jeu;
 import Services.Tutorials.ServiceFormation;
+import Services.Tutorials.ServiceJeu;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class EditFormationController {
 
     @FXML
     private TextField tfTitre;
+
     @FXML
     private TextField tfDescription;
+
     @FXML
     private ComboBox<String> cbNiveau;
+
+    @FXML
+    private ComboBox<Jeu> cbJeu;
+
     @FXML
     private TextField tfImage;
 
-    private ServiceFormation serviceFormation = new ServiceFormation();
-    private Formation formation;
+    @FXML
+    private Label lbError;
+
+    private ServiceFormation serviceFormation;
+    private ServiceJeu serviceJeu;
+    private Formation targetFormation;
+
+    public EditFormationController() {
+        serviceFormation = new ServiceFormation();
+        serviceJeu = new ServiceJeu();
+    }
 
     @FXML
     public void initialize() {
         cbNiveau.setItems(FXCollections.observableArrayList("debutant", "intermediaire", "avance"));
+        lbError.setText("");
+
+        try {
+            List<Jeu> jeux = serviceJeu.getAll();
+            cbJeu.setItems(FXCollections.observableArrayList(jeux));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            lbError.setText("Erreur: Impossible de charger les jeux.");
+        }
     }
 
-    public void setFormation(Formation formation) {
-        this.formation = formation;
-        tfTitre.setText(formation.getTitre());
-        tfDescription.setText(formation.getDescription());
-        cbNiveau.setValue(formation.getNiveau());
-        tfImage.setText(formation.getImage() != null ? formation.getImage() : "");
+    public void setFormation(Formation f) {
+        this.targetFormation = f;
+        if (f != null) {
+            tfTitre.setText(f.getTitre());
+            tfDescription.setText(f.getDescription());
+            cbNiveau.getSelectionModel().select(f.getNiveau());
+            cbJeu.getSelectionModel().select(f.getJeu());
+            tfImage.setText(f.getImage());
+        }
     }
 
     @FXML
     private void sauvegarder() {
         String titre = tfTitre.getText().trim();
         String description = tfDescription.getText().trim();
-        String niveau = cbNiveau.getValue();
+        String niveau = cbNiveau.getSelectionModel().getSelectedItem();
+        Jeu jeu = cbJeu.getSelectionModel().getSelectedItem();
 
-        if (titre.isEmpty() || niveau == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Le titre et le niveau sont obligatoires.");
+        if (titre.isEmpty() || niveau == null || jeu == null) {
+            lbError.setText("Erreur: Titre, Niveau et Jeu sont obligatoires !");
             return;
         }
 
         try {
-            boolean exists = serviceFormation.getAll().stream()
-                    .anyMatch(f -> f.getTitre().equalsIgnoreCase(titre) && f.getId() != formation.getId());
-            if (exists) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Une formation avec ce titre existe déjà !");
-                return;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            targetFormation.setTitre(titre);
+            targetFormation.setDescription(description);
+            targetFormation.setNiveau(niveau);
+            targetFormation.setJeu(jeu);
+            targetFormation.setImage(tfImage.getText().trim());
 
-        formation.setTitre(titre);
-        formation.setDescription(description);
-        formation.setNiveau(niveau);
-        formation.setImage(tfImage.getText().trim());
-
-        try {
-            serviceFormation.update(formation);
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Formation mise à jour avec succès !");
-            closeWindow();
-        } catch (SQLException e) {
+            serviceFormation.update(targetFormation);
+            fermerFenetre();
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de mettre à jour la formation.");
+            lbError.setText("Erreur: Impossible de mettre à jour la formation.");
         }
     }
 
     @FXML
     private void annuler() {
-        closeWindow();
+        fermerFenetre();
     }
 
-    private void closeWindow() {
+    private void fermerFenetre() {
         Stage stage = (Stage) tfTitre.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }
