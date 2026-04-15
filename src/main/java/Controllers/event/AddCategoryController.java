@@ -1,11 +1,13 @@
 package Controllers.event;
 
+import Controllers.Marketplace.PageHost;
 import Entities.event.Category;
 import Services.event.CategoryService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -23,32 +25,55 @@ public class AddCategoryController {
     private ComboBox<String> cbTypeTarification;
     @FXML
     private TextField tfPrix;
+    @FXML
+    private Label lblNomError;
+    @FXML
+    private Label lblDescriptionError;
+    @FXML
+    private Label lblTarificationError;
+    @FXML
+    private Label lblPrixError;
 
     private final CategoryService categoryService = new CategoryService();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
 
     @FXML
     public void initialize() {
         cbTypeTarification.setItems(FXCollections.observableArrayList("FREE", "PAID"));
         cbTypeTarification.valueProperty().addListener((obs, oldVal, newVal) -> {
+            setInlineError(lblTarificationError, "");
             if ("FREE".equals(newVal)) {
                 tfPrix.clear();
                 tfPrix.setDisable(true);
+                setInlineError(lblPrixError, "");
             } else {
                 tfPrix.setDisable(false);
             }
         });
+
+        tfNom.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblNomError, ""));
+        taDescription.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblDescriptionError, ""));
+        tfPrix.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblPrixError, ""));
     }
 
     @FXML
     private void handleAjouter() {
+        clearInlineErrors();
+
+        Category category = buildAndValidateCategory();
+        if (category == null) {
+            return;
+        }
+
         try {
-            Category category = buildAndValidateCategory();
             category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             categoryService.add(category);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie ajoutee avec succes.");
-            closeWindow();
-        } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
+            navigateBackToCategoryList();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         }
@@ -56,38 +81,51 @@ public class AddCategoryController {
 
     @FXML
     private void handleAnnuler() {
-        closeWindow();
+        navigateBackToCategoryList();
     }
 
     private Category buildAndValidateCategory() {
         String nom = tfNom.getText() != null ? tfNom.getText().trim() : "";
         String description = taDescription.getText() != null ? taDescription.getText().trim() : "";
         String tarification = cbTypeTarification.getValue();
+        boolean hasInputError = false;
 
         if (nom.isEmpty()) {
-            throw new IllegalArgumentException("Le nom est obligatoire.");
+            setInlineError(lblNomError, "Le nom est obligatoire.");
+            hasInputError = true;
         }
         if (description.isEmpty()) {
-            throw new IllegalArgumentException("La description est obligatoire.");
+            setInlineError(lblDescriptionError, "La description est obligatoire.");
+            hasInputError = true;
         }
         if (tarification == null || tarification.isBlank()) {
-            throw new IllegalArgumentException("Le type de tarification est obligatoire.");
+            setInlineError(lblTarificationError, "Le type de tarification est obligatoire.");
+            hasInputError = true;
         }
 
         Double prix = null;
         if ("PAID".equals(tarification)) {
             String prixText = tfPrix.getText() != null ? tfPrix.getText().trim() : "";
             if (prixText.isEmpty()) {
-                throw new IllegalArgumentException("Le prix est obligatoire pour une categorie payante.");
+                setInlineError(lblPrixError, "Le prix est obligatoire pour une categorie payante.");
+                hasInputError = true;
             }
             try {
-                prix = Double.parseDouble(prixText);
+                if (!prixText.isEmpty()) {
+                    prix = Double.parseDouble(prixText);
+                }
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Le prix doit etre un nombre valide.");
+                setInlineError(lblPrixError, "Le prix doit etre un nombre valide.");
+                hasInputError = true;
             }
-            if (prix <= 0) {
-                throw new IllegalArgumentException("Le prix doit etre superieur a 0.");
+            if (prix != null && prix <= 0) {
+                setInlineError(lblPrixError, "Le prix doit etre superieur a 0.");
+                hasInputError = true;
             }
+        }
+
+        if (hasInputError) {
+            return null;
         }
 
         Category category = new Category();
@@ -104,11 +142,36 @@ public class AddCategoryController {
         stage.close();
     }
 
+    private void navigateBackToCategoryList() {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/CategoryView.fxml");
+            return;
+        }
+        closeWindow();
+    }
+
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void clearInlineErrors() {
+        setInlineError(lblNomError, "");
+        setInlineError(lblDescriptionError, "");
+        setInlineError(lblTarificationError, "");
+        setInlineError(lblPrixError, "");
+    }
+
+    private void setInlineError(Label label, String message) {
+        if (label == null) {
+            return;
+        }
+        boolean show = message != null && !message.isBlank();
+        label.setText(show ? message : "");
+        label.setVisible(show);
+        label.setManaged(show);
     }
 }

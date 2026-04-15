@@ -5,7 +5,13 @@ import Controllers.Marketplace.ManagementCategorieController;
 import Controllers.Marketplace.ManagementProduitController;
 import Controllers.Marketplace.ManagementTypeController;
 import Controllers.Marketplace.PageHost;
+import Controllers.event.CategoryController;
+import Controllers.event.AddCategoryController;
+import Controllers.event.AddEventController;
+import Controllers.event.EventController;
 import Controllers.event.EventSelectorController;
+import Controllers.event.EditCategoryController;
+import Controllers.event.EditEventController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -158,6 +164,24 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EventSelectorController) {
                 ((EventSelectorController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof EventController) {
+                ((EventController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof CategoryController) {
+                ((CategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof AddEventController) {
+                ((AddEventController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof EditEventController) {
+                ((EditEventController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof AddCategoryController) {
+                ((AddCategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof EditCategoryController) {
+                ((EditCategoryController) controller).setDashboardContext(this);
             }
             if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
