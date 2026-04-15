@@ -1,5 +1,6 @@
 package Controllers.event;
 
+import Controllers.Marketplace.PageHost;
 import Entities.event.Category;
 import Entities.event.Event;
 import Services.event.CategoryService;
@@ -10,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -42,9 +44,36 @@ public class AddEventController {
     private ComboBox<String> cbStatus;
     @FXML
     private ComboBox<String> cbLocationType;
+    @FXML
+    private Label lblTitleError;
+    @FXML
+    private Label lblDescriptionError;
+    @FXML
+    private Label lblLocationError;
+    @FXML
+    private Label lblStartDateError;
+    @FXML
+    private Label lblEndDateError;
+    @FXML
+    private Label lblImageError;
+    @FXML
+    private Label lblCapacityError;
+    @FXML
+    private Label lblCategoryError;
+    @FXML
+    private Label lblStatusError;
+    @FXML
+    private Label lblLocationTypeError;
+    @FXML
+    private Label lblFormError;
 
     private final EventService eventService = new EventService();
     private final CategoryService categoryService = new CategoryService();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
 
     @FXML
     public void initialize() {
@@ -56,18 +85,33 @@ public class AddEventController {
 
         cbStatus.setItems(FXCollections.observableArrayList("ACTIVE", "INACTIVE", "DRAFT"));
         cbLocationType.setItems(FXCollections.observableArrayList("indoor", "outdoor"));
+
+        tfTitle.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblTitleError, ""));
+        taDescription.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblDescriptionError, ""));
+        tfLocation.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationError, ""));
+        dpStartDate.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblStartDateError, ""));
+        dpEndDate.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblEndDateError, ""));
+        tfImage.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblImageError, ""));
+        tfCapacity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblCapacityError, ""));
+        cbCategory.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblCategoryError, ""));
+        cbStatus.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblStatusError, ""));
+        cbLocationType.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationTypeError, ""));
     }
 
     @FXML
     private void handleAjouter() {
+        clearInlineErrors();
+
+        Event event = buildAndValidateEvent();
+        if (event == null) {
+            return;
+        }
+
         try {
-            Event event = buildAndValidateEvent();
             event.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             eventService.add(event);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement ajoute avec succes.");
-            closeWindow();
-        } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
+            navigateBackToEventList();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         }
@@ -75,7 +119,7 @@ public class AddEventController {
 
     @FXML
     private void handleAnnuler() {
-        closeWindow();
+        navigateBackToEventList();
     }
 
     private Event buildAndValidateEvent() {
@@ -89,28 +133,74 @@ public class AddEventController {
         Category category = cbCategory.getValue();
         String status = cbStatus.getValue();
         String locationType = cbLocationType.getValue();
+        boolean hasInputError = false;
 
-        if (title.isEmpty()) throw new IllegalArgumentException("Le titre est obligatoire.");
-        if (description.isEmpty()) throw new IllegalArgumentException("La description est obligatoire.");
-        if (location.isEmpty()) throw new IllegalArgumentException("La localisation est obligatoire.");
-        if (startDate == null) throw new IllegalArgumentException("La date de debut est obligatoire.");
-        if (endDate == null) throw new IllegalArgumentException("La date de fin est obligatoire.");
-        if (!startDate.isBefore(endDate)) throw new IllegalArgumentException("La date de debut doit etre avant la date de fin.");
-        if (image.isEmpty()) throw new IllegalArgumentException("L'image est obligatoire.");
-        if (capacityText.isEmpty()) throw new IllegalArgumentException("La capacite est obligatoire.");
-        if (category == null) throw new IllegalArgumentException("La categorie est obligatoire.");
-        if (status == null || status.isBlank()) throw new IllegalArgumentException("Le status est obligatoire.");
-        if (locationType == null || locationType.isBlank()) throw new IllegalArgumentException("Le type de lieu est obligatoire.");
-        if (SessionManager.getCurrentUser() == null) throw new IllegalArgumentException("Aucun utilisateur connecte.");
+        if (title.isEmpty()) {
+            setInlineError(lblTitleError, "Le titre est obligatoire.");
+            hasInputError = true;
+        }
+        if (description.isEmpty()) {
+            setInlineError(lblDescriptionError, "La description est obligatoire.");
+            hasInputError = true;
+        }
+        if (location.isEmpty()) {
+            setInlineError(lblLocationError, "La localisation est obligatoire.");
+            hasInputError = true;
+        }
+        if (startDate == null) {
+            setInlineError(lblStartDateError, "La date de debut est obligatoire.");
+            hasInputError = true;
+        }
+        if (endDate == null) {
+            setInlineError(lblEndDateError, "La date de fin est obligatoire.");
+            hasInputError = true;
+        }
+        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
+            setInlineError(lblEndDateError, "La date de fin doit etre apres la date de debut.");
+            hasInputError = true;
+        }
+        if (image.isEmpty()) {
+            setInlineError(lblImageError, "L'image est obligatoire.");
+            hasInputError = true;
+        }
+        if (capacityText.isEmpty()) {
+            setInlineError(lblCapacityError, "La capacite est obligatoire.");
+            hasInputError = true;
+        }
+        if (category == null) {
+            setInlineError(lblCategoryError, "La categorie est obligatoire.");
+            hasInputError = true;
+        }
+        if (status == null || status.isBlank()) {
+            setInlineError(lblStatusError, "Le status est obligatoire.");
+            hasInputError = true;
+        }
+        if (locationType == null || locationType.isBlank()) {
+            setInlineError(lblLocationTypeError, "Le type de lieu est obligatoire.");
+            hasInputError = true;
+        }
+        if (SessionManager.getCurrentUser() == null) {
+            setInlineError(lblFormError, "Aucun utilisateur connecte.");
+            hasInputError = true;
+        }
 
         int capacity;
         try {
             capacity = Integer.parseInt(capacityText);
         } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("La capacite doit etre un nombre entier.");
+            setInlineError(lblCapacityError, "La capacite doit etre un nombre entier.");
+            hasInputError = true;
+            capacity = -1;
         }
 
-        if (capacity <= 0) throw new IllegalArgumentException("La capacite doit etre superieure a 0.");
+        if (!capacityText.isEmpty() && capacity <= 0) {
+            setInlineError(lblCapacityError, "La capacite doit etre superieure a 0.");
+            hasInputError = true;
+        }
+
+        if (hasInputError) {
+            return null;
+        }
 
         Event event = new Event();
         event.setTitle(title);
@@ -134,11 +224,43 @@ public class AddEventController {
         stage.close();
     }
 
+    private void navigateBackToEventList() {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/EventView.fxml");
+            return;
+        }
+        closeWindow();
+    }
+
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void clearInlineErrors() {
+        setInlineError(lblTitleError, "");
+        setInlineError(lblDescriptionError, "");
+        setInlineError(lblLocationError, "");
+        setInlineError(lblStartDateError, "");
+        setInlineError(lblEndDateError, "");
+        setInlineError(lblImageError, "");
+        setInlineError(lblCapacityError, "");
+        setInlineError(lblCategoryError, "");
+        setInlineError(lblStatusError, "");
+        setInlineError(lblLocationTypeError, "");
+        setInlineError(lblFormError, "");
+    }
+
+    private void setInlineError(Label label, String message) {
+        if (label == null) {
+            return;
+        }
+        boolean show = message != null && !message.isBlank();
+        label.setText(show ? message : "");
+        label.setVisible(show);
+        label.setManaged(show);
     }
 }
