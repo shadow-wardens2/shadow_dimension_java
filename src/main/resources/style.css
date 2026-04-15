@@ -92,6 +92,27 @@
     border-color: #8b5cf6;
 }
 
+.users-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.users-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.user-row-card {
+    -fx-background-color: #0e0e11;
+    -fx-border-color: rgba(139, 92, 246, 0.2);
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-padding: 10 12;
+}
+
+.user-row-card:hover {
+    -fx-border-color: rgba(186, 158, 255, 0.45);
+}
+
 .table-view {
     -fx-background-color: transparent;
     background-color: transparent;
@@ -243,6 +264,14 @@
     font-size: 13px;
     -fx-font-weight: bold;
     font-weight: bold;
+}
+
+.validation-error {
+    -fx-text-fill: #ff7f9a;
+    color: #ff7f9a;
+    -fx-font-size: 12px;
+    font-size: 12px;
+    -fx-wrap-text: true;
 }
 
 .edit-button {

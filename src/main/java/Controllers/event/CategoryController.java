@@ -1,31 +1,28 @@
 package Controllers.event;
 
+import Controllers.Marketplace.PageHost;
 import Entities.event.Category;
 import Services.event.CategoryService;
+import Utils.EventNavigationState;
 import Utils.PdfExportUtil;
 import Utils.VoiceToTextUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,20 +35,10 @@ import javafx.stage.FileChooser;
 
 public class CategoryController implements Initializable {
 
+    private PageHost dashboardContext;
+
     @FXML
-    private TableView<Category> categoryTable;
-    @FXML
-    private TableColumn<Category, Integer> colId;
-    @FXML
-    private TableColumn<Category, String> colNom;
-    @FXML
-    private TableColumn<Category, String> colDescription;
-    @FXML
-    private TableColumn<Category, String> colTarification;
-    @FXML
-    private TableColumn<Category, Double> colPrix;
-    @FXML
-    private TableColumn<Category, Integer> colActions;
+    private VBox categoriesContainer;
     @FXML
     private TextField tfSearch;
     @FXML
@@ -60,76 +47,20 @@ public class CategoryController implements Initializable {
     private Button btnMic;
 
     private final CategoryService categoryService = new CategoryService();
-    private final ObservableList<Category> observableCategories = FXCollections.observableArrayList();
-    private FilteredList<Category> filteredCategories;
-    private SortedList<Category> sortedCategories;
+    private final ObservableList<Category> masterCategories = FXCollections.observableArrayList();
+    private final ObservableList<Category> displayedCategories = FXCollections.observableArrayList();
+
+    public void setDashboardContext(PageHost dashboardContext) {
+        this.dashboardContext = dashboardContext;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        colTarification.setCellValueFactory(new PropertyValueFactory<>("typeTarification"));
-        colPrix.setCellValueFactory(new PropertyValueFactory<>("prix"));
-
         setupSearchAndSort();
         loadCategories();
-
-        colActions.setCellFactory(param -> new TableCell<Category, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
-
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnDelete.setOnAction(event -> {
-                    Category c = getTableView().getItems().get(getIndex());
-                    try {
-                        categoryService.delete(c);
-                        loadCategories();
-                        showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie supprimee avec succes.");
-                    } catch (SQLException ex) {
-                        showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
-                    }
-                });
-
-                btnUpdate.setOnAction(event -> {
-                    Category c = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EditCategory.fxml"));
-                        Parent root = loader.load();
-                        EditCategoryController controller = loader.getController();
-                        controller.setCategory(c);
-                        Stage stage = new Stage();
-                        stage.setTitle("Edit Category");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadCategories();
-                    } catch (IOException ex) {
-                        showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
-            }
-        });
     }
 
     private void setupSearchAndSort() {
-        filteredCategories = new FilteredList<>(observableCategories, c -> true);
-        sortedCategories = new SortedList<>(filteredCategories);
-        categoryTable.setItems(sortedCategories);
-
         cbSort.setItems(FXCollections.observableArrayList(
                 "Newest first",
                 "Oldest first",
@@ -149,21 +80,27 @@ public class CategoryController implements Initializable {
     private void applyDynamicFilterAndSort() {
         String search = tfSearch.getText() == null ? "" : tfSearch.getText().trim().toLowerCase(Locale.ROOT);
 
-        filteredCategories.setPredicate(category -> {
+        displayedCategories.clear();
+        for (Category category : masterCategories) {
             if (search.isEmpty()) {
-                return true;
+                displayedCategories.add(category);
+                continue;
             }
 
-            String name = safe(category.getNom());
-            String description = safe(category.getDescription());
-            String pricing = safe(category.getTypeTarification());
+            String name = safeLower(category.getNom());
+            String description = safeLower(category.getDescription());
+            String pricing = safeLower(category.getTypeTarification());
             String price = category.getPrix() == null ? "" : String.valueOf(category.getPrix());
 
-            return name.contains(search)
+            boolean match = name.contains(search)
                     || description.contains(search)
                     || pricing.contains(search)
                     || price.contains(search);
-        });
+
+            if (match) {
+                displayedCategories.add(category);
+            }
+        }
 
         String selectedSort = cbSort.getValue();
         Comparator<Category> comparator;
@@ -171,9 +108,9 @@ public class CategoryController implements Initializable {
         if ("Oldest first".equals(selectedSort)) {
             comparator = Comparator.comparingInt(Category::getId);
         } else if ("Name A-Z".equals(selectedSort)) {
-            comparator = Comparator.comparing(c -> safe(c.getNom()));
+            comparator = Comparator.comparing(c -> safeLower(c.getNom()));
         } else if ("Name Z-A".equals(selectedSort)) {
-            comparator = Comparator.comparing((Category c) -> safe(c.getNom())).reversed();
+            comparator = Comparator.comparing((Category c) -> safeLower(c.getNom())).reversed();
         } else if ("Price high-low".equals(selectedSort)) {
             comparator = Comparator.comparing(
                     (Category c) -> c.getPrix() == null ? Double.NEGATIVE_INFINITY : c.getPrix()
@@ -186,7 +123,8 @@ public class CategoryController implements Initializable {
             comparator = Comparator.comparingInt(Category::getId).reversed();
         }
 
-        sortedCategories.setComparator(comparator);
+        displayedCategories.sort(comparator);
+        renderCategories();
     }
 
     @FXML
@@ -211,16 +149,16 @@ public class CategoryController implements Initializable {
 
     @FXML
     void handleAddCategory(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/AddCategory.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("Add New Category");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-            loadCategories();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+        EventNavigationState.clearEditingCategory();
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/AddCategory.fxml");
+        }
+    }
+
+    @FXML
+    private void handleGoBack() {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/EventSelector.fxml");
         }
     }
 
@@ -231,13 +169,13 @@ public class CategoryController implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         fileChooser.setInitialFileName("categories-report.pdf");
 
-        java.io.File file = fileChooser.showSaveDialog(categoryTable.getScene().getWindow());
+        java.io.File file = fileChooser.showSaveDialog(tfSearch.getScene().getWindow());
         if (file == null) {
             return;
         }
 
         try {
-            List<Category> rows = new ArrayList<>(sortedCategories);
+            List<Category> rows = new ArrayList<>(displayedCategories);
             PdfExportUtil.exportCategories(file.getAbsolutePath(), rows);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "PDF exporte avec succes.");
         } catch (Exception e) {
@@ -246,16 +184,116 @@ public class CategoryController implements Initializable {
     }
 
     private void loadCategories() {
-        observableCategories.clear();
+        masterCategories.clear();
         try {
-            observableCategories.addAll(categoryService.getAll());
+            masterCategories.addAll(categoryService.getAll());
             applyDynamicFilterAndSort();
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         }
     }
 
-    private String safe(String value) {
+    private void renderCategories() {
+        categoriesContainer.getChildren().clear();
+        if (displayedCategories.isEmpty()) {
+            Label empty = new Label("No categories found.");
+            empty.setStyle("-fx-text-fill: #9ea3b0; -fx-font-size: 14px;");
+            categoriesContainer.getChildren().add(empty);
+            return;
+        }
+
+        for (Category category : displayedCategories) {
+            categoriesContainer.getChildren().add(createCategoryCard(category));
+        }
+    }
+
+    private HBox createCategoryCard(Category category) {
+        Label idLabel = new Label("#" + category.getId());
+        idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700;");
+        idLabel.setMinWidth(56);
+        idLabel.setPrefWidth(56);
+
+        Label nameLabel = new Label(truncate(safeDisplay(category.getNom()), 34));
+        nameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
+        nameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+        nameLabel.setMaxWidth(300);
+
+        Label descriptionLabel = new Label(truncate(safeDisplay(category.getDescription()), 58));
+        descriptionLabel.setStyle("-fx-text-fill: #9ea3b0; -fx-font-size: 12px;");
+        descriptionLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+        descriptionLabel.setMaxWidth(380);
+        VBox identityBox = new VBox(2, nameLabel, descriptionLabel);
+        identityBox.setMinWidth(260);
+        identityBox.setPrefWidth(340);
+        identityBox.setMaxWidth(380);
+
+        Label pricingLabel = new Label(truncate(safeDisplay(category.getTypeTarification()), 16));
+        pricingLabel.setStyle("-fx-text-fill: #c8b3ff; -fx-font-weight: 700;");
+        pricingLabel.setMinWidth(120);
+        pricingLabel.setPrefWidth(130);
+        pricingLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+
+        String priceText = category.getPrix() == null ? "-" : String.format(Locale.US, "%.2f", category.getPrix());
+        Label priceLabel = new Label(priceText);
+        priceLabel.setStyle("-fx-text-fill: #9ea3b0;");
+        priceLabel.setMinWidth(90);
+        priceLabel.setPrefWidth(100);
+
+        Button btnEdit = new Button("Edit");
+        btnEdit.getStyleClass().add("edit-button");
+        btnEdit.setOnAction(actionEvent -> openEditCategory(category));
+
+        Button btnDelete = new Button("Delete");
+        btnDelete.getStyleClass().add("delete-button");
+        btnDelete.setOnAction(actionEvent -> deleteCategory(category));
+
+        HBox actionsBox = new HBox(8, btnEdit, btnDelete);
+        actionsBox.setAlignment(Pos.CENTER_RIGHT);
+        actionsBox.setMinWidth(170);
+        actionsBox.setPrefWidth(170);
+        actionsBox.setMaxWidth(170);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox row = new HBox(14, idLabel, identityBox, pricingLabel, priceLabel, spacer, actionsBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("user-row-card");
+        return row;
+    }
+
+    private void openEditCategory(Category category) {
+        EventNavigationState.setEditingCategory(category);
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/EditCategory.fxml");
+        }
+    }
+
+    private void deleteCategory(Category category) {
+        try {
+            categoryService.delete(category);
+            loadCategories();
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie supprimee avec succes.");
+        } catch (SQLException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
+        }
+    }
+
+    private String safeDisplay(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return "-";
+        }
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, Math.max(0, maxLength - 3)) + "...";
+    }
+
+    private String safeLower(String value) {
         return value == null ? "" : value.toLowerCase(Locale.ROOT);
     }
 

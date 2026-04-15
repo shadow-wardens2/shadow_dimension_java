@@ -14,5 +14,8 @@
         <Button mnemonicParsing="false" onAction="#handleCategories" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Categories" />
         <Button mnemonicParsing="false" onAction="#handleTypes" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Types" />
     </HBox>
-    <Button mnemonicParsing="false" onAction="#handleDownloadReport" styleClass="secondary-button" text="Download Marketplace Report (PDF)" style="-fx-margin: 20 0 0 0;" />
+    <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 10 0 0 0;">
+        <Button mnemonicParsing="false" onAction="#handleDownloadReport" styleClass="secondary-button" text="Download Marketplace Report (PDF)" />
+        <Button mnemonicParsing="false" onAction="#handleStatistics" styleClass="secondary-button" text="View Statistics" />
+    </HBox>
 </VBox>
