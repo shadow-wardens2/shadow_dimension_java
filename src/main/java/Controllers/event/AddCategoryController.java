@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Map;
 
 public class AddCategoryController {
 
@@ -85,56 +86,32 @@ public class AddCategoryController {
     }
 
     private Category buildAndValidateCategory() {
-        String nom = tfNom.getText() != null ? tfNom.getText().trim() : "";
-        String description = taDescription.getText() != null ? taDescription.getText().trim() : "";
-        String tarification = cbTypeTarification.getValue();
-        boolean hasInputError = false;
+        CategoryFormValidator.Result validation = CategoryFormValidator.validate(
+                tfNom.getText(),
+                taDescription.getText(),
+                cbTypeTarification.getValue(),
+                tfPrix.getText()
+        );
 
-        if (nom.isEmpty()) {
-            setInlineError(lblNomError, "Le nom est obligatoire.");
-            hasInputError = true;
-        }
-        if (description.isEmpty()) {
-            setInlineError(lblDescriptionError, "La description est obligatoire.");
-            hasInputError = true;
-        }
-        if (tarification == null || tarification.isBlank()) {
-            setInlineError(lblTarificationError, "Le type de tarification est obligatoire.");
-            hasInputError = true;
-        }
-
-        Double prix = null;
-        if ("PAID".equals(tarification)) {
-            String prixText = tfPrix.getText() != null ? tfPrix.getText().trim() : "";
-            if (prixText.isEmpty()) {
-                setInlineError(lblPrixError, "Le prix est obligatoire pour une categorie payante.");
-                hasInputError = true;
-            }
-            try {
-                if (!prixText.isEmpty()) {
-                    prix = Double.parseDouble(prixText);
-                }
-            } catch (NumberFormatException e) {
-                setInlineError(lblPrixError, "Le prix doit etre un nombre valide.");
-                hasInputError = true;
-            }
-            if (prix != null && prix <= 0) {
-                setInlineError(lblPrixError, "Le prix doit etre superieur a 0.");
-                hasInputError = true;
-            }
-        }
-
-        if (hasInputError) {
+        if (!validation.isValid()) {
+            applyValidationErrors(validation.getErrors());
             return null;
         }
 
         Category category = new Category();
-        category.setNom(nom);
-        category.setDescription(description);
-        category.setTypeTarification(tarification);
-        category.setPrix(prix);
+        category.setNom(validation.getNom());
+        category.setDescription(validation.getDescription());
+        category.setTypeTarification(validation.getTarification());
+        category.setPrix(validation.getPrix());
         category.setCreatorType(null);
         return category;
+    }
+
+    private void applyValidationErrors(Map<String, String> errors) {
+        setInlineError(lblNomError, errors.get(CategoryFormValidator.FIELD_NOM));
+        setInlineError(lblDescriptionError, errors.get(CategoryFormValidator.FIELD_DESCRIPTION));
+        setInlineError(lblTarificationError, errors.get(CategoryFormValidator.FIELD_TARIFICATION));
+        setInlineError(lblPrixError, errors.get(CategoryFormValidator.FIELD_PRIX));
     }
 
     private void closeWindow() {

@@ -18,9 +18,9 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 
 public class AddEventController {
 
@@ -123,100 +123,54 @@ public class AddEventController {
     }
 
     private Event buildAndValidateEvent() {
-        String title = tfTitle.getText() != null ? tfTitle.getText().trim() : "";
-        String description = taDescription.getText() != null ? taDescription.getText().trim() : "";
-        String location = tfLocation.getText() != null ? tfLocation.getText().trim() : "";
-        String image = tfImage.getText() != null ? tfImage.getText().trim() : "";
-        String capacityText = tfCapacity.getText() != null ? tfCapacity.getText().trim() : "";
-        LocalDate startDate = dpStartDate.getValue();
-        LocalDate endDate = dpEndDate.getValue();
-        Category category = cbCategory.getValue();
-        String status = cbStatus.getValue();
-        String locationType = cbLocationType.getValue();
-        boolean hasInputError = false;
+        EventFormValidator.Result validation = EventFormValidator.validate(
+                tfTitle.getText(),
+                taDescription.getText(),
+                tfLocation.getText(),
+                dpStartDate.getValue(),
+                dpEndDate.getValue(),
+                tfImage.getText(),
+                tfCapacity.getText(),
+                cbCategory.getValue(),
+                cbStatus.getValue(),
+                cbLocationType.getValue(),
+                SessionManager.getCurrentUser() != null
+        );
 
-        if (title.isEmpty()) {
-            setInlineError(lblTitleError, "Le titre est obligatoire.");
-            hasInputError = true;
-        }
-        if (description.isEmpty()) {
-            setInlineError(lblDescriptionError, "La description est obligatoire.");
-            hasInputError = true;
-        }
-        if (location.isEmpty()) {
-            setInlineError(lblLocationError, "La localisation est obligatoire.");
-            hasInputError = true;
-        }
-        if (startDate == null) {
-            setInlineError(lblStartDateError, "La date de debut est obligatoire.");
-            hasInputError = true;
-        }
-        if (endDate == null) {
-            setInlineError(lblEndDateError, "La date de fin est obligatoire.");
-            hasInputError = true;
-        }
-        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
-            setInlineError(lblEndDateError, "La date de fin doit etre apres la date de debut.");
-            hasInputError = true;
-        }
-        if (image.isEmpty()) {
-            setInlineError(lblImageError, "L'image est obligatoire.");
-            hasInputError = true;
-        }
-        if (capacityText.isEmpty()) {
-            setInlineError(lblCapacityError, "La capacite est obligatoire.");
-            hasInputError = true;
-        }
-        if (category == null) {
-            setInlineError(lblCategoryError, "La categorie est obligatoire.");
-            hasInputError = true;
-        }
-        if (status == null || status.isBlank()) {
-            setInlineError(lblStatusError, "Le status est obligatoire.");
-            hasInputError = true;
-        }
-        if (locationType == null || locationType.isBlank()) {
-            setInlineError(lblLocationTypeError, "Le type de lieu est obligatoire.");
-            hasInputError = true;
-        }
-        if (SessionManager.getCurrentUser() == null) {
-            setInlineError(lblFormError, "Aucun utilisateur connecte.");
-            hasInputError = true;
-        }
-
-        int capacity;
-        try {
-            capacity = Integer.parseInt(capacityText);
-        } catch (NumberFormatException ex) {
-            setInlineError(lblCapacityError, "La capacite doit etre un nombre entier.");
-            hasInputError = true;
-            capacity = -1;
-        }
-
-        if (!capacityText.isEmpty() && capacity <= 0) {
-            setInlineError(lblCapacityError, "La capacite doit etre superieure a 0.");
-            hasInputError = true;
-        }
-
-        if (hasInputError) {
+        if (!validation.isValid()) {
+            applyValidationErrors(validation.getErrors());
             return null;
         }
 
         Event event = new Event();
-        event.setTitle(title);
-        event.setDescription(description);
-        event.setLocation(location);
-        event.setStartDate(Timestamp.valueOf(LocalDateTime.of(startDate, LocalTime.of(0, 0))));
-        event.setEndDate(Timestamp.valueOf(LocalDateTime.of(endDate, LocalTime.of(23, 59, 59))));
-        event.setImage(image);
-        event.setCapacity(capacity);
+        event.setTitle(validation.getTitle());
+        event.setDescription(validation.getDescription());
+        event.setLocation(validation.getLocation());
+        event.setStartDate(Timestamp.valueOf(LocalDateTime.of(validation.getStartDate(), LocalTime.of(0, 0))));
+        event.setEndDate(Timestamp.valueOf(LocalDateTime.of(validation.getEndDate(), LocalTime.of(23, 59, 59))));
+        event.setImage(validation.getImage());
+        event.setCapacity(validation.getCapacity());
         event.setQrCodePath(null);
-        event.setStatus(status);
-        event.setCategory(category);
+        event.setStatus(validation.getStatus());
+        event.setCategory(validation.getCategory());
         event.setCreatedById(SessionManager.getCurrentUser().getId());
         event.setVisualVibe(null);
-        event.setLocationType(locationType);
+        event.setLocationType(validation.getLocationType());
         return event;
+    }
+
+    private void applyValidationErrors(Map<String, String> errors) {
+        setInlineError(lblTitleError, errors.get(EventFormValidator.FIELD_TITLE));
+        setInlineError(lblDescriptionError, errors.get(EventFormValidator.FIELD_DESCRIPTION));
+        setInlineError(lblLocationError, errors.get(EventFormValidator.FIELD_LOCATION));
+        setInlineError(lblStartDateError, errors.get(EventFormValidator.FIELD_START_DATE));
+        setInlineError(lblEndDateError, errors.get(EventFormValidator.FIELD_END_DATE));
+        setInlineError(lblImageError, errors.get(EventFormValidator.FIELD_IMAGE));
+        setInlineError(lblCapacityError, errors.get(EventFormValidator.FIELD_CAPACITY));
+        setInlineError(lblCategoryError, errors.get(EventFormValidator.FIELD_CATEGORY));
+        setInlineError(lblStatusError, errors.get(EventFormValidator.FIELD_STATUS));
+        setInlineError(lblLocationTypeError, errors.get(EventFormValidator.FIELD_LOCATION_TYPE));
+        setInlineError(lblFormError, errors.get(EventFormValidator.FIELD_FORM));
     }
 
     private void closeWindow() {
