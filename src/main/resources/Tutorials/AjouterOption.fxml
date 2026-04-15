@@ -12,27 +12,23 @@
     <children>
         <VBox alignment="CENTER" spacing="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
             <Label styleClass="headline" text="Ajouter une Option" />
-            
             <VBox spacing="15" styleClass="panel-card">
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label prefWidth="120" styleClass="form-label" text="Text de l'option :" />
+                    <Label prefWidth="120" styleClass="form-label" text="Texte de l'option :" />
                     <TextField fx:id="tfTexte" promptText="Saisissez l'option..." HBox.hgrow="ALWAYS" />
                 </HBox>
-
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label prefWidth="120" styleClass="form-label" text="Est Correcte ?" />
                     <ComboBox fx:id="cbEstCorrecte" promptText="Sélectionnez..." HBox.hgrow="ALWAYS" />
                 </HBox>
-
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label prefWidth="120" styleClass="form-label" text="Question :" />
                     <ComboBox fx:id="cbQuestion" promptText="Sélectionnez..." HBox.hgrow="ALWAYS" />
                 </HBox>
             </VBox>
-
             <HBox alignment="CENTER" spacing="15">
-                <Button fx:id="btnAjouter" onAction="#ajouterOption" styleClass="glow-button" text="Ajouter" />
-                <Button fx:id="btnAnnuler" onAction="#annuler" styleClass="secondary-button" text="Annuler" />
+                <Button onAction="#ajouterOption" styleClass="glow-button" text="Ajouter" />
+                <Button onAction="#annuler" styleClass="secondary-button" text="Annuler" />
             </HBox>
         </VBox>
     </children>

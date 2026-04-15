@@ -12,12 +12,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -30,6 +29,15 @@ public class ManagementFormationController implements Initializable {
 
     private PageHost dashboardContext;
 
+    @FXML
+    private VBox listContainer;
+    @FXML
+    private TextField searchField;
+
+    private ServiceFormation serviceFormation = new ServiceFormation();
+    private ObservableList<Formation> observableList = FXCollections.observableArrayList();
+    private FilteredList<Formation> filteredList;
+
     public void setDashboardContext(PageHost context) {
         this.dashboardContext = context;
     }
@@ -41,104 +49,84 @@ public class ManagementFormationController implements Initializable {
         }
     }
 
-    @FXML
-    private TableColumn<Formation, Integer> colActions;
-    @FXML
-    private TableColumn<Formation, Integer> colId;
-    @FXML
-    private TableColumn<Formation, String> colTitre;
-    @FXML
-    private TableColumn<Formation, String> colNiveau;
-    @FXML
-    private TableView<Formation> formationTable;
-
-    @FXML
-    private TextField searchField;
-
-    private ServiceFormation serviceFormation = new ServiceFormation();
-    private ObservableList<Formation> observableList = FXCollections.observableArrayList();
-    private FilteredList<Formation> filteredList;
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTitre.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        colNiveau.setCellValueFactory(new PropertyValueFactory<>("niveau"));
-
         loadFormations();
 
         filteredList = new FilteredList<>(observableList, p -> true);
-        formationTable.setItems(filteredList);
         searchField.textProperty().addListener((obs, old, val) -> {
             String lower = val == null ? "" : val.toLowerCase();
             filteredList.setPredicate(f -> lower.isEmpty()
                     || f.getTitre().toLowerCase().contains(lower)
                     || f.getNiveau().toLowerCase().contains(lower));
+            renderList();
         });
 
-        colActions.setCellFactory(param -> new TableCell<Formation, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
-
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnDelete.setOnAction(event -> {
-                    Formation item = getTableView().getItems().get(getIndex());
-                    try {
-                        serviceFormation.delete(item);
-                        loadFormations();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.INFORMATION);
-                        alert.setTitle("Succès");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Formation supprimée avec succès.");
-                        alert.showAndWait();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                btnUpdate.setOnAction(event -> {
-                    Formation item = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Tutorials/EditFormation.fxml"));
-                        Parent root = loader.load();
-                        EditFormationController controller = loader.getController();
-                        controller.setFormation(item);
-                        Stage stage = new Stage();
-                        stage.setTitle("Edit Formation");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadFormations();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
-            }
-        });
+        renderList();
     }
 
     private void loadFormations() {
-        observableList.clear();
         try {
-            observableList.addAll(serviceFormation.getAll());
-            if (filteredList != null)
-                formationTable.setItems(filteredList);
-            else
-                formationTable.setItems(observableList);
+            observableList.setAll(serviceFormation.getAll());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void renderList() {
+        listContainer.getChildren().clear();
+        for (Formation f : filteredList) {
+            listContainer.getChildren().add(createCard(f));
+        }
+    }
+
+    private HBox createCard(Formation f) {
+        HBox card = new HBox(15);
+        card.getStyleClass().add("panel-card");
+        card.setStyle("-fx-alignment: CENTER_LEFT; -fx-padding: 15;");
+
+        VBox details = new VBox(5);
+        Label lblTitre = new Label(f.getTitre());
+        lblTitre.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+        Label lblNiveau = new Label("Niveau: " + f.getNiveau());
+        lblNiveau.setStyle("-fx-text-fill: #aaa;");
+        details.getChildren().addAll(lblTitre, lblNiveau);
+        HBox.setHgrow(details, Priority.ALWAYS);
+
+        Button btnEdit = new Button("Edit");
+        btnEdit.getStyleClass().add("edit-button");
+        btnEdit.setOnAction(e -> handleEdit(f));
+
+        Button btnDelete = new Button("Delete");
+        btnDelete.getStyleClass().add("delete-button");
+        btnDelete.setOnAction(e -> handleDelete(f));
+
+        card.getChildren().addAll(details, btnEdit, btnDelete);
+        return card;
+    }
+
+    private void handleEdit(Formation f) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Tutorials/EditFormation.fxml"));
+            Parent root = loader.load();
+            EditFormationController controller = loader.getController();
+            controller.setFormation(f);
+            Stage stage = new Stage();
+            stage.setTitle("Edit Formation");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            loadFormations();
+            renderList();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleDelete(Formation f) {
+        try {
+            serviceFormation.delete(f);
+            loadFormations();
+            renderList();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -154,6 +142,7 @@ public class ManagementFormationController implements Initializable {
             stage.setScene(new Scene(root));
             stage.showAndWait();
             loadFormations();
+            renderList();
         } catch (IOException e) {
             e.printStackTrace();
         }

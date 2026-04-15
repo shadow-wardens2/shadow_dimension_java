@@ -16,12 +16,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -36,45 +34,18 @@ public class ManagementQuizDetailsController implements Initializable {
     public static Quiz currentContextQuiz;
     private PageHost dashboardContext;
 
-    public void setDashboardContext(PageHost context) {
-        this.dashboardContext = context;
-    }
-
-    @FXML
-    void handleBack(ActionEvent event) {
-        if (dashboardContext != null) {
-            dashboardContext.loadPage("/Tutorials/ManagementQuiz.fxml");
-        }
-    }
-
-    private Quiz selectedQuiz;
-
     @FXML
     private Label lbQuizTitle;
-
-    // Question components
     @FXML
-    private TableView<Question> questionTable;
+    private VBox questionContainer;
     @FXML
-    private TableColumn<Question, Integer> colQuestionId;
+    private VBox optionContainer;
     @FXML
-    private TableColumn<Question, String> colQuestionTexte;
+    private TextField questionSearchField;
     @FXML
-    private TableColumn<Question, Integer> colQuestionActions;
+    private TextField optionSearchField;
     @FXML
     private Button btnAddQuestion;
-
-    // Option components
-    @FXML
-    private TableView<Option> optionTable;
-    @FXML
-    private TableColumn<Option, Integer> colOptionId;
-    @FXML
-    private TableColumn<Option, String> colOptionTexte;
-    @FXML
-    private TableColumn<Option, Boolean> colOptionEstCorrecte;
-    @FXML
-    private TableColumn<Option, Integer> colOptionActions;
     @FXML
     private Button btnAddOption;
 
@@ -86,144 +57,189 @@ public class ManagementQuizDetailsController implements Initializable {
     private FilteredList<Question> filteredQuestions;
     private FilteredList<Option> filteredOptions;
 
+    private Quiz selectedQuiz;
+    private Question selectedQuestion;
+
+    public void setDashboardContext(PageHost context) {
+        this.dashboardContext = context;
+    }
+
     @FXML
-    private TextField questionSearchField;
-    @FXML
-    private TextField optionSearchField;
+    void handleBack(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Tutorials/ManagementQuiz.fxml");
+        }
+    }
 
     public void setQuiz(Quiz quiz) {
         this.selectedQuiz = quiz;
-        lbQuizTitle.setText("Configuring details for Quiz: " + quiz.getTitre());
-        loadQuestionsForQuiz(quiz.getId());
+        lbQuizTitle.setText("Quiz: " + quiz.getTitre());
+        refreshQuestions();
         btnAddQuestion.setDisable(false);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initQuestionColumns();
-        initOptionColumns();
-
         btnAddQuestion.setDisable(true);
         btnAddOption.setDisable(true);
 
         filteredQuestions = new FilteredList<>(obsQuestions, p -> true);
-        questionTable.setItems(filteredQuestions);
         filteredOptions = new FilteredList<>(obsOptions, p -> true);
-        optionTable.setItems(filteredOptions);
 
         questionSearchField.textProperty().addListener((obs, old, val) -> {
             String lower = val == null ? "" : val.toLowerCase();
             filteredQuestions.setPredicate(q -> lower.isEmpty() || q.getTexte().toLowerCase().contains(lower));
+            renderQuestions();
         });
 
         optionSearchField.textProperty().addListener((obs, old, val) -> {
             String lower = val == null ? "" : val.toLowerCase();
             filteredOptions.setPredicate(o -> lower.isEmpty() || o.getTexte().toLowerCase().contains(lower));
+            renderOptions();
         });
 
         if (currentContextQuiz != null) {
             setQuiz(currentContextQuiz);
         }
-
-        questionTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            if (newSel != null) {
-                btnAddOption.setDisable(false);
-                loadOptionsForQuestion(newSel.getId());
-            }
-        });
     }
 
-    private void initQuestionColumns() {
-        colQuestionId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colQuestionTexte.setCellValueFactory(new PropertyValueFactory<>("texte"));
-        colQuestionActions.setCellFactory(p -> new ActionCell<>(this::editQuestion, this::deleteQuestion));
-    }
-
-    private void initOptionColumns() {
-        colOptionId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colOptionTexte.setCellValueFactory(new PropertyValueFactory<>("texte"));
-        colOptionEstCorrecte.setCellValueFactory(new PropertyValueFactory<>("estCorrecte"));
-        colOptionActions.setCellFactory(p -> new ActionCell<>(this::editOption, this::deleteOption));
-    }
-
-    private void loadQuestionsForQuiz(int quizId) {
+    private void refreshQuestions() {
+        if (selectedQuiz == null)
+            return;
         try {
             obsQuestions.setAll(serviceQuestion.getAll().stream()
-                    .filter(q -> q.getQuiz().getId() == quizId).collect(Collectors.toList()));
-            questionTable.setItems(obsQuestions);
+                    .filter(q -> q.getQuiz().getId() == selectedQuiz.getId()).collect(Collectors.toList()));
+            renderQuestions();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadOptionsForQuestion(int questionId) {
+    private void refreshOptions() {
+        if (selectedQuestion == null) {
+            obsOptions.clear();
+            renderOptions();
+            return;
+        }
         try {
             obsOptions.setAll(serviceOption.getAll().stream()
-                    .filter(o -> o.getQuestion().getId() == questionId).collect(Collectors.toList()));
-            optionTable.setItems(obsOptions);
+                    .filter(o -> o.getQuestion().getId() == selectedQuestion.getId()).collect(Collectors.toList()));
+            renderOptions();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void renderQuestions() {
+        questionContainer.getChildren().clear();
+        for (Question q : filteredQuestions) {
+            questionContainer.getChildren().add(createQuestionCard(q));
+        }
+    }
+
+    private void renderOptions() {
+        optionContainer.getChildren().clear();
+        for (Option o : filteredOptions) {
+            optionContainer.getChildren().add(createOptionCard(o));
+        }
+    }
+
+    private HBox createQuestionCard(Question q) {
+        HBox card = new HBox(10);
+        card.getStyleClass().add("panel-card");
+        card.setStyle("-fx-alignment: CENTER_LEFT; -fx-padding: 10; -fx-cursor: hand;");
+
+        if (selectedQuestion != null && selectedQuestion.getId() == q.getId()) {
+            card.setStyle(
+                    "-fx-alignment: CENTER_LEFT; -fx-padding: 10; -fx-cursor: hand; -fx-border-color: #ba9eff; -fx-border-width: 1;");
+        }
+
+        card.setOnMouseClicked(e -> {
+            selectedQuestion = q;
+            btnAddOption.setDisable(false);
+            refreshOptions();
+            renderQuestions();
+        });
+
+        Label lbl = new Label(q.getTexte());
+        lbl.setStyle("-fx-text-fill: white; -fx-wrap-text: true;");
+        HBox.setHgrow(lbl, Priority.ALWAYS);
+
+        Button btnEdit = new Button("Edit");
+        btnEdit.getStyleClass().add("edit-button");
+        btnEdit.setOnAction(e -> {
+            openPopup("/Tutorials/EditQuestion.fxml", "Edit Question",
+                    c -> ((EditQuestionController) c).setQuestion(q));
+            refreshQuestions();
+        });
+
+        Button btnDel = new Button("Del");
+        btnDel.getStyleClass().add("delete-button");
+        btnDel.setOnAction(e -> {
+            try {
+                serviceQuestion.delete(q);
+                if (selectedQuestion != null && selectedQuestion.getId() == q.getId()) {
+                    selectedQuestion = null;
+                    btnAddOption.setDisable(true);
+                    refreshOptions();
+                }
+                refreshQuestions();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        card.getChildren().addAll(lbl, btnEdit, btnDel);
+        return card;
+    }
+
+    private HBox createOptionCard(Option o) {
+        HBox card = new HBox(10);
+        card.getStyleClass().add("panel-card");
+        card.setStyle("-fx-alignment: CENTER_LEFT; -fx-padding: 10;");
+
+        Label lbl = new Label(o.getTexte());
+        lbl.setStyle("-fx-text-fill: " + (o.isEstCorrecte() ? "#4CAF50" : "white") + "; -fx-wrap-text: true;");
+        HBox.setHgrow(lbl, Priority.ALWAYS);
+
+        Button btnEdit = new Button("Edit");
+        btnEdit.getStyleClass().add("edit-button");
+        btnEdit.setOnAction(e -> {
+            openPopup("/Tutorials/EditOption.fxml", "Edit Option", c -> ((EditOptionController) c).setOption(o));
+            refreshOptions();
+        });
+
+        Button btnDel = new Button("Del");
+        btnDel.getStyleClass().add("delete-button");
+        btnDel.setOnAction(e -> {
+            try {
+                serviceOption.delete(o);
+                refreshOptions();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        card.getChildren().addAll(lbl, btnEdit, btnDel);
+        return card;
     }
 
     @FXML
     void handleAddQuestion(ActionEvent event) {
         openPopup("/Tutorials/AjouterQuestion.fxml", "Add Question", c -> {
-            if (selectedQuiz != null) {
+            if (selectedQuiz != null)
                 ((AjouterQuestionController) c).setPreselectedQuiz(selectedQuiz);
-            }
         });
         refreshQuestions();
     }
 
     @FXML
     void handleAddOption(ActionEvent event) {
-        Question q = questionTable.getSelectionModel().getSelectedItem();
-        openPopup("/Tutorials/AjouterOption.fxml", "Add Option", c -> {
-            if (q != null) {
-                ((AjouterOptionController) c).setPreselectedQuestion(q);
-            }
-        });
-        refreshOptions();
-    }
-
-    private void editQuestion(Question item) {
-        openPopup("/Tutorials/EditQuestion.fxml", "Edit Question", c -> ((EditQuestionController) c).setQuestion(item));
-        refreshQuestions();
-    }
-
-    private void editOption(Option item) {
-        openPopup("/Tutorials/EditOption.fxml", "Edit Option", c -> ((EditOptionController) c).setOption(item));
-        refreshOptions();
-    }
-
-    private void deleteQuestion(Question item) {
-        try {
-            serviceQuestion.delete(item);
-            refreshQuestions();
-        } catch (Exception e) {
-        }
-    }
-
-    private void deleteOption(Option item) {
-        try {
-            serviceOption.delete(item);
+        if (selectedQuestion != null) {
+            openPopup("/Tutorials/AjouterOption.fxml", "Add Option",
+                    c -> ((AjouterOptionController) c).setPreselectedQuestion(selectedQuestion));
             refreshOptions();
-        } catch (Exception e) {
         }
-    }
-
-    private void refreshQuestions() {
-        if (selectedQuiz != null)
-            loadQuestionsForQuiz(selectedQuiz.getId());
-    }
-
-    private void refreshOptions() {
-        Question q = questionTable.getSelectionModel().getSelectedItem();
-        if (q != null)
-            loadOptionsForQuestion(q.getId());
-        else
-            obsOptions.clear();
     }
 
     private void openPopup(String fxml, String title, java.util.function.Consumer<Object> controllerSetup) {
@@ -232,36 +248,12 @@ public class ManagementQuizDetailsController implements Initializable {
             Parent root = loader.load();
             if (controllerSetup != null)
                 controllerSetup.accept(loader.getController());
-            Scene scene = new Scene(root);
-            try {
-                scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-            } catch (Exception e) {
-            }
             Stage stage = new Stage();
             stage.setTitle(title);
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private class ActionCell<T> extends TableCell<T, Integer> {
-        private final Button btnEdit = new Button("Edit");
-        private final Button btnDel = new Button("Del");
-        private final HBox pane = new HBox(5, btnEdit, btnDel);
-
-        public ActionCell(java.util.function.Consumer<T> onEdit, java.util.function.Consumer<T> onDel) {
-            btnEdit.getStyleClass().add("edit-button");
-            btnDel.getStyleClass().add("delete-button");
-            btnEdit.setOnAction(e -> onEdit.accept(getTableView().getItems().get(getIndex())));
-            btnDel.setOnAction(e -> onDel.accept(getTableView().getItems().get(getIndex())));
-        }
-
-        @Override
-        protected void updateItem(Integer item, boolean empty) {
-            super.updateItem(item, empty);
-            setGraphic(empty ? null : pane);
         }
     }
 }

@@ -19,16 +19,14 @@ public class ServiceQuiz implements InterfaceServiceTuto<Quiz> {
     @Override
     public void add(Quiz quiz) throws SQLException {
         String sql = "INSERT INTO quiz (titre, ordre, formation_id) VALUES (?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, quiz.getTitre());
-            preparedStatement.setInt(2, quiz.getOrdre());
-            preparedStatement.setObject(3, quiz.getFormation() != null ? quiz.getFormation().getId() : null);
-            preparedStatement.executeUpdate();
-
-            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    quiz.setId(generatedKeys.getInt(1));
-                }
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, quiz.getTitre());
+            ps.setInt(2, quiz.getOrdre());
+            ps.setObject(3, quiz.getFormation() != null ? quiz.getFormation().getId() : null);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next())
+                    quiz.setId(keys.getInt(1));
             }
         }
     }
@@ -36,21 +34,21 @@ public class ServiceQuiz implements InterfaceServiceTuto<Quiz> {
     @Override
     public void update(Quiz quiz) throws SQLException {
         String sql = "UPDATE quiz SET titre = ?, ordre = ?, formation_id = ? WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, quiz.getTitre());
-            preparedStatement.setInt(2, quiz.getOrdre());
-            preparedStatement.setObject(3, quiz.getFormation() != null ? quiz.getFormation().getId() : null);
-            preparedStatement.setInt(4, quiz.getId());
-            preparedStatement.executeUpdate();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, quiz.getTitre());
+            ps.setInt(2, quiz.getOrdre());
+            ps.setObject(3, quiz.getFormation() != null ? quiz.getFormation().getId() : null);
+            ps.setInt(4, quiz.getId());
+            ps.executeUpdate();
         }
     }
 
     @Override
     public void delete(Quiz quiz) throws SQLException {
         String sql = "DELETE FROM quiz WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, quiz.getId());
-            preparedStatement.executeUpdate();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, quiz.getId());
+            ps.executeUpdate();
         }
     }
 
@@ -58,8 +56,8 @@ public class ServiceQuiz implements InterfaceServiceTuto<Quiz> {
     public List<Quiz> getAll() throws SQLException {
         List<Quiz> list = new ArrayList<>();
         String sql = "SELECT * FROM quiz";
-        try (Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery(sql)) {
+        try (Statement st = connection.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Quiz quiz = new Quiz();
                 quiz.setId(rs.getInt("id"));
@@ -68,11 +66,10 @@ public class ServiceQuiz implements InterfaceServiceTuto<Quiz> {
 
                 int formationId = rs.getInt("formation_id");
                 if (!rs.wasNull()) {
-                    Formation formation = new Formation();
-                    formation.setId(formationId);
-                    quiz.setFormation(formation);
+                    Formation f = new Formation();
+                    f.setId(formationId);
+                    quiz.setFormation(f);
                 }
-
                 list.add(quiz);
             }
         }
