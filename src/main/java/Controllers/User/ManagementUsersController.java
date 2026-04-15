@@ -39,6 +39,8 @@ import java.util.Comparator;
 
 public class ManagementUsersController {
 
+    // User list container and toolbar controls.
+
     @FXML
     private VBox usersContainer;
 
@@ -53,6 +55,7 @@ public class ManagementUsersController {
     private final ObservableList<User> displayedUsers = FXCollections.observableArrayList();
     private boolean idAscending = false;
 
+    // Initializes admin-only user management screen.
     @FXML
     public void initialize() {
         User currentUser = SessionManager.getCurrentUser();
@@ -66,6 +69,7 @@ public class ManagementUsersController {
         loadUsers();
     }
 
+    // Toolbar actions.
     @FXML
     private void handleRefresh() {
         loadUsers();
@@ -104,6 +108,7 @@ public class ManagementUsersController {
         }
     }
 
+    // Row actions.
     private void handleToggleLock(User selected) {
         if (selected == null) {
             return;
@@ -143,6 +148,7 @@ public class ManagementUsersController {
         }
     }
 
+    // Data loading + filtering/sorting pipeline.
     private void loadUsers() {
         masterUsers.clear();
         try {
@@ -175,6 +181,7 @@ public class ManagementUsersController {
         renderUsers();
     }
 
+    // Card-based rendering (non-TableView UI).
     private void renderUsers() {
         usersContainer.getChildren().clear();
 
@@ -190,6 +197,7 @@ public class ManagementUsersController {
         }
     }
 
+    // Builds one interactive card per user with rank/status/actions.
     private HBox createUserCard(User user) {
         Label idLabel = new Label("#" + user.getId());
         idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700; -fx-min-width: 56;");
@@ -254,6 +262,7 @@ public class ManagementUsersController {
         return row;
     }
 
+    // Utility helpers.
     private String normalizeRoles(String rawRoles) {
         if (rawRoles == null || rawRoles.isBlank()) {
             return "[\"ROLE_USER\"]";
@@ -279,6 +288,7 @@ public class ManagementUsersController {
         alert.showAndWait();
     }
 
+    // PDF export helpers.
     private void exportUsersToPdf(String path) throws IOException, DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, new FileOutputStream(path));

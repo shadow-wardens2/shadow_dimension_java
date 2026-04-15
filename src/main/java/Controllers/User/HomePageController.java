@@ -23,6 +23,7 @@ import java.io.IOException;
 
 public class HomePageController implements PageHost {
 
+    // Main content host where center pages are swapped dynamically.
 
     @FXML
     private StackPane contentArea;
@@ -57,12 +58,14 @@ public class HomePageController implements PageHost {
     @FXML
     private Button btnEventManagement;
 
+    // Initial landing content + auth UI state.
     @FXML
     public void initialize() {
         loadPage("/HomeContent.fxml");
         refreshAuthUi();
     }
 
+    // Sidebar navigation actions.
     @FXML
     void openHome(ActionEvent event) {
         loadPage("/HomeContent.fxml");
@@ -125,6 +128,7 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Connect Soul / Logout action shared by top and bottom buttons.
     @FXML
     void handleAuthAction(ActionEvent event) {
         if (SessionManager.isLoggedIn()) {
@@ -146,6 +150,7 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Refreshes labels/buttons and section availability based on session state.
     private void refreshAuthUi() {
         boolean loggedIn = SessionManager.isLoggedIn();
 
@@ -187,6 +192,7 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Central guard for sections that require authentication.
     private boolean requireLoggedIn(String sectionName) {
         if (SessionManager.isLoggedIn()) {
             return true;
@@ -197,6 +203,7 @@ public class HomePageController implements PageHost {
         return false;
     }
 
+    // Generic blocking alert helper for home shell.
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -205,6 +212,7 @@ public class HomePageController implements PageHost {
         alert.showAndWait();
     }
 
+    // Loads a center page and injects dashboard context when needed.
     public void loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -263,6 +271,7 @@ public class HomePageController implements PageHost {
 
     @Override
 
+    // PageHost hook (currently no-op).
     public void refreshStatistics() {
         // Implementation for refreshing statistics if needed
     }

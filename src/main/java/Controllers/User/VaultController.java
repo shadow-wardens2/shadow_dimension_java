@@ -9,6 +9,8 @@ import javafx.scene.control.Label;
 
 public class VaultController {
 
+    // Vault profile display controls.
+
     @FXML
     private Label lbVaultTitle;
 
@@ -39,8 +41,10 @@ public class VaultController {
     @FXML
     private Button btnEditProfile;
 
+    // Dashboard page host to navigate to edit profile.
     private PageHost dashboardContext;
 
+    // Renders guest or authenticated vault snapshot from session user.
     @FXML
     public void initialize() {
         User user = SessionManager.getCurrentUser();
@@ -72,10 +76,12 @@ public class VaultController {
         btnEditProfile.setDisable(false);
     }
 
+    // Injected by home shell to enable in-page navigation.
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
+    // Opens profile editor only when user is logged in.
     @FXML
     private void handleEditProfile() {
         if (dashboardContext != null && SessionManager.isLoggedIn()) {
@@ -83,6 +89,7 @@ public class VaultController {
         }
     }
 
+    // Returns fallback text when profile fields are empty.
     private String safe(String value, String fallback) {
         return (value == null || value.isBlank()) ? fallback : value;
     }

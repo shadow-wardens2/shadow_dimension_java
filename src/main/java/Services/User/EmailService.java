@@ -12,6 +12,7 @@ import java.util.Properties;
 
 public class EmailService {
 
+    // Sends one-time verification code using SMTP settings from environment variables.
     public void sendVerificationCode(String toEmail, String username, String code) {
         String host = getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
         String port = getOrDefault("MAIL_SMTP_PORT", "587");
@@ -51,6 +52,7 @@ public class EmailService {
         }
     }
 
+    // Reads mandatory SMTP environment variables.
     private String required(String key) {
         String value = System.getenv(key);
         if (value == null || value.isBlank()) {
@@ -59,6 +61,7 @@ public class EmailService {
         return value;
     }
 
+    // Reads optional SMTP values with a default fallback.
     private String getOrDefault(String key, String defaultValue) {
         String value = System.getenv(key);
         return (value == null || value.isBlank()) ? defaultValue : value;

@@ -36,6 +36,7 @@ public class GoogleOAuthService {
             .connectTimeout(Duration.ofSeconds(20))
             .build();
 
+        // Full OAuth flow: browser auth -> code exchange -> profile fetch.
     public GoogleProfile authenticate() throws Exception {
         String clientId = resolveClientId();
         String codeVerifier = generateCodeVerifier();
@@ -48,6 +49,7 @@ public class GoogleOAuthService {
         return fetchUserProfile(accessToken);
     }
 
+    // Builds Google authorization URL with PKCE and state.
     private String buildAuthUrl(String clientId, String codeChallenge, String state) {
         return AUTH_ENDPOINT
                 + "?response_type=code"
@@ -59,6 +61,7 @@ public class GoogleOAuthService {
                 + "&state=" + encode(state);
     }
 
+    // Starts local callback server and waits for auth code.
     private String openBrowserAndWaitForCode(String authUrl, String expectedState) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> codeRef = new AtomicReference<>();
@@ -115,6 +118,7 @@ public class GoogleOAuthService {
         return codeRef.get();
     }
 
+    // Exchanges authorization code for access token.
     private String exchangeCodeForToken(String clientId, String code, String codeVerifier) throws IOException, InterruptedException {
         String clientSecret = resolveOptionalClientSecret();
 
@@ -157,6 +161,7 @@ public class GoogleOAuthService {
         return json.get("access_token").getAsString();
     }
 
+    // Retrieves user identity from Google UserInfo endpoint.
     private GoogleProfile fetchUserProfile(String accessToken) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(USERINFO_ENDPOINT))

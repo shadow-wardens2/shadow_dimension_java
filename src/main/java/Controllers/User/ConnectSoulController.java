@@ -24,6 +24,8 @@ import java.util.Optional;
 
 public class ConnectSoulController {
 
+    // Login form controls.
+
     @FXML
     private TextField tfLoginIdentity;
 
@@ -42,6 +44,7 @@ public class ConnectSoulController {
     @FXML
     private Label lblLoginPasswordError;
 
+    // Signup form controls.
     @FXML
     private TextField tfSignupEmail;
 
@@ -78,6 +81,7 @@ public class ConnectSoulController {
     @FXML
     private VBox signupBox;
 
+    // Service layer dependencies and local UI state flags.
     private final ServiceUser serviceUser = new ServiceUser();
     private final GoogleOAuthService googleOAuthService = new GoogleOAuthService();
     private boolean loginPasswordVisible;
@@ -98,6 +102,7 @@ public class ConnectSoulController {
         pfSignupConfirmPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
     }
 
+    // Handles login with inline input validation then delegates credential check to the service.
     @FXML
     private void handleLogin() {
         try {
@@ -144,6 +149,7 @@ public class ConnectSoulController {
         }
     }
 
+    // Handles signup with inline validation, then starts email verification flow.
     @FXML
     private void handleSignup() {
         try {
@@ -221,6 +227,7 @@ public class ConnectSoulController {
         }
     }
 
+    // Handles Google OAuth login/signup flow.
     @FXML
     private void handleGoogleAuth() {
         try {
@@ -235,6 +242,7 @@ public class ConnectSoulController {
         }
     }
 
+    // Switches UI to signup panel.
     @FXML
     private void showSignup() {
         loginBox.setVisible(false);
@@ -243,6 +251,7 @@ public class ConnectSoulController {
         signupBox.setManaged(true);
     }
 
+    // Switches UI to login panel.
     @FXML
     private void showLogin() {
         signupBox.setVisible(false);
@@ -251,6 +260,7 @@ public class ConnectSoulController {
         loginBox.setManaged(true);
     }
 
+    // Toggles login password masking.
     @FXML
     private void toggleLoginPasswordVisibility() {
         loginPasswordVisible = !loginPasswordVisible;
@@ -262,6 +272,7 @@ public class ConnectSoulController {
         applyLoginPasswordVisibility();
     }
 
+    // Toggles signup password masking.
     @FXML
     private void toggleSignupPasswordVisibility() {
         signupPasswordVisible = !signupPasswordVisible;
@@ -273,6 +284,7 @@ public class ConnectSoulController {
         applySignupPasswordVisibility();
     }
 
+    // Applies visibility state to login password controls and eye icon.
     private void applyLoginPasswordVisibility() {
         pfLoginPassword.setVisible(!loginPasswordVisible);
         pfLoginPassword.setManaged(!loginPasswordVisible);
@@ -281,6 +293,7 @@ public class ConnectSoulController {
         btnToggleLoginPassword.setText(loginPasswordVisible ? "🙈" : "👁");
     }
 
+    // Applies visibility state to signup password controls and eye icon.
     private void applySignupPasswordVisibility() {
         pfSignupPassword.setVisible(!signupPasswordVisible);
         pfSignupPassword.setManaged(!signupPasswordVisible);
@@ -289,14 +302,17 @@ public class ConnectSoulController {
         btnToggleSignupPassword.setText(signupPasswordVisible ? "🙈" : "👁");
     }
 
+    // Returns the effective login password based on current visibility mode.
     private String getLoginPassword() {
         return loginPasswordVisible ? tfLoginPasswordVisible.getText() : pfLoginPassword.getText();
     }
 
+    // Returns the effective signup password based on current visibility mode.
     private String getSignupPassword() {
         return signupPasswordVisible ? tfSignupPasswordVisible.getText() : pfSignupPassword.getText();
     }
 
+    // Builds a combined password-policy message; empty string means valid password.
     private String passwordPolicyMessage(String password) {
         if (password == null || password.isBlank()) {
             return "Le mot de passe est obligatoire.";
@@ -327,10 +343,12 @@ public class ConnectSoulController {
         return "Le mot de passe doit respecter:\n" + sb;
     }
 
+    // Basic email format check used by signup validation.
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 
+    // Clears all signup inline error labels.
     private void clearSignupInlineErrors() {
         setInlineError(lblSignupEmailError, "");
         setInlineError(lblSignupUsernameError, "");
@@ -338,11 +356,13 @@ public class ConnectSoulController {
         setInlineError(lblSignupConfirmPasswordError, "");
     }
 
+    // Clears all login inline error labels.
     private void clearLoginInlineErrors() {
         setInlineError(lblLoginIdentityError, "");
         setInlineError(lblLoginPasswordError, "");
     }
 
+    // Central helper for showing/hiding inline validation labels.
     private void setInlineError(Label label, String message) {
         if (label == null) {
             return;
@@ -354,6 +374,7 @@ public class ConnectSoulController {
         label.setManaged(show);
     }
 
+    // Email verification dialog loop used after signup (verify/resend/cancel).
     private void startVerificationDialog(String email) {
         while (true) {
             Dialog<ButtonType> dialog = new Dialog<>();
@@ -409,6 +430,7 @@ public class ConnectSoulController {
         }
     }
 
+    // Returns to home shell scene.
     @FXML
     private void handleBackHome() {
         try {
@@ -418,6 +440,7 @@ public class ConnectSoulController {
         }
     }
 
+    // Loads HomePage scene in the current stage.
     private void openHomePage() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomePage.fxml"));
         Parent root = loader.load();
@@ -427,6 +450,7 @@ public class ConnectSoulController {
         stage.show();
     }
 
+    // Generic popup helper for system/business messages.
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

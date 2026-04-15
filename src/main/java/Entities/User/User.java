@@ -2,6 +2,7 @@ package Entities.User;
 
 public class User {
 
+    // Persistent user fields mapped from database.
     private int id;
     private String email;
     private String username;
@@ -146,12 +147,14 @@ public class User {
     }
 
     public String getUserIdentity() {
+        // Compact display format used by management UI cards/tables.
         String u = (username == null || username.isBlank()) ? "-" : username;
         String e = (email == null || email.isBlank()) ? "-" : email;
         return u + "\n" + e;
     }
 
     public String getRank() {
+        // Converts ROLE_* token to human-readable rank.
         String role = extractPrimaryRole();
         if (role.startsWith("ROLE_")) {
             return role.substring(5);
@@ -160,6 +163,7 @@ public class User {
     }
 
     public String getStatus() {
+        // Locked status has priority over active/inactive flags.
         if (isLocked == 1) {
             return "LOCKED";
         }
@@ -167,6 +171,7 @@ public class User {
     }
 
     public String extractPrimaryRole() {
+        // Parses first role from stored JSON-like roles string.
         if (roles == null || roles.isBlank()) {
             return "ROLE_USER";
         }
@@ -184,6 +189,7 @@ public class User {
     }
 
     public boolean isAdmin() {
+        // Supports both primary-role and multi-role checks.
         return extractPrimaryRole().equals("ROLE_ADMIN") || (roles != null && roles.contains("ROLE_ADMIN"));
     }
 }

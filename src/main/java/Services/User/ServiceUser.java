@@ -24,6 +24,7 @@ import java.util.UUID;
 
 public class ServiceUser implements InterfaceServiceUser {
 
+    // DB connection and auxiliary email service.
     private final Connection cnx;
     private final EmailService emailService = new EmailService();
 
@@ -32,6 +33,7 @@ public class ServiceUser implements InterfaceServiceUser {
         ensureVerificationTable();
     }
 
+    // Local signup (email/password) with password policy + verification email.
     public User signup(String email, String username, String plainPassword) throws SQLException {
         if (email == null || email.isBlank() || username == null || username.isBlank() || plainPassword == null || plainPassword.isBlank()) {
             throw new IllegalArgumentException("Tous les champs sont obligatoires.");
@@ -85,6 +87,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return createdUser;
     }
 
+    // Local login with lock/verification checks and password validation.
     public User login(String emailOrUsername, String plainPassword) throws SQLException {
         if (emailOrUsername == null || emailOrUsername.isBlank() || plainPassword == null || plainPassword.isBlank()) {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
@@ -118,6 +121,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return mapUser(rs);
     }
 
+    // Google auth flow: login existing, link by email, or create a new user.
     public User loginOrSignupWithGoogle(String googleId, String email, String fullName) throws SQLException {
         if (googleId == null || googleId.isBlank() || email == null || email.isBlank()) {
             throw new IllegalArgumentException("Google id et email sont obligatoires.");
@@ -172,6 +176,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return findByEmail(email.trim());
     }
 
+    // Verification-code API.
     public void resendVerificationCode(String email) throws SQLException {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email obligatoire.");
@@ -231,6 +236,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return true;
     }
 
+    // Profile and admin CRUD operations.
     public User getById(int id) throws SQLException {
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -245,12 +251,17 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public void updateProfile(User user) throws SQLException {
+        String phone = user.getPhone() == null ? "" : user.getPhone().trim();
+        if (!phone.isBlank() && !isValidTunisiaPhone(phone)) {
+            throw new IllegalArgumentException("Le numero de telephone doit etre au format +216 suivi de 8 chiffres.");
+        }
+
         String sql = "UPDATE `user` SET email = ?, username = ?, full_name = ?, phone = ?, country = ?, city = ?, bio = ? WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, user.getEmail());
         ps.setString(2, user.getUsername());
         ps.setString(3, user.getFullName());
-        ps.setString(4, user.getPhone());
+        ps.setString(4, phone);
         ps.setString(5, user.getCountry());
         ps.setString(6, user.getCity());
         ps.setString(7, user.getBio());
@@ -295,6 +306,7 @@ public class ServiceUser implements InterfaceServiceUser {
         ps.executeUpdate();
     }
 
+    // Internal lookup helpers.
     private User findByEmail(String email) throws SQLException {
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -345,6 +357,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return candidate;
     }
 
+    // ResultSet -> User mapper.
     private User mapUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
@@ -369,6 +382,7 @@ public class ServiceUser implements InterfaceServiceUser {
         return user;
     }
 
+    // Verification-code persistence + outbound email send.
     private void sendVerificationCode(User user) throws SQLException {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
         Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(10));
@@ -386,6 +400,7 @@ public class ServiceUser implements InterfaceServiceUser {
         emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
     }
 
+    // Ensures verification-code table exists at service startup.
     private void ensureVerificationTable() {
         String sql = "CREATE TABLE IF NOT EXISTS user_verification_codes ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
@@ -404,6 +419,7 @@ public class ServiceUser implements InterfaceServiceUser {
         }
     }
 
+    // Password helpers (legacy compatibility + policy).
     private String hashPassword(String value) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -461,5 +477,9 @@ public class ServiceUser implements InterfaceServiceUser {
         if (sb.length() > 0) {
             throw new IllegalArgumentException("Le mot de passe doit respecter:\n" + sb);
         }
+    }
+
+    private boolean isValidTunisiaPhone(String phone) {
+        return phone.matches("^\\+216\\d{8}$");
     }
 }
