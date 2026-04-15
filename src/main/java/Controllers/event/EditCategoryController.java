@@ -27,6 +27,7 @@ public class EditCategoryController {
     @FXML
     private TextField tfPrix;
     @FXML
+<<<<<<< HEAD
     private Label lblNomError;
     @FXML
     private Label lblDescriptionError;
@@ -34,6 +35,9 @@ public class EditCategoryController {
     private Label lblTarificationError;
     @FXML
     private Label lblPrixError;
+=======
+    private javafx.scene.control.Label lblError;
+>>>>>>> origin/gestion-produits-v5
 
     private final CategoryService categoryService = new CategoryService();
     private Category category;
@@ -78,8 +82,9 @@ public class EditCategoryController {
 
     @FXML
     private void sauvegarder() {
+        lblError.setVisible(false);
         if (category == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Aucune categorie a modifier.");
+            showError("Aucune categorie a modifier.");
             return;
         }
 
@@ -91,11 +96,22 @@ public class EditCategoryController {
         try {
             categoryService.update(category);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie mise a jour avec succes.");
+<<<<<<< HEAD
             EventNavigationState.clearEditingCategory();
             navigateBackToCategoryList();
+=======
+            closeWindow();
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+>>>>>>> origin/gestion-produits-v5
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML

@@ -76,8 +76,13 @@ public class AddCategoryController {
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie ajoutee avec succes.");
             navigateBackToCategoryList();
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML

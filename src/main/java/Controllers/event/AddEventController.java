@@ -113,8 +113,13 @@ public class AddEventController {
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement ajoute avec succes.");
             navigateBackToEventList();
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML
