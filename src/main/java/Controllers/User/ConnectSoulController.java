@@ -85,10 +85,12 @@ public class ConnectSoulController {
 
     @FXML
     public void initialize() {
+        // Clear login validation messages as the user types.
         tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
         pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
         tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
 
+        // Clear signup validation messages as the user corrects each field.
         tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
         tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
         pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
@@ -99,6 +101,7 @@ public class ConnectSoulController {
     @FXML
     private void handleLogin() {
         try {
+            // Login validation is shown inline, not via popup.
             clearLoginInlineErrors();
 
             String identity = tfLoginIdentity.getText() == null ? "" : tfLoginIdentity.getText().trim();
@@ -119,6 +122,7 @@ public class ConnectSoulController {
                 return;
             }
 
+            // Delegate credential verification to service layer after local checks pass.
             User user = serviceUser.login(identity, password);
             if (user == null) {
                 setInlineError(lblLoginIdentityError, "Identifiants invalides");
@@ -143,6 +147,7 @@ public class ConnectSoulController {
     @FXML
     private void handleSignup() {
         try {
+            // Signup validation is split in 2 layers: local input checks first, business checks second.
             clearSignupInlineErrors();
 
             String email = tfSignupEmail.getText() == null ? "" : tfSignupEmail.getText().trim();
@@ -182,6 +187,7 @@ public class ConnectSoulController {
                 return;
             }
 
+            // Cross-field validation: confirm password must match password.
             if (!password.equals(confirmPassword)) {
                 setInlineError(lblSignupConfirmPasswordError, "Doit etre identique au mot de passe");
                 return;
@@ -296,6 +302,7 @@ public class ConnectSoulController {
             return "Le mot de passe est obligatoire.";
         }
 
+        // Returns all unmet password rules in one message for better user guidance.
         StringBuilder sb = new StringBuilder();
         if (password.length() < 8) {
             sb.append("- 8 caracteres minimum\n");
@@ -340,6 +347,7 @@ public class ConnectSoulController {
         if (label == null) {
             return;
         }
+        // Show/hide error labels dynamically to keep layout compact when there is no error.
         boolean show = message != null && !message.isBlank();
         label.setText(show ? message : "");
         label.setVisible(show);
