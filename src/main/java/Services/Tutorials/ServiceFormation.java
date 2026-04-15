@@ -19,18 +19,15 @@ public class ServiceFormation implements InterfaceServiceTuto<Formation> {
     @Override
     public void add(Formation formation) throws SQLException {
         String sql = "INSERT INTO formation (titre, description, niveau, jeu_id, image) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, formation.getTitre());
-            preparedStatement.setString(2, formation.getDescription());
-            preparedStatement.setString(3, formation.getNiveau());
-            preparedStatement.setObject(4, formation.getJeu() != null ? formation.getJeu().getId() : null);
-            preparedStatement.setString(5, formation.getImage());
-            preparedStatement.executeUpdate();
-
-            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    formation.setId(generatedKeys.getInt(1));
-                }
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, formation.getTitre());
+            ps.setString(2, formation.getDescription());
+            ps.setString(3, formation.getNiveau());
+            ps.setObject(4, formation.getJeu() != null ? formation.getJeu().getId() : null);
+            ps.setString(5, formation.getImage());
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) formation.setId(keys.getInt(1));
             }
         }
     }
@@ -38,23 +35,23 @@ public class ServiceFormation implements InterfaceServiceTuto<Formation> {
     @Override
     public void update(Formation formation) throws SQLException {
         String sql = "UPDATE formation SET titre = ?, description = ?, niveau = ?, jeu_id = ?, image = ? WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, formation.getTitre());
-            preparedStatement.setString(2, formation.getDescription());
-            preparedStatement.setString(3, formation.getNiveau());
-            preparedStatement.setObject(4, formation.getJeu() != null ? formation.getJeu().getId() : null);
-            preparedStatement.setString(5, formation.getImage());
-            preparedStatement.setInt(6, formation.getId());
-            preparedStatement.executeUpdate();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, formation.getTitre());
+            ps.setString(2, formation.getDescription());
+            ps.setString(3, formation.getNiveau());
+            ps.setObject(4, formation.getJeu() != null ? formation.getJeu().getId() : null);
+            ps.setString(5, formation.getImage());
+            ps.setInt(6, formation.getId());
+            ps.executeUpdate();
         }
     }
 
     @Override
     public void delete(Formation formation) throws SQLException {
         String sql = "DELETE FROM formation WHERE id = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, formation.getId());
-            preparedStatement.executeUpdate();
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, formation.getId());
+            ps.executeUpdate();
         }
     }
 
@@ -62,8 +59,8 @@ public class ServiceFormation implements InterfaceServiceTuto<Formation> {
     public List<Formation> getAll() throws SQLException {
         List<Formation> list = new ArrayList<>();
         String sql = "SELECT * FROM formation";
-        try (Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery(sql)) {
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Formation formation = new Formation();
                 formation.setId(rs.getInt("id"));
@@ -78,7 +75,6 @@ public class ServiceFormation implements InterfaceServiceTuto<Formation> {
                     jeu.setId(jeuId);
                     formation.setJeu(jeu);
                 }
-
                 list.add(formation);
             }
         }
