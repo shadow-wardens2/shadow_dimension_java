@@ -42,6 +42,8 @@ public class EditEventController {
     private ComboBox<String> cbStatus;
     @FXML
     private ComboBox<String> cbLocationType;
+    @FXML
+    private javafx.scene.control.Label lblError;
 
     private final EventService eventService = new EventService();
     private final CategoryService categoryService = new CategoryService();
@@ -86,8 +88,9 @@ public class EditEventController {
 
     @FXML
     private void sauvegarder() {
+        lblError.setVisible(false);
         if (event == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Aucun evenement a modifier.");
+            showError("Aucun evenement a modifier.");
             return;
         }
 
@@ -97,10 +100,15 @@ public class EditEventController {
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement mis a jour avec succes.");
             closeWindow();
         } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
+            showError(e.getMessage());
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML

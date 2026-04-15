@@ -52,6 +52,8 @@
 
                 <Pane VBox.vgrow="ALWAYS" />
 
+                <Label fx:id="lblError" alignment="CENTER" maxWidth="Infinity" styleClass="error-label" visible="false" />
+
                 <HBox alignment="CENTER_RIGHT" spacing="10">
                     <Button onAction="#sauvegarder" styleClass="glow-button" text="Enregistrer" />
                     <Button onAction="#annuler" styleClass="secondary-button" text="Annuler" />

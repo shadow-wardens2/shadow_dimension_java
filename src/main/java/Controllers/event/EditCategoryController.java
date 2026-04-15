@@ -22,6 +22,8 @@ public class EditCategoryController {
     private ComboBox<String> cbTypeTarification;
     @FXML
     private TextField tfPrix;
+    @FXML
+    private javafx.scene.control.Label lblError;
 
     private final CategoryService categoryService = new CategoryService();
     private Category category;
@@ -50,8 +52,9 @@ public class EditCategoryController {
 
     @FXML
     private void sauvegarder() {
+        lblError.setVisible(false);
         if (category == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Aucune categorie a modifier.");
+            showError("Aucune categorie a modifier.");
             return;
         }
 
@@ -61,10 +64,15 @@ public class EditCategoryController {
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie mise a jour avec succes.");
             closeWindow();
         } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
+            showError(e.getMessage());
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML

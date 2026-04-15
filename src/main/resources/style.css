@@ -539,11 +539,12 @@
     -fx-border-color: rgba(139, 92, 246, 0.1);
     -fx-border-radius: 12;
     -fx-background-radius: 12;
-    -fx-padding: 20;
-    -fx-spacing: 12;
+    -fx-padding: 0 0 16 0;
+    -fx-spacing: 10;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 15, 0, 0, 8);
     -fx-cursor: hand;
-    -fx-transition: all 0.3s ease-in-out;
+    -fx-min-width: 240;
+    -fx-max-width: 260;
 }
 
 .product-card:hover {
@@ -554,16 +555,18 @@
 
 .product-name {
     -fx-font-family: 'Cinzel', serif;
-    -fx-font-size: 18px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
+    -fx-padding: 0 14 0 14;
 }
 
 .product-price {
     -fx-font-family: 'Inter', sans-serif;
-    -fx-font-size: 22px;
+    -fx-font-size: 20px;
     -fx-text-fill: #8b5cf6;
     -fx-font-weight: 800;
+    -fx-padding: 0 14 0 14;
 }
 
 .product-stock {
@@ -579,5 +582,20 @@
     -fx-font-size: 13px;
     -fx-text-fill: #adaaae;
     -fx-line-spacing: 1.4;
+}
+
+.error-label {
+    -fx-text-fill: #ff4d4d;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-background-color: rgba(220, 53, 69, 0.1);
+    -fx-border-color: rgba(220, 53, 69, 0.35);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14;
 }
 

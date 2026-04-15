@@ -19,6 +19,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.io.IOException;
 import java.net.URL;
@@ -113,6 +115,35 @@ public class ManagementProduitController implements Initializable {
         card.getStyleClass().add("product-card");
         card.setAlignment(Pos.TOP_LEFT);
 
+        // --- Product Image ---
+        String imageUrl = p.getImage();
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(220);
+        imageView.setFitHeight(140);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setStyle("-fx-background-radius: 10;");
+
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            try {
+                String url = imageUrl.startsWith("http") ? imageUrl : "file:" + imageUrl;
+                Image img = new Image(url, 220, 140, true, true, true);
+                imageView.setImage(img);
+                img.errorProperty().addListener((obs, wasError, isError) -> {
+                    if (isError) imageView.setImage(buildPlaceholderImage());
+                });
+            } catch (Exception ex) {
+                imageView.setImage(buildPlaceholderImage());
+            }
+        } else {
+            imageView.setImage(buildPlaceholderImage());
+        }
+
+        javafx.scene.layout.StackPane imageWrapper = new javafx.scene.layout.StackPane(imageView);
+        imageWrapper.setStyle("-fx-background-color: #0d0d12; -fx-background-radius: 10;");
+        imageWrapper.setMaxWidth(Double.MAX_VALUE);
+
+        // --- Labels ---
         Label nameLabel = new Label(p.getNom());
         nameLabel.getStyleClass().add("product-name");
         nameLabel.setWrapText(true);
@@ -121,6 +152,7 @@ public class ManagementProduitController implements Initializable {
         descLabel.getStyleClass().add("product-description");
         descLabel.setWrapText(true);
         descLabel.setMaxHeight(60);
+        descLabel.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
         VBox.setVgrow(descLabel, Priority.ALWAYS);
 
         Label priceLabel = new Label(String.format("%.2f DT", p.getPrix()));
@@ -129,9 +161,11 @@ public class ManagementProduitController implements Initializable {
         Label stockLabel = new Label("Stock: " + p.getStock());
         stockLabel.getStyleClass().add("product-stock");
 
+        // --- Actions ---
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_RIGHT);
-        
+        actions.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
+
         Button btnEdit = new Button("Edit");
         btnEdit.getStyleClass().add("edit-button");
         btnEdit.setOnAction(e -> handleEditAction(p));
@@ -142,16 +176,24 @@ public class ManagementProduitController implements Initializable {
 
         actions.getChildren().addAll(btnEdit, btnDelete);
 
-        card.getChildren().addAll(nameLabel, descLabel, priceLabel, stockLabel, actions);
-        
-        // Make whole card clickable for edit maybe?
+        card.getChildren().addAll(imageWrapper, nameLabel, descLabel, priceLabel, stockLabel, actions);
+
         card.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                handleEditAction(p);
-            }
+            if (e.getClickCount() == 2) handleEditAction(p);
         });
 
         return card;
+    }
+
+    /** Returns a simple purple placeholder image when no real image is available. */
+    private Image buildPlaceholderImage() {
+        // 1×1 transparent PNG encoded in base64 — used as safe fallback
+        String placeholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+        try {
+            return new Image(placeholder);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void handleEditAction(Produit p) {

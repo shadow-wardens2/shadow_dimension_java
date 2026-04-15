@@ -52,6 +52,8 @@
 
                 <Pane VBox.vgrow="ALWAYS" />
 
+                <Label fx:id="lblError" alignment="CENTER" maxWidth="Infinity" styleClass="error-label" visible="false" />
+
                 <HBox alignment="CENTER_RIGHT" spacing="10">
                     <Button onAction="#handleAjouter" styleClass="glow-button" text="Ajouter" />
                     <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />

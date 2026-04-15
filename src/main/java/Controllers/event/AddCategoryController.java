@@ -23,6 +23,8 @@ public class AddCategoryController {
     private ComboBox<String> cbTypeTarification;
     @FXML
     private TextField tfPrix;
+    @FXML
+    private javafx.scene.control.Label lblError;
 
     private final CategoryService categoryService = new CategoryService();
 
@@ -41,6 +43,7 @@ public class AddCategoryController {
 
     @FXML
     private void handleAjouter() {
+        lblError.setVisible(false);
         try {
             Category category = buildAndValidateCategory();
             category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
@@ -48,10 +51,15 @@ public class AddCategoryController {
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie ajoutee avec succes.");
             closeWindow();
         } catch (IllegalArgumentException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation", e.getMessage());
+            showError(e.getMessage());
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     @FXML
