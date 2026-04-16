@@ -1,11 +1,18 @@
 package Controllers.event;
 
+// Host interface for loading pages in dashboard content area.
 import Controllers.Marketplace.PageHost;
+// Category entity used in category selector.
 import Entities.event.Category;
+// Event entity currently edited.
 import Entities.event.Event;
+// Service to load category choices.
 import Services.event.CategoryService;
+// Service to persist event updates.
 import Services.event.EventService;
+// Shared edit-state transport between list and edit pages.
 import Utils.EventNavigationState;
+// Session helper for current user id validation.
 import Utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -23,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 
+// Controller for Edit Event page.
 public class EditEventController {
 
     @FXML
@@ -68,26 +76,36 @@ public class EditEventController {
     @FXML
     private Label lblFormError;
 
+    // Event persistence service.
     private final EventService eventService = new EventService();
+    // Category lookup service.
     private final CategoryService categoryService = new CategoryService();
+    // Currently loaded event being edited.
     private Event event;
+    // Host context for back navigation.
     private PageHost dashboardContext;
 
+    // Injects dashboard host context.
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
+    // JavaFX lifecycle initialization callback.
     @FXML
     public void initialize() {
         try {
+            // Loads category options in combobox.
             cbCategory.setItems(FXCollections.observableArrayList(categoryService.getAll()));
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les categories: " + e.getMessage());
         }
 
+        // Populates status options.
         cbStatus.setItems(FXCollections.observableArrayList("ACTIVE", "INACTIVE", "DRAFT"));
+        // Populates location type options.
         cbLocationType.setItems(FXCollections.observableArrayList("indoor", "outdoor"));
 
+        // Clears validation labels when user edits values.
         tfTitle.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblTitleError, ""));
         taDescription.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblDescriptionError, ""));
         tfLocation.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationError, ""));
@@ -99,12 +117,14 @@ public class EditEventController {
         cbStatus.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblStatusError, ""));
         cbLocationType.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationTypeError, ""));
 
+        // Recovers selected event from navigation state.
         Event editingEvent = EventNavigationState.getEditingEvent();
         if (editingEvent != null) {
             setEvent(editingEvent);
         }
     }
 
+    // Pre-fills form fields from selected event.
     public void setEvent(Event event) {
         this.event = event;
         tfTitle.setText(event.getTitle());
@@ -124,27 +144,34 @@ public class EditEventController {
 
         for (Category category : cbCategory.getItems()) {
             if (event.getCategory() != null && category.getId() == event.getCategory().getId()) {
+                // Selects matching category item in combobox.
                 cbCategory.getSelectionModel().select(category);
                 break;
             }
         }
     }
 
+    // Save button handler.
     @FXML
     private void sauvegarder() {
+        // Guard when no event was provided for editing.
         if (event == null) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Aucun evenement a modifier.");
             return;
         }
 
+        // Clears old validation messages.
         clearInlineErrors();
+        // Runs validation and model update.
         if (!updateAndValidateEvent()) {
             return;
         }
 
         try {
+            // Persists update to database.
             eventService.update(event);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement mis a jour avec succes.");
+            // Clears shared edit state and returns to list.
             EventNavigationState.clearEditingEvent();
             navigateBackToEventList();
         } catch (SQLException e) {
@@ -152,13 +179,17 @@ public class EditEventController {
         }
     }
 
+    // Cancel handler.
     @FXML
     private void annuler() {
+        // Clears edit state then returns without saving.
         EventNavigationState.clearEditingEvent();
         navigateBackToEventList();
     }
 
+    // Validates form then copies validated values into current event object.
     private boolean updateAndValidateEvent() {
+        // Delegates rules to centralized validator.
         EventFormValidator.Result validation = EventFormValidator.validate(
                 tfTitle.getText(),
                 taDescription.getText(),
@@ -173,11 +204,13 @@ public class EditEventController {
                 SessionManager.getCurrentUser() != null
         );
 
+            // Writes validation messages into UI when invalid.
         if (!validation.isValid()) {
             applyValidationErrors(validation.getErrors());
             return false;
         }
 
+            // Copies normalized validated values to mutable event entity.
         event.setTitle(validation.getTitle());
         event.setDescription(validation.getDescription());
         event.setLocation(validation.getLocation());
@@ -194,6 +227,7 @@ public class EditEventController {
         return true;
     }
 
+    // Maps validator keys to inline label components.
     private void applyValidationErrors(Map<String, String> errors) {
         setInlineError(lblTitleError, errors.get(EventFormValidator.FIELD_TITLE));
         setInlineError(lblDescriptionError, errors.get(EventFormValidator.FIELD_DESCRIPTION));
@@ -208,11 +242,13 @@ public class EditEventController {
         setInlineError(lblFormError, errors.get(EventFormValidator.FIELD_FORM));
     }
 
+    // Fallback close for standalone modal usage.
     private void closeWindow() {
         Stage stage = (Stage) tfTitle.getScene().getWindow();
         stage.close();
     }
 
+    // Returns to event list through host or fallback stage close.
     private void navigateBackToEventList() {
         if (dashboardContext != null) {
             dashboardContext.loadPage("/event/EventView.fxml");
@@ -221,6 +257,7 @@ public class EditEventController {
         closeWindow();
     }
 
+    // Shared alert helper.
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -229,6 +266,7 @@ public class EditEventController {
         alert.showAndWait();
     }
 
+    // Clears all inline validation labels.
     private void clearInlineErrors() {
         setInlineError(lblTitleError, "");
         setInlineError(lblDescriptionError, "");
@@ -243,6 +281,7 @@ public class EditEventController {
         setInlineError(lblFormError, "");
     }
 
+    // Shows/hides one inline error label depending on message content.
     private void setInlineError(Label label, String message) {
         if (label == null) {
             return;

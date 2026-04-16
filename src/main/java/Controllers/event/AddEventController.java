@@ -1,10 +1,16 @@
 package Controllers.event;
 
+// Host interface used for navigation inside dashboard content area.
 import Controllers.Marketplace.PageHost;
+// Category entity used in category combobox.
 import Entities.event.Category;
+// Event entity built from form values.
 import Entities.event.Event;
+// Service used to load categories for dropdown.
 import Services.event.CategoryService;
+// Service used to persist newly created events.
 import Services.event.EventService;
+// Session helper used to resolve current logged-in user id.
 import Utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -22,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
 
+// Controller for Add Event page.
 public class AddEventController {
 
     @FXML
@@ -67,25 +74,34 @@ public class AddEventController {
     @FXML
     private Label lblFormError;
 
+    // Service that writes event rows to database.
     private final EventService eventService = new EventService();
+    // Service that reads categories for combobox options.
     private final CategoryService categoryService = new CategoryService();
+    // Host context for in-page navigation.
     private PageHost dashboardContext;
 
+    // Injected by HomePage host when page is loaded.
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
+    // JavaFX initialization callback.
     @FXML
     public void initialize() {
         try {
+            // Loads all categories into category selector.
             cbCategory.setItems(FXCollections.observableArrayList(categoryService.getAll()));
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les categories: " + e.getMessage());
         }
 
+        // Populates status dropdown.
         cbStatus.setItems(FXCollections.observableArrayList("ACTIVE", "INACTIVE", "DRAFT"));
+        // Populates location type dropdown.
         cbLocationType.setItems(FXCollections.observableArrayList("indoor", "outdoor"));
 
+        // Live-clear validation messages while user edits fields.
         tfTitle.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblTitleError, ""));
         taDescription.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblDescriptionError, ""));
         tfLocation.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationError, ""));
@@ -98,31 +114,43 @@ public class AddEventController {
         cbLocationType.valueProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLocationTypeError, ""));
     }
 
+    // Save handler for event creation.
     @FXML
     private void handleAjouter() {
+        // Resets previous errors before new validation pass.
         clearInlineErrors();
 
+        // Validates form then builds event entity.
         Event event = buildAndValidateEvent();
+        // Stops save flow on validation errors.
         if (event == null) {
             return;
         }
 
         try {
+            // Sets created_at timestamp.
             event.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            // Persists event in database.
             eventService.add(event);
+            // Shows user feedback.
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement ajoute avec succes.");
+            // Returns to event list page.
             navigateBackToEventList();
         } catch (SQLException e) {
+            // Reports backend failure.
             showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
         }
     }
 
+    // Cancel handler.
     @FXML
     private void handleAnnuler() {
         navigateBackToEventList();
     }
 
+    // Validates form fields and builds Event when valid.
     private Event buildAndValidateEvent() {
+        // Delegates validation rules to centralized validator class.
         EventFormValidator.Result validation = EventFormValidator.validate(
                 tfTitle.getText(),
                 taDescription.getText(),
@@ -137,11 +165,13 @@ public class AddEventController {
                 SessionManager.getCurrentUser() != null
         );
 
+            // Maps field errors to inline labels when invalid.
         if (!validation.isValid()) {
             applyValidationErrors(validation.getErrors());
             return null;
         }
 
+            // Constructs event from normalized validated values.
         Event event = new Event();
         event.setTitle(validation.getTitle());
         event.setDescription(validation.getDescription());
@@ -159,6 +189,7 @@ public class AddEventController {
         return event;
     }
 
+    // Assigns each validator error to its matching UI label.
     private void applyValidationErrors(Map<String, String> errors) {
         setInlineError(lblTitleError, errors.get(EventFormValidator.FIELD_TITLE));
         setInlineError(lblDescriptionError, errors.get(EventFormValidator.FIELD_DESCRIPTION));
@@ -173,11 +204,13 @@ public class AddEventController {
         setInlineError(lblFormError, errors.get(EventFormValidator.FIELD_FORM));
     }
 
+    // Fallback close for modal usage.
     private void closeWindow() {
         Stage stage = (Stage) tfTitle.getScene().getWindow();
         stage.close();
     }
 
+    // Navigates back to Event list page using host or stage close fallback.
     private void navigateBackToEventList() {
         if (dashboardContext != null) {
             dashboardContext.loadPage("/event/EventView.fxml");
@@ -186,6 +219,7 @@ public class AddEventController {
         closeWindow();
     }
 
+    // Shared alert utility method.
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -194,6 +228,7 @@ public class AddEventController {
         alert.showAndWait();
     }
 
+    // Clears all inline validation labels.
     private void clearInlineErrors() {
         setInlineError(lblTitleError, "");
         setInlineError(lblDescriptionError, "");
@@ -208,6 +243,7 @@ public class AddEventController {
         setInlineError(lblFormError, "");
     }
 
+    // Shows or hides one validation label.
     private void setInlineError(Label label, String message) {
         if (label == null) {
             return;

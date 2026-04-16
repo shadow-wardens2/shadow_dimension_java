@@ -1,10 +1,16 @@
 package Controllers.event;
 
+// Host interface used to navigate within dashboard center content.
 import Controllers.Marketplace.PageHost;
+// Category entity rendered in list cards.
 import Entities.event.Category;
+// Service used for category CRUD/retrieval.
 import Services.event.CategoryService;
+// Shared state for carrying selected category to edit page.
 import Utils.EventNavigationState;
+// Utility for PDF export.
 import Utils.PdfExportUtil;
+// Utility for speech-to-text search.
 import Utils.VoiceToTextUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,8 +39,10 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import javafx.stage.FileChooser;
 
+// Controller for Category management page.
 public class CategoryController implements Initializable {
 
+    // Dashboard host context for page switching.
     private PageHost dashboardContext;
 
     @FXML
@@ -46,20 +54,28 @@ public class CategoryController implements Initializable {
     @FXML
     private Button btnMic;
 
+    // Service layer instance.
     private final CategoryService categoryService = new CategoryService();
+    // Full loaded dataset.
     private final ObservableList<Category> masterCategories = FXCollections.observableArrayList();
+    // Filtered/sorted dataset currently shown.
     private final ObservableList<Category> displayedCategories = FXCollections.observableArrayList();
 
+    // Receives dashboard host context from home controller.
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
+    // JavaFX initialization callback.
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Configures search/sort controls.
         setupSearchAndSort();
+        // Loads initial data.
         loadCategories();
     }
 
+    // Initializes sort options and reactive listeners.
     private void setupSearchAndSort() {
         cbSort.setItems(FXCollections.observableArrayList(
                 "Newest first",
@@ -77,9 +93,11 @@ public class CategoryController implements Initializable {
         applyDynamicFilterAndSort();
     }
 
+    // Applies search filter and selected sorting strategy.
     private void applyDynamicFilterAndSort() {
         String search = tfSearch.getText() == null ? "" : tfSearch.getText().trim().toLowerCase(Locale.ROOT);
 
+        // Rebuilds display subset from master list.
         displayedCategories.clear();
         for (Category category : masterCategories) {
             if (search.isEmpty()) {
@@ -102,6 +120,7 @@ public class CategoryController implements Initializable {
             }
         }
 
+        // Selects active sort comparator.
         String selectedSort = cbSort.getValue();
         Comparator<Category> comparator;
 
@@ -123,10 +142,12 @@ public class CategoryController implements Initializable {
             comparator = Comparator.comparingInt(Category::getId).reversed();
         }
 
+        // Applies sort then rerenders cards.
         displayedCategories.sort(comparator);
         renderCategories();
     }
 
+    // Starts voice capture and writes result into search field.
     @FXML
     private void handleVoiceSearch() {
         btnMic.setDisable(true);
@@ -147,6 +168,7 @@ public class CategoryController implements Initializable {
         }));
     }
 
+    // Opens add category page in main content area.
     @FXML
     void handleAddCategory(ActionEvent event) {
         EventNavigationState.clearEditingCategory();
@@ -155,6 +177,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Goes back to event selector page.
     @FXML
     private void handleGoBack() {
         if (dashboardContext != null) {
@@ -162,6 +185,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Exports currently displayed category rows to PDF.
     @FXML
     void handleExportPdf(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -183,6 +207,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Loads all categories from service then refreshes view.
     private void loadCategories() {
         masterCategories.clear();
         try {
@@ -193,6 +218,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Renders category cards into scroll container.
     private void renderCategories() {
         categoriesContainer.getChildren().clear();
         if (displayedCategories.isEmpty()) {
@@ -207,6 +233,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Builds one category row-card with actions.
     private HBox createCategoryCard(Category category) {
         Label idLabel = new Label("#" + category.getId());
         idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700;");
@@ -239,10 +266,12 @@ public class CategoryController implements Initializable {
         priceLabel.setMinWidth(90);
         priceLabel.setPrefWidth(100);
 
+        // Edit action button.
         Button btnEdit = new Button("Edit");
         btnEdit.getStyleClass().add("edit-button");
         btnEdit.setOnAction(actionEvent -> openEditCategory(category));
 
+        // Delete action button.
         Button btnDelete = new Button("Delete");
         btnDelete.getStyleClass().add("delete-button");
         btnDelete.setOnAction(actionEvent -> deleteCategory(category));
@@ -262,6 +291,7 @@ public class CategoryController implements Initializable {
         return row;
     }
 
+    // Opens edit category page using shared navigation state.
     private void openEditCategory(Category category) {
         EventNavigationState.setEditingCategory(category);
         if (dashboardContext != null) {
@@ -269,6 +299,7 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Deletes one category then refreshes list.
     private void deleteCategory(Category category) {
         try {
             categoryService.delete(category);
@@ -279,10 +310,12 @@ public class CategoryController implements Initializable {
         }
     }
 
+    // Null-safe display helper.
     private String safeDisplay(String value) {
         return value == null || value.isBlank() ? "-" : value;
     }
 
+    // Truncates long text for compact row layout.
     private String truncate(String value, int maxLength) {
         if (value == null) {
             return "-";
@@ -293,10 +326,12 @@ public class CategoryController implements Initializable {
         return value.substring(0, Math.max(0, maxLength - 3)) + "...";
     }
 
+    // Null-safe lowercase helper for search/sort.
     private String safeLower(String value) {
         return value == null ? "" : value.toLowerCase(Locale.ROOT);
     }
 
+    // Shared alert helper.
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
