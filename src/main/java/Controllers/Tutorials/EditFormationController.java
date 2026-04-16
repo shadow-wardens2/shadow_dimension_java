@@ -35,14 +35,15 @@ public class EditFormationController {
         tfTitre.setText(formation.getTitre());
         tfDescription.setText(formation.getDescription());
         cbNiveau.setValue(formation.getNiveau());
-        tfImage.setText(formation.getImage() != null ? formation.getImage() : "");
+        tfImage.setText(formation.getImage());
     }
 
     @FXML
     private void sauvegarder() {
         String titre = tfTitre.getText().trim();
-        String description = tfDescription.getText().trim();
+        String description = tfDescription.getText() != null ? tfDescription.getText().trim() : "";
         String niveau = cbNiveau.getValue();
+        String image = tfImage.getText() != null ? tfImage.getText().trim() : "";
 
         if (titre.isEmpty() || niveau == null) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Le titre et le niveau sont obligatoires.");
@@ -56,16 +57,12 @@ public class EditFormationController {
                 showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Une formation avec ce titre existe déjà !");
                 return;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        formation.setTitre(titre);
-        formation.setDescription(description);
-        formation.setNiveau(niveau);
-        formation.setImage(tfImage.getText().trim());
+            formation.setTitre(titre);
+            formation.setDescription(description);
+            formation.setNiveau(niveau);
+            formation.setImage(image);
 
-        try {
             serviceFormation.update(formation);
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Formation mise à jour avec succès !");
             closeWindow();

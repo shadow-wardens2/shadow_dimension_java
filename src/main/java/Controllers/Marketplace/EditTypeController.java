@@ -13,8 +13,6 @@ public class EditTypeController {
 
     @FXML
     private TextField tfNom;
-    @FXML
-    private javafx.scene.control.Label lblError;
 
     private ServiceType serviceType = new ServiceType();
     private Type type;
@@ -26,15 +24,14 @@ public class EditTypeController {
 
     @FXML
     private void sauvegarder() {
-        lblError.setVisible(false);
         String nom = tfNom.getText().trim();
         if (nom.isEmpty()) {
-            showError("Le nom ne peut pas être vide.");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom ne peut pas être vide.");
             return;
         }
 
         if (nom.length() <= 3) {
-            showError("Le nom du type doit avoir plus de 3 caractères !");
+            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type doit avoir plus de 3 caractères !");
             return;
         }
 
@@ -42,7 +39,7 @@ public class EditTypeController {
             // Duplicate Check
             for (Type existing : serviceType.getAll()) {
                 if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != type.getId()) {
-                    showError("Un autre type porte déjà ce nom !");
+                    Utils.ValidationUtils.showAlert("Doublon", "Un autre type porte déjà ce nom !");
                     return;
                 }
             }
@@ -52,13 +49,8 @@ public class EditTypeController {
             Utils.ValidationUtils.showSuccess("Succès", "Type mis à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            showError("Impossible de mettre à jour : " + e.getMessage());
+            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
         }
-    }
-
-    private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
     }
 
     @FXML

@@ -24,7 +24,6 @@ public class AjouterProduitController {
     @FXML private ComboBox<Categorie> cbCategorie;
     @FXML private ComboBox<Type> cbType;
     @FXML private TextField tfImage;
-    @FXML private javafx.scene.control.Label lblError;
 
     private ServiceProduit sp = new ServiceProduit();
     private ServiceCategorie sc = new ServiceCategorie();
@@ -45,7 +44,6 @@ public class AjouterProduitController {
 
     @FXML
     private void handleAjouter() {
-        lblError.setVisible(false);
         String nom = tfNom.getText().trim();
         String desc = tfDescription.getText().trim();
         String prixStr = tfPrix.getText().trim();
@@ -54,42 +52,46 @@ public class AjouterProduitController {
         Type type = cbType.getValue();
         String image = tfImage.getText().trim();
 
-        if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty()
-                || image.isEmpty() || cat == null || type == null) {
-            showError("Tous les champs sont obligatoires !");
+        // Validation - Required fields
+        if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty() || cat == null || type == null) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Tous les champs doivent être remplis !");
             return;
         }
 
+        // Validation - Name length
         if (nom.length() <= 3) {
-            showError("Le nom du produit doit avoir plus de 3 caractères !");
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le nom du produit doit avoir plus de 3 caractères !");
             return;
         }
 
+        // Validation - Numeric Price
         if (!Utils.ValidationUtils.isNumeric(prixStr)) {
-            showError("Le prix doit être un nombre valide (ex: 10.5) !");
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix doit être un nombre valide (ex: 10.5) !");
             return;
         }
         double prix = Double.parseDouble(prixStr);
-        if (prix <= 0) {
-            showError("Le prix doit être supérieur à 0 !");
+        if (prix < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix ne peut pas être négatif !");
             return;
         }
 
+        // Validation - Numeric Stock
         if (!Utils.ValidationUtils.isInteger(stockStr)) {
-            showError("Le stock doit être un nombre entier !");
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock doit être un nombre entier !");
             return;
         }
         int stock = Integer.parseInt(stockStr);
-        if (stock <= 0) {
-            showError("Le stock doit être supérieur à 0 !");
+        if (stock < 0) {
+            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock ne peut pas être négatif !");
             return;
         }
 
         try {
+            // Duplicate Check
             List<Produit> existingProduits = sp.getAll();
             for (Produit existing : existingProduits) {
                 if (existing.getNom().equalsIgnoreCase(nom)) {
-                    showError("Un produit avec ce nom existe déjà !");
+                    Utils.ValidationUtils.showAlert("Doublon", "Un produit avec ce nom existe déjà !");
                     return;
                 }
             }
@@ -99,13 +101,8 @@ public class AjouterProduitController {
             Utils.ValidationUtils.showSuccess("Succès", "Produit ajouté avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            showError("Une erreur est survenue lors de l'ajout : " + e.getMessage());
+            Utils.ValidationUtils.showAlert("Erreur SQL", "Une erreur est survenue lors de l'ajout : " + e.getMessage());
         }
-    }
-
-    private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
     }
 
     @FXML

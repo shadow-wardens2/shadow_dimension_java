@@ -4,7 +4,6 @@ import Entities.Tutorials.Option;
 import Services.Tutorials.ServiceOption;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,11 +11,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,91 +26,87 @@ import java.util.ResourceBundle;
 public class ManagementOptionController implements Initializable {
 
     @FXML
-    private VBox listContainer;
+    private TableColumn<Option, Integer> colActions;
     @FXML
-    private TextField searchField;
+    private TableColumn<Option, Integer> colId;
+    @FXML
+    private TableColumn<Option, String> colTexte;
+    @FXML
+    private TableColumn<Option, Boolean> colEstCorrecte;
+    @FXML
+    private TableView<Option> optionTable;
 
     private ServiceOption serviceOption = new ServiceOption();
     private ObservableList<Option> observableList = FXCollections.observableArrayList();
-    private FilteredList<Option> filteredList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colTexte.setCellValueFactory(new PropertyValueFactory<>("texte"));
+        colEstCorrecte.setCellValueFactory(new PropertyValueFactory<>("estCorrecte"));
+
         loadOptions();
 
-        filteredList = new FilteredList<>(observableList, p -> true);
-        searchField.textProperty().addListener((obs, old, val) -> {
-            String lower = val == null ? "" : val.toLowerCase();
-            filteredList.setPredicate(o -> lower.isEmpty() || o.getTexte().toLowerCase().contains(lower));
-            renderList();
-        });
+        colActions.setCellFactory(param -> new TableCell<Option, Integer>() {
+            private final Button btnUpdate = new Button("Edit");
+            private final Button btnDelete = new Button("Delete");
+            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
 
-        renderList();
+            {
+                btnUpdate.getStyleClass().add("edit-button");
+                btnDelete.getStyleClass().add("delete-button");
+
+                btnDelete.setOnAction(event -> {
+                    Option item = getTableView().getItems().get(getIndex());
+                    try {
+                        serviceOption.delete(item);
+                        loadOptions();
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                javafx.scene.control.Alert.AlertType.INFORMATION);
+                        alert.setTitle("Succès");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Option supprimée avec succès.");
+                        alert.showAndWait();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+                btnUpdate.setOnAction(event -> {
+                    Option item = getTableView().getItems().get(getIndex());
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Tutorials/EditOption.fxml"));
+                        Parent root = loader.load();
+                        EditOptionController controller = loader.getController();
+                        controller.setOption(item);
+                        Stage stage = new Stage();
+                        stage.setTitle("Edit Option");
+                        stage.setScene(new Scene(root));
+                        stage.showAndWait();
+                        loadOptions();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(pane);
+                }
+            }
+        });
     }
 
     private void loadOptions() {
+        observableList.clear();
         try {
-            observableList.setAll(serviceOption.getAll());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void renderList() {
-        listContainer.getChildren().clear();
-        for (Option o : filteredList) {
-            listContainer.getChildren().add(createCard(o));
-        }
-    }
-
-    private HBox createCard(Option o) {
-        HBox card = new HBox(15);
-        card.getStyleClass().add("panel-card");
-        card.setStyle("-fx-alignment: CENTER_LEFT; -fx-padding: 15;");
-
-        VBox details = new VBox(5);
-        Label lblTexte = new Label(o.getTexte());
-        lblTexte.setStyle("-fx-text-fill: " + (o.isEstCorrecte() ? "#4CAF50" : "white")
-                + "; -fx-font-size: 16px; -fx-font-weight: bold;");
-        Label lblStatus = new Label(o.isEstCorrecte() ? "Correcte" : "Incorrecte");
-        lblStatus.setStyle("-fx-text-fill: #aaa;");
-        details.getChildren().addAll(lblTexte, lblStatus);
-        HBox.setHgrow(details, Priority.ALWAYS);
-
-        Button btnEdit = new Button("Edit");
-        btnEdit.getStyleClass().add("edit-button");
-        btnEdit.setOnAction(e -> handleEdit(o));
-
-        Button btnDelete = new Button("Delete");
-        btnDelete.getStyleClass().add("delete-button");
-        btnDelete.setOnAction(e -> handleDelete(o));
-
-        card.getChildren().addAll(details, btnEdit, btnDelete);
-        return card;
-    }
-
-    private void handleEdit(Option o) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Tutorials/EditOption.fxml"));
-            Parent root = loader.load();
-            EditOptionController controller = loader.getController();
-            controller.setOption(o);
-            Stage stage = new Stage();
-            stage.setTitle("Edit Option");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-            loadOptions();
-            renderList();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleDelete(Option o) {
-        try {
-            serviceOption.delete(o);
-            loadOptions();
-            renderList();
+            observableList.addAll(serviceOption.getAll());
+            optionTable.setItems(observableList);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -127,7 +122,6 @@ public class ManagementOptionController implements Initializable {
             stage.setScene(new Scene(root));
             stage.showAndWait();
             loadOptions();
-            renderList();
         } catch (IOException e) {
             e.printStackTrace();
         }
