@@ -4,20 +4,17 @@ import Entities.Marketplace.Type;
 import Services.Marketplace.ServiceType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.transformation.FilteredList;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -28,22 +25,14 @@ import java.util.ResourceBundle;
 public class ManagementTypeController implements Initializable {
 
     @FXML
-    private TableColumn<Type, Integer> colActions;
-
-    @FXML
-    private TableColumn<Type, Integer> colId;
-
-    @FXML
-    private TableColumn<Type, String> colNom;
-
-    @FXML
-    private TableView<Type> typeTable;
+    private TilePane typeTilePane;
 
     @FXML
     private TextField searchField;
 
     private ServiceType serviceType = new ServiceType();
     private ObservableList<Type> observableTypes = FXCollections.observableArrayList();
+    private FilteredList<Type> filteredData;
     private PageHost dashboardContext;
 
     public void setDashboardContext(PageHost dashboardContext) {
@@ -59,98 +48,86 @@ public class ManagementTypeController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        setupData();
 
-        loadTypes();
+        // Listen for changes in the filtered list to update the UI
+        filteredData.addListener((ListChangeListener<Type>) c -> refreshGrid());
 
-        colActions.setCellFactory(param -> new TableCell<Type, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
+        // Initial display
+        refreshGrid();
+    }
 
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnDelete.setOnAction(event -> {
-                    Type t = getTableView().getItems().get(getIndex());
-                    try {
-                        serviceType.delete(t);
-                        loadTypes();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.INFORMATION);
-                        alert.setTitle("Succès");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Type supprimé avec succès.");
-                        alert.showAndWait();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.ERROR);
-                        alert.setTitle("Erreur");
-                        alert.setHeaderText("Impossible de supprimer");
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
-                    }
+    private void setupData() {
+        try {
+            observableTypes.setAll(serviceType.getAll());
+            filteredData = new FilteredList<>(observableTypes, t -> true);
+            
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                filteredData.setPredicate(type -> {
+                    if (newVal == null || newVal.isEmpty()) return true;
+                    String lower = newVal.toLowerCase();
+                    return type.getNom().toLowerCase().contains(lower) || 
+                           String.valueOf(type.getId()).contains(lower);
                 });
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-                btnUpdate.setOnAction(event -> {
-                    Type t = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditType.fxml"));
-                        javafx.scene.Parent root = loader.load();
-                        EditTypeController controller = loader.getController();
-                        controller.setType(t);
-                        Stage stage = new Stage();
-                        stage.setTitle("Editer Type");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadTypes();
-                    } catch (java.io.IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+    private void refreshGrid() {
+        typeTilePane.getChildren().clear();
+        for (Type type : filteredData) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/TypeCard.fxml"));
+                Parent card = loader.load();
+                TypeCardController controller = loader.getController();
+                controller.setTypeData(type, this::editType, this::deleteType);
+                typeTilePane.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+    }
 
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
-            }
-        });
+    private void editType(Type t) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditType.fxml"));
+            Parent root = loader.load();
+            EditTypeController controller = loader.getController();
+            controller.setType(t);
+            Stage stage = new Stage();
+            stage.setTitle("Edit Type");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            loadTypes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteType(Type t) {
+        try {
+            serviceType.delete(t);
+            loadTypes();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Type deleted successfully.");
+            alert.showAndWait();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not delete");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     private void loadTypes() {
-        observableTypes.clear();
         try {
-            observableTypes.addAll(serviceType.getAll());
-            
-            FilteredList<Type> filteredData = new FilteredList<>(observableTypes, t -> true);
-            
-            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-                filteredData.setPredicate(type -> {
-                    if (newValue == null || newValue.isEmpty()) {
-                        return true;
-                    }
-                    
-                    String lowerCaseFilter = newValue.toLowerCase();
-                    
-                    if (type.getNom().toLowerCase().contains(lowerCaseFilter)) {
-                        return true;
-                    } else if (String.valueOf(type.getId()).contains(lowerCaseFilter)) {
-                        return true;
-                    }
-                    
-                    return false;
-                });
-            });
-            
-            typeTable.setItems(filteredData);
+            observableTypes.setAll(serviceType.getAll());
         } catch (SQLException e) {
             e.printStackTrace();
         }
