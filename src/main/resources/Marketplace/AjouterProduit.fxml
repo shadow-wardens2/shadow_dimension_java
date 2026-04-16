@@ -35,8 +35,11 @@
         <Label styleClass="form-label" text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
         <ComboBox fx:id="cbType" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-        <Label styleClass="form-label" text="Image URL:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-        <TextField fx:id="tfImage" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+        <Label styleClass="form-label" text="Image:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <TextField fx:id="tfImage" prefWidth="250.0" promptText="Path or URL..." />
+            <Button onAction="#handleBrowseImage" styleClass="secondary-button" text="..." />
+        </HBox>
     </GridPane>
 
     <!-- Buttons -->

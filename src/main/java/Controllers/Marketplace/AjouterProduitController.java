@@ -10,7 +10,9 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import java.io.File;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -108,6 +110,19 @@ public class AjouterProduitController {
     @FXML
     private void handleAnnuler() {
         closeWindow();
+    }
+
+    @FXML
+    private void handleBrowseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Product Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        File selectedFile = fileChooser.showOpenDialog(tfNom.getScene().getWindow());
+        if (selectedFile != null) {
+            tfImage.setText(selectedFile.getAbsolutePath());
+        }
     }
 
     private void closeWindow() {

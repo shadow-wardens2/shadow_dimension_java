@@ -43,17 +43,29 @@ public class ProductCardController {
         // Handle image if available
         if (produit.getImage() != null && !produit.getImage().isEmpty()) {
             try {
-                File file = new File(produit.getImage());
-                if (file.exists()) {
-                    productImage.setImage(new Image(file.toURI().toString()));
+                if (produit.getImage().startsWith("http")) {
+                    productImage.setImage(new Image(produit.getImage(), true));
                 } else {
-                    // Fallback to default icon or placeholder
-                    // productImage.setImage(new Image(getClass().getResourceAsStream("/icons/placeholder.png")));
+                    File file = new File(produit.getImage());
+                    if (file.exists()) {
+                        productImage.setImage(new Image(file.toURI().toString()));
+                    } else {
+                        setPlaceholderImage();
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Error loading image: " + e.getMessage());
+                setPlaceholderImage();
             }
+        } else {
+            setPlaceholderImage();
         }
+    }
+
+    private void setPlaceholderImage() {
+        // Using a professional product placeholder
+        productImage.setImage(new Image("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&auto=format&fit=crop&q=60"));
+        productImage.setOpacity(0.6);
     }
 
     @FXML
@@ -70,3 +82,5 @@ public class ProductCardController {
         }
     }
 }
+
+
