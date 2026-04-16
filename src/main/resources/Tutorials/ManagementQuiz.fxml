@@ -2,35 +2,27 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="650.0" prefWidth="850.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.ManagementQuizController">
+<AnchorPane prefHeight="680.0" prefWidth="880.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.ManagementQuizController">
    <children>
       <VBox spacing="20.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="&lt; Back" />
-               <Label styleClass="headline" text="Séléctionnez un Quiz" />
-               <Pane HBox.hgrow="ALWAYS" />
-               <Button fx:id="btnManageDetails" mnemonicParsing="false" onAction="#handleConfigQuiz" styleClass="glow-button" text="Configure Selected Quiz" />
-               <Button mnemonicParsing="false" onAction="#handleAddQuiz" styleClass="glow-button" text="+ Add Quiz" />
-            </HBox>
-            <TextField fx:id="searchField" promptText="🔍  Rechercher par titre..." styleClass="search-field" />
-            <TableView fx:id="quizTable" prefHeight="500.0" styleClass="table-view tuto-table" VBox.vgrow="ALWAYS">
-              <columns>
-                <TableColumn fx:id="colQuizId" prefWidth="50.0" text="ID" />
-                <TableColumn fx:id="colQuizTitre" prefWidth="350.0" text="Titre" />
-                <TableColumn fx:id="colQuizOrdre" prefWidth="80.0" text="Ordre" />
-                <TableColumn fx:id="colQuizActions" prefWidth="150.0" text="Actions" />
-              </columns>
-            </TableView>
-         </children>
+         <HBox alignment="CENTER_LEFT" spacing="16.0">
+            <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="&lt; Back" />
+            <Label styleClass="headline" text="Quizzes" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnManageDetails" mnemonicParsing="false" onAction="#handleConfigQuiz" styleClass="secondary-button" text="⚙ Configure Selected" />
+            <Button mnemonicParsing="false" onAction="#handleAddQuiz" styleClass="glow-button" text="+ Add Quiz" />
+         </HBox>
+         <TextField fx:id="searchField" promptText="🔍  Rechercher par titre..." styleClass="search-field" />
+         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane" hbarPolicy="NEVER">
+            <VBox fx:id="listContainer" spacing="12" style="-fx-padding: 4 2 4 2;" />
+         </ScrollPane>
       </VBox>
    </children>
 </AnchorPane>

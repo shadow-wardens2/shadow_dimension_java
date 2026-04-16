@@ -8,17 +8,17 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="300.0" prefWidth="400.0" stylesheets="@../style.css" styleClass="root" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.EditOptionController">
+<AnchorPane prefHeight="300.0" prefWidth="400.0" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.EditOptionController">
     <children>
         <VBox alignment="CENTER" spacing="15" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
             <Label styleClass="headline" text="Editer l'Option" />
             <VBox spacing="15" styleClass="panel-card">
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label styleClass="form-label" text="Text de l'option:" prefWidth="120" />
+                    <Label prefWidth="120" styleClass="form-label" text="Texte de l'option :" />
                     <TextField fx:id="tfTexte" promptText="Saisissez l'option..." HBox.hgrow="ALWAYS" />
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label styleClass="form-label" text="Est Correcte?" prefWidth="120" />
+                    <Label prefWidth="120" styleClass="form-label" text="Est Correcte ?" />
                     <ComboBox fx:id="cbEstCorrecte" promptText="Sélectionnez..." HBox.hgrow="ALWAYS" />
                 </HBox>
             </VBox>

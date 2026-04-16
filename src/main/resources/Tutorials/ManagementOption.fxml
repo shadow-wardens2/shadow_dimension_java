@@ -2,32 +2,30 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500.0" prefWidth="550.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.ManagementOptionController">
+<AnchorPane prefHeight="580.0" prefWidth="680.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.ManagementOptionController">
    <children>
-      <VBox spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+      <VBox spacing="20.0" AnchorPane.bottomAnchor="24.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="24.0">
          <children>
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
                <children>
                   <Label styleClass="headline" text="Management Option" />
                   <Pane HBox.hgrow="ALWAYS" />
                   <Button mnemonicParsing="false" onAction="#handleAddOption" styleClass="glow-button" text="+ Add New" />
                </children>
             </HBox>
-            <TableView fx:id="optionTable" prefHeight="400.0" prefWidth="510.0" VBox.vgrow="ALWAYS" styleClass="table-view tuto-table">
-              <columns>
-                <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
-                <TableColumn fx:id="colTexte" prefWidth="200.0" text="Option Text" />
-                <TableColumn fx:id="colEstCorrecte" prefWidth="100.0" text="Correcte?" />
-                <TableColumn fx:id="colActions" prefWidth="150.0" text="Actions" />
-              </columns>
-            </TableView>
+            <TextField fx:id="searchField" promptText="🔍  Rechercher par texte..." styleClass="search-field" />
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane" hbarPolicy="NEVER">
+               <content>
+                  <VBox fx:id="listContainer" spacing="12" style="-fx-padding: 4 2 4 2;" />
+               </content>
+            </ScrollPane>
          </children>
       </VBox>
    </children>

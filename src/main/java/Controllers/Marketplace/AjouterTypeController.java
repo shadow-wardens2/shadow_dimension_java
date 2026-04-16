@@ -13,6 +13,8 @@ public class AjouterTypeController {
 
     @FXML
     private TextField tfNomType;
+    @FXML
+    private javafx.scene.control.Label lblError;
 
     // Initialize your service
     private InterfaceServiceProduit<Type> typeService = new ServiceType();
@@ -20,15 +22,16 @@ public class AjouterTypeController {
     // Called when user clicks "Ajouter"
     @FXML
     private void handleAjouterType() {
+        lblError.setVisible(false);
         String nom = tfNomType.getText().trim();
 
         if (nom.isEmpty()) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type ne peut pas être vide.");
+            showError("Le nom du type ne peut pas être vide.");
             return;
         }
 
         if (nom.length() <= 3) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom du type doit avoir plus de 3 caractères !");
+            showError("Le nom du type doit avoir plus de 3 caractères !");
             return;
         }
 
@@ -36,19 +39,25 @@ public class AjouterTypeController {
             // Duplicate Check
             for (Type existing : ((Services.Marketplace.ServiceType)typeService).getAll()) {
                 if (existing.getNom().equalsIgnoreCase(nom)) {
-                    Utils.ValidationUtils.showAlert("Doublon", "Ce type existe déjà !");
+                    showError("Ce type existe déjà !");
                     return;
                 }
             }
 
             Type type = new Type();
+            type.setNom(nom);
             typeService.add(type);
             Utils.ValidationUtils.showSuccess("Succès", "Type ajouté avec succès !");
             Stage stage = (Stage) tfNomType.getScene().getWindow();
             stage.close();
         } catch (SQLException e) {
-            Utils.ValidationUtils.showAlert("Erreur SQL", e.getMessage());
+            showError(e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     // Called when user clicks "Annuler"

@@ -3,12 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -25,14 +25,11 @@
                   <Button mnemonicParsing="false" onAction="#handleAddCategorie" styleClass="glow-button" text="+ Add New" />
                </children>
             </HBox>
-            <TableView fx:id="categorieTable" prefHeight="400.0" prefWidth="560.0" VBox.vgrow="ALWAYS" styleClass="table-view">
-              <columns>
-                <TableColumn fx:id="colId" prefWidth="80.0" text="ID" />
-                <TableColumn fx:id="colNom" prefWidth="180.0" text="Name" />
-                <TableColumn fx:id="colDescription" prefWidth="200.0" text="Description" />
-                <TableColumn fx:id="colActions" prefWidth="150.0" text="Actions" />
-              </columns>
-            </TableView>
+            <ScrollPane fitToWidth="true" styleClass="scroll-pane" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
+               <content>
+                  <TilePane fx:id="categoriesContainer" hgap="24.0" prefColumns="3" prefTileWidth="240.0" style="-fx-background-color: transparent; -fx-padding: 10;" vgap="24.0" />
+               </content>
+            </ScrollPane>
          </children>
       </VBox>
    </children>
