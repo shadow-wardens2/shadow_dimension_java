@@ -28,7 +28,7 @@ public class EditJeuController {
     @FXML
     private void sauvegarder() {
         String nom = tfNom.getText().trim();
-        String genre = tfGenre.getText().trim();
+        String genre = tfGenre.getText() != null ? tfGenre.getText().trim() : "";
 
         if (nom.isEmpty() || genre.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Tous les champs sont obligatoires.");
@@ -42,14 +42,10 @@ public class EditJeuController {
                 showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Un jeu avec ce nom existe déjà !");
                 return;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        jeu.setNom(nom);
-        jeu.setGenre(genre);
+            jeu.setNom(nom);
+            jeu.setGenre(genre);
 
-        try {
             serviceJeu.update(jeu);
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Jeu mis à jour avec succès !");
             closeWindow();

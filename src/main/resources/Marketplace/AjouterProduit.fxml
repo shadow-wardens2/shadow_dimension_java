@@ -5,62 +5,44 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="520.0" prefWidth="600.0" stylesheets="@../style.css"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="Controllers.Marketplace.AjouterProduitController">
+<AnchorPane prefHeight="500.0" prefWidth="600.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.AjouterProduitController">
 
-    <VBox spacing="18.0"
-          AnchorPane.topAnchor="20.0"
-          AnchorPane.bottomAnchor="20.0"
-          AnchorPane.leftAnchor="20.0"
-          AnchorPane.rightAnchor="20.0">
+    <!-- Title -->
+    <Label layoutX="20" layoutY="20" styleClass="headline" text="Ajouter un Produit" />
 
-        <!-- Title -->
-        <Label styleClass="headline" text="Ajouter un Produit" />
+    <!-- Form Grid -->
+    <GridPane hgap="10" layoutX="20" layoutY="80" vgap="15">
+        <Label styleClass="form-label" text="Nom:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="tfNom" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-        <!-- Form Grid -->
-        <GridPane hgap="10" vgap="15">
-            <Label styleClass="form-label" text="Nom:"         GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <TextField fx:id="tfNom"                           GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="tfDescription" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-            <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <TextField fx:id="tfDescription"                   GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label styleClass="form-label" text="Prix:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="tfPrix" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-            <Label styleClass="form-label" text="Prix:"        GridPane.columnIndex="0" GridPane.rowIndex="2" />
-            <TextField fx:id="tfPrix"                          GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label styleClass="form-label" text="Stock:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <TextField fx:id="tfStock" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-            <Label styleClass="form-label" text="Stock:"       GridPane.columnIndex="0" GridPane.rowIndex="3" />
-            <TextField fx:id="tfStock"                         GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Label styleClass="form-label" text="Categorie:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <ComboBox fx:id="cbCategorie" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-            <Label styleClass="form-label" text="Categorie:"   GridPane.columnIndex="0" GridPane.rowIndex="4" />
-            <ComboBox fx:id="cbCategorie"                      GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <Label styleClass="form-label" text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <ComboBox fx:id="cbType" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-            <Label styleClass="form-label" text="Type:"        GridPane.columnIndex="0" GridPane.rowIndex="5" />
-            <ComboBox fx:id="cbType"                           GridPane.columnIndex="1" GridPane.rowIndex="5" />
+        <Label styleClass="form-label" text="Image URL:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+        <TextField fx:id="tfImage" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+    </GridPane>
 
-            <Label styleClass="form-label" text="Image URL:"   GridPane.columnIndex="0" GridPane.rowIndex="6" />
-            <TextField fx:id="tfImage"                         GridPane.columnIndex="1" GridPane.rowIndex="6" />
-        </GridPane>
-
-        <!-- Spacer -->
-        <Pane VBox.vgrow="ALWAYS" />
-
-        <!-- Inline Error Message -->
-        <Label fx:id="lblError" styleClass="error-label" visible="false"
-               maxWidth="Infinity" alignment="CENTER" />
-
-        <!-- Buttons -->
-        <HBox alignment="CENTER_RIGHT" spacing="10">
-            <Button onAction="#handleAjouter"  styleClass="glow-button"       text="Ajouter" />
-            <Button onAction="#handleAnnuler"  styleClass="secondary-button"  text="Annuler" />
-        </HBox>
-    </VBox>
+    <!-- Buttons -->
+    <HBox alignment="CENTER_RIGHT" layoutX="400" layoutY="420" spacing="10">
+        <Button onAction="#handleAjouter" styleClass="glow-button" text="Ajouter" />
+        <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />
+    </HBox>
 
 </AnchorPane>

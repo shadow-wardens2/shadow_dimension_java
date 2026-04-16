@@ -121,12 +121,16 @@ public class MarketplaceManagementController implements PageHost {
         loadPage("/Marketplace/MarketplaceSelector.fxml");
     }
 
+    // Helper method to swap out the center FXML content dynamically
     public void loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
 
-        
+            // If the loaded page is the MarketplaceSelector, we want to inject this parent
+            // controller
+            // so from inside the selector they can swap the entire dashboard to
+            // Prod/Cat/Type
             Object controller = loader.getController();
             if (controller instanceof MarketplaceSelectorController) {
                 ((MarketplaceSelectorController) controller).setDashboardContext(this);

@@ -14,7 +14,6 @@ public class User {
     private String roles;
     private int isActive;
     private int isLocked;
-    private int isVerified;
     private String lastPresence;
 
     public User() {
@@ -127,14 +126,6 @@ public class User {
 
     public void setIsLocked(int isLocked) {
         this.isLocked = isLocked;
-    }
-
-    public int getIsVerified() {
-        return isVerified;
-    }
-
-    public void setIsVerified(int isVerified) {
-        this.isVerified = isVerified;
     }
 
     public String getLastPresence() {

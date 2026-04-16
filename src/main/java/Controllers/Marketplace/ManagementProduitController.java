@@ -8,30 +8,54 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import java.util.Comparator;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.ResourceBundle;
 
 public class ManagementProduitController implements Initializable {
 
     @FXML
-    private TilePane productsContainer;
+    private TableColumn<Produit, Integer> colActions;
+
+    @FXML
+    private TableColumn<Produit, Integer> colCatId;
+
+    @FXML
+    private TableColumn<Produit, String> colDescription;
+
+    @FXML
+    private TableColumn<Produit, Integer> colId;
+
+    @FXML
+    private TableColumn<Produit, String> colNom;
+
+    @FXML
+    private TableColumn<Produit, Double> colPrix;
+
+    @FXML
+    private TableColumn<Produit, Integer> colStock;
+
+    @FXML
+    private TableColumn<Produit, Integer> colTypeId;
+
+    @FXML
+    private TableView<Produit> productsTable;
 
     @FXML
     private TextField searchField;
@@ -41,8 +65,6 @@ public class ManagementProduitController implements Initializable {
 
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ObservableList<Produit> observableProducts = FXCollections.observableArrayList();
-    private FilteredList<Produit> filteredData;
-    private SortedList<Produit> sortedData;
     private PageHost dashboardContext;
 
     public void setDashboardContext(PageHost dashboardContext) {
@@ -58,22 +80,96 @@ public class ManagementProduitController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setupData();
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
+        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
+        colPrix.setCellValueFactory(new PropertyValueFactory<>("prix"));
+        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        colCatId.setCellValueFactory(new PropertyValueFactory<>("categorieId"));
+        colTypeId.setCellValueFactory(new PropertyValueFactory<>("typeId"));
+
+        setupTable();
 
         // Populate sort options
         sortComboBox.getItems().addAll("Default (ID)", "Name (A-Z)", "Price: Low to High", "Price: High to Low", "Stock: High to Low");
         sortComboBox.setValue("Default (ID)");
         sortComboBox.setOnAction(e -> applySortAndFilter());
 
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> applySortAndFilter());
+        // Custom action cell
+        colActions.setCellFactory(param -> new TableCell<Produit, Integer>() {
+            private final Button btnUpdate = new Button("Edit");
+            private final Button btnDelete = new Button("Delete");
+            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
+
+            {
+                btnUpdate.getStyleClass().add("edit-button");
+                btnDelete.getStyleClass().add("delete-button");
+
+                btnDelete.setOnAction(event -> {
+                    Produit p = getTableView().getItems().get(getIndex());
+                    try {
+                        serviceProduit.delete(p);
+                        loadProducts(); // refresh table
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                javafx.scene.control.Alert.AlertType.INFORMATION);
+                        alert.setTitle("Succès");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Produit supprimé avec succès.");
+                        alert.showAndWait();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                                javafx.scene.control.Alert.AlertType.ERROR);
+                        alert.setTitle("Erreur");
+                        alert.setHeaderText("Impossible de supprimer");
+                        alert.setContentText(e.getMessage());
+                        alert.showAndWait();
+                    }
+                });
+
+                btnUpdate.setOnAction(event -> {
+                    Produit p = getTableView().getItems().get(getIndex());
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditProduit.fxml"));
+                        javafx.scene.Parent root = loader.load();
+                        EditProduitController controller = loader.getController();
+                        controller.setProduit(p);
+                        Stage stage = new Stage();
+                        stage.setTitle("Editer Produit");
+                        stage.setScene(new Scene(root));
+                        stage.showAndWait();
+                        loadProducts();
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(pane);
+                }
+            }
+        });
     }
 
-    private void setupData() {
+    private FilteredList<Produit> filteredData;
+    private SortedList<Produit> sortedData;
+
+    private void setupTable() {
         try {
             observableProducts.setAll(serviceProduit.getAll());
+            
             filteredData = new FilteredList<>(observableProducts, p -> true);
             sortedData = new SortedList<>(filteredData);
-            displayProducts();
+            
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> applySortAndFilter());
+            
+            productsTable.setItems(sortedData);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -90,162 +186,27 @@ public class ManagementProduitController implements Initializable {
         });
 
         String sortOption = sortComboBox.getValue();
-        if (sortOption != null) {
-            Comparator<Produit> comparator = switch (sortOption) {
-                case "Name (A-Z)" -> Comparator.comparing(Produit::getNom, String.CASE_INSENSITIVE_ORDER);
-                case "Price: Low to High" -> Comparator.comparingDouble(Produit::getPrix);
-                case "Price: High to Low" -> Comparator.comparingDouble(Produit::getPrix).reversed();
-                case "Stock: High to Low" -> Comparator.comparingInt(Produit::getStock).reversed();
-                default -> Comparator.comparingInt(Produit::getId);
-            };
-            sortedData.setComparator(comparator);
-        }
-        displayProducts();
-    }
+        if (sortOption == null) return;
 
-    private void displayProducts() {
-        productsContainer.getChildren().clear();
-        for (Produit p : sortedData) {
-            productsContainer.getChildren().add(createProductCard(p));
-        }
-    }
+        Comparator<Produit> comparator = switch (sortOption) {
+            case "Name (A-Z)" -> Comparator.comparing(Produit::getNom, String.CASE_INSENSITIVE_ORDER);
+            case "Price: Low to High" -> Comparator.comparingDouble(Produit::getPrix);
+            case "Price: High to Low" -> Comparator.comparingDouble(Produit::getPrix).reversed();
+            case "Stock: High to Low" -> Comparator.comparingInt(Produit::getStock).reversed();
+            default -> Comparator.comparingInt(Produit::getId);
+        };
 
-    private VBox createProductCard(Produit p) {
-        VBox card = new VBox(10);
-        card.getStyleClass().add("product-card");
-        card.setAlignment(Pos.TOP_LEFT);
-
-        // --- Product Image ---
-        String imageUrl = p.getImage();
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(220);
-        imageView.setFitHeight(140);
-        imageView.setPreserveRatio(true);
-        imageView.setSmooth(true);
-        imageView.setStyle("-fx-background-radius: 10;");
-
-        if (imageUrl != null && !imageUrl.isBlank()) {
-            try {
-                String url = imageUrl.startsWith("http") ? imageUrl : "file:" + imageUrl;
-                Image img = new Image(url, 220, 140, true, true, true);
-                imageView.setImage(img);
-                img.errorProperty().addListener((obs, wasError, isError) -> {
-                    if (isError) imageView.setImage(buildPlaceholderImage());
-                });
-            } catch (Exception ex) {
-                imageView.setImage(buildPlaceholderImage());
-            }
-        } else {
-            imageView.setImage(buildPlaceholderImage());
-        }
-
-        javafx.scene.layout.StackPane imageWrapper = new javafx.scene.layout.StackPane(imageView);
-        imageWrapper.setStyle("-fx-background-color: #0d0d12; -fx-background-radius: 10;");
-        imageWrapper.setMaxWidth(Double.MAX_VALUE);
-
-        // --- Labels ---
-        Label nameLabel = new Label(p.getNom());
-        nameLabel.getStyleClass().add("product-name");
-        nameLabel.setWrapText(true);
-
-        Label descLabel = new Label(p.getDescription());
-        descLabel.getStyleClass().add("product-description");
-        descLabel.setWrapText(true);
-        descLabel.setMaxHeight(60);
-        descLabel.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
-        VBox.setVgrow(descLabel, Priority.ALWAYS);
-
-        Label priceLabel = new Label(String.format("%.2f DT", p.getPrix()));
-        priceLabel.getStyleClass().add("product-price");
-
-        Label stockLabel = new Label("Stock: " + p.getStock());
-        stockLabel.getStyleClass().add("product-stock");
-
-        // --- Actions ---
-        HBox actions = new HBox(10);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        actions.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
-
-        Button btnEdit = new Button("Edit");
-        btnEdit.getStyleClass().add("edit-button");
-        btnEdit.setOnAction(e -> handleEditAction(p));
-
-        Button btnDelete = new Button("Delete");
-        btnDelete.getStyleClass().add("delete-button");
-        btnDelete.setOnAction(e -> handleDeleteAction(p));
-
-        actions.getChildren().addAll(btnEdit, btnDelete);
-
-        card.getChildren().addAll(imageWrapper, nameLabel, descLabel, priceLabel, stockLabel, actions);
-
-        card.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) handleEditAction(p);
-        });
-
-        return card;
-    }
-
-    /** Returns a simple purple placeholder image when no real image is available. */
-    private Image buildPlaceholderImage() {
-        // 1×1 transparent PNG encoded in base64 — used as safe fallback
-        String placeholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
-        try {
-            return new Image(placeholder);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private void handleEditAction(Produit p) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditProduit.fxml"));
-            Parent root = loader.load();
-            EditProduitController controller = loader.getController();
-            controller.setProduit(p);
-            Stage stage = new Stage();
-            stage.setTitle("Edit Product");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-            loadProducts();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleDeleteAction(Produit p) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Product");
-        alert.setHeaderText("Delete " + p.getNom() + "?");
-        alert.setContentText("Are you sure you want to delete this product? This action cannot be undone.");
-
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                try {
-                    serviceProduit.delete(p);
-                    loadProducts();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    showError("Error", "Could not delete product: " + e.getMessage());
-                }
-            }
-        });
+        sortedData.setComparator(comparator);
     }
 
     private void loadProducts() {
         try {
             observableProducts.setAll(serviceProduit.getAll());
-            displayProducts();
+            // Since setupTable already bound the table to sortedData (which follows observableProducts),
+            // simply updating observableProducts will refresh the view automatically.
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private void showError(String title, String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.show();
     }
 
     @FXML
@@ -256,7 +217,8 @@ public class ManagementProduitController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Add New Product");
             stage.setScene(new Scene(root));
-            stage.showAndWait();
+            stage.showAndWait(); // Wait for it to close
+            // refresh data after closing
             loadProducts();
         } catch (IOException e) {
             e.printStackTrace();

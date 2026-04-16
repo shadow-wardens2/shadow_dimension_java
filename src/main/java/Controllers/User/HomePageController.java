@@ -5,13 +5,7 @@ import Controllers.Marketplace.ManagementCategorieController;
 import Controllers.Marketplace.ManagementProduitController;
 import Controllers.Marketplace.ManagementTypeController;
 import Controllers.Marketplace.PageHost;
-import Controllers.event.CategoryController;
-import Controllers.event.AddCategoryController;
-import Controllers.event.AddEventController;
-import Controllers.event.EventController;
 import Controllers.event.EventSelectorController;
-import Controllers.event.EditCategoryController;
-import Controllers.event.EditEventController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -19,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -49,21 +42,6 @@ public class HomePageController implements PageHost {
     private Button btnUserStatistics;
 
     @FXML
-    private Button btnVault;
-
-    @FXML
-    private Button btnMarketplaceManagement;
-
-    @FXML
-    private Button btnMarketplaceStatistics;
-
-    @FXML
-    private Button btnTutorialsManagement;
-
-    @FXML
-    private Button btnEventManagement;
-
-    @FXML
     public void initialize() {
         loadPage("/HomeContent.fxml");
         refreshAuthUi();
@@ -76,9 +54,6 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openVault() {
-        if (!requireLoggedIn("My Vault")) {
-            return;
-        }
         loadPage("/User/VaultContent.fxml");
     }
 
@@ -93,25 +68,16 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openMarketplaceStatistics(ActionEvent event) {
-        if (!requireLoggedIn("Marketplace Statistics")) {
-            return;
-        }
         loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
     }
 
     @FXML
     void openTutorialsManagement(ActionEvent event) {
-        if (!requireLoggedIn("Tutorials Management")) {
-            return;
-        }
         loadPage("/Tutorials/TutorialsSelector.fxml");
     }
 
     @FXML
     void openEventManagement(ActionEvent event) {
-        if (!requireLoggedIn("Event Management")) {
-            return;
-        }
         loadPage("/event/EventSelector.fxml");
     }
 
@@ -153,25 +119,7 @@ public class HomePageController implements PageHost {
     }
 
     private void refreshAuthUi() {
-        boolean loggedIn = SessionManager.isLoggedIn();
-
-        if (btnVault != null) {
-            btnVault.setDisable(!loggedIn);
-        }
-        if (btnMarketplaceManagement != null) {
-            btnMarketplaceManagement.setDisable(!loggedIn);
-        }
-        if (btnMarketplaceStatistics != null) {
-            btnMarketplaceStatistics.setDisable(!loggedIn);
-        }
-        if (btnTutorialsManagement != null) {
-            btnTutorialsManagement.setDisable(!loggedIn);
-        }
-        if (btnEventManagement != null) {
-            btnEventManagement.setDisable(!loggedIn);
-        }
-
-        if (loggedIn) {
+        if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
             String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
                     : user.getUsername();
@@ -193,24 +141,6 @@ public class HomePageController implements PageHost {
         }
     }
 
-    private boolean requireLoggedIn(String sectionName) {
-        if (SessionManager.isLoggedIn()) {
-            return true;
-        }
-
-        showAlert(Alert.AlertType.WARNING, "Acces restreint", "Connectez-vous pour acceder a " + sectionName + ".");
-        handleAuthAction(null);
-        return false;
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     public void loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -228,24 +158,6 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EventSelectorController) {
                 ((EventSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof EventController) {
-                ((EventController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof CategoryController) {
-                ((CategoryController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof AddEventController) {
-                ((AddEventController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof EditEventController) {
-                ((EditEventController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof AddCategoryController) {
-                ((AddCategoryController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof EditCategoryController) {
-                ((EditCategoryController) controller).setDashboardContext(this);
             }
             if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
