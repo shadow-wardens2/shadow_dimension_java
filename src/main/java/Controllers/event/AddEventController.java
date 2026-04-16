@@ -147,12 +147,6 @@ public class AddEventController {
         lblError.setVisible(true);
     }
 
-    private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
-    }
-
-    // Cancel handler.
     @FXML
     private void handleAnnuler() {
         navigateBackToEventList();
