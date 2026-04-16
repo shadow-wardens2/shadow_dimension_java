@@ -112,11 +112,15 @@ public class AddCategoryController {
             navigateBackToCategoryList();
         } catch (SQLException e) {
             // Reports SQL failure.
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
     }
 
-    // Cancel handler returns to list page.
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
+    }
+
     @FXML
     private void handleAnnuler() {
         navigateBackToCategoryList();

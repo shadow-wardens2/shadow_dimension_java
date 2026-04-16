@@ -138,8 +138,18 @@ public class AddEventController {
             navigateBackToEventList();
         } catch (SQLException e) {
             // Reports backend failure.
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
+    }
+
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
     }
 
     // Cancel handler.

@@ -32,6 +32,7 @@ public class EditCategoryController {
     @FXML
     private TextField tfPrix;
     @FXML
+<<<<<<< HEAD
     private Label lblNomError;
     @FXML
     private Label lblDescriptionError;
@@ -39,6 +40,9 @@ public class EditCategoryController {
     private Label lblTarificationError;
     @FXML
     private Label lblPrixError;
+=======
+    private javafx.scene.control.Label lblError;
+>>>>>>> origin/gestion-produits-v5
 
     // Service instance used to persist updates.
     private final CategoryService categoryService = new CategoryService();
@@ -97,8 +101,9 @@ public class EditCategoryController {
     @FXML
     private void sauvegarder() {
         // Guard when no category is loaded.
+        lblError.setVisible(false);
         if (category == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Aucune categorie a modifier.");
+            showError("Aucune categorie a modifier.");
             return;
         }
 
@@ -114,14 +119,24 @@ public class EditCategoryController {
             categoryService.update(category);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie mise a jour avec succes.");
             // Clears shared edit state and returns to list page.
+<<<<<<< HEAD
             EventNavigationState.clearEditingCategory();
             navigateBackToCategoryList();
+=======
+            closeWindow();
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+>>>>>>> origin/gestion-produits-v5
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
+            showError("Erreur SQL: " + e.getMessage());
         }
     }
 
-    // Cancel button handler.
+    private void showError(String message) {
+        lblError.setText(message);
+        lblError.setVisible(true);
+    }
+
     @FXML
     private void annuler() {
         // Clears edit state then goes back to list.
