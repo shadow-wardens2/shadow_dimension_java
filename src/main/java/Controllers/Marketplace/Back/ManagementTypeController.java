@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Type;
 import Services.Marketplace.ServiceType;
@@ -42,7 +42,7 @@ public class ManagementTypeController implements Initializable {
     @FXML
     void goBack(ActionEvent event) {
         if (dashboardContext != null) {
-            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+            dashboardContext.loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
         }
     }
 
@@ -79,7 +79,7 @@ public class ManagementTypeController implements Initializable {
         typeTilePane.getChildren().clear();
         for (Type type : filteredData) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/TypeCard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/TypeCard.fxml"));
                 Parent card = loader.load();
                 TypeCardController controller = loader.getController();
                 controller.setTypeData(type, this::editType, this::deleteType);
@@ -92,7 +92,7 @@ public class ManagementTypeController implements Initializable {
 
     private void editType(Type t) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditType.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/EditType.fxml"));
             Parent root = loader.load();
             EditTypeController controller = loader.getController();
             controller.setType(t);
@@ -136,7 +136,7 @@ public class ManagementTypeController implements Initializable {
     @FXML
     void handleAddType(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/AjouterType.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/AjouterType.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Add New Type");

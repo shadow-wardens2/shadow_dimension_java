@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Type;
 import javafx.event.ActionEvent;

@@ -1,9 +1,8 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Interfaces.InterfaceServiceProduit;
 import Services.Marketplace.ServiceType;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import Entities.Marketplace.Type; // your Type model class

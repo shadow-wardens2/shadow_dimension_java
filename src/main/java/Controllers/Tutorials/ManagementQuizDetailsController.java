@@ -29,7 +29,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 
 public class ManagementQuizDetailsController implements Initializable {
 

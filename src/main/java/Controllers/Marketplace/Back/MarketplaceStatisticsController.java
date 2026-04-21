@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Categorie;
 import Entities.Marketplace.Produit;
@@ -6,7 +6,6 @@ import Entities.Marketplace.Type;
 import Services.Marketplace.ServiceCategorie;
 import Services.Marketplace.ServiceProduit;
 import Services.Marketplace.ServiceType;
-import Controllers.Marketplace.PageHost;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
@@ -14,7 +13,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

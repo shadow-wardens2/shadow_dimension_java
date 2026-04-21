@@ -25,7 +25,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 
 public class ManagementJeuController implements Initializable {
     private PageHost dashboardContext;

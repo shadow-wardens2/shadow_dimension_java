@@ -206,10 +206,10 @@ public class ConnectSoulController {
     }
 
     private void openHomePage() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomePage.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomeFront.fxml"));
         Parent root = loader.load();
         Stage stage = (Stage) tfLoginIdentity.getScene().getWindow();
-        stage.setTitle("Home");
+        stage.setTitle("Shadow Dimensions");
         stage.setScene(new Scene(root));
         stage.show();
     }

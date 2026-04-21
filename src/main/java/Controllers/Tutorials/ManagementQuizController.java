@@ -1,6 +1,6 @@
 package Controllers.Tutorials;
 
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 
 import Entities.Tutorials.Quiz;
 import Services.Tutorials.ServiceQuiz;

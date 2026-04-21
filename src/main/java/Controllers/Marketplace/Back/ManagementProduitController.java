@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Produit;
 import Services.Marketplace.ServiceProduit;
@@ -12,7 +12,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.collections.transformation.FilteredList;
@@ -50,7 +49,7 @@ public class ManagementProduitController implements Initializable {
     @FXML
     void goBack(ActionEvent event) {
         if (dashboardContext != null) {
-            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+            dashboardContext.loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
         }
     }
 
@@ -111,7 +110,7 @@ public class ManagementProduitController implements Initializable {
         productsTilePane.getChildren().clear();
         for (Produit product : sortedData) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/ProductCard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/ProductCard.fxml"));
                 Parent card = loader.load();
                 ProductCardController controller = loader.getController();
                 controller.setProductData(product, this::editProduct, this::deleteProduct);
@@ -124,7 +123,7 @@ public class ManagementProduitController implements Initializable {
 
     private void editProduct(Produit p) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditProduit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/EditProduit.fxml"));
             Parent root = loader.load();
             EditProduitController controller = loader.getController();
             controller.setProduit(p);
@@ -168,7 +167,7 @@ public class ManagementProduitController implements Initializable {
     @FXML
     void handleAddProduct(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/AjouterProduit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/AjouterProduit.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Add New Product");

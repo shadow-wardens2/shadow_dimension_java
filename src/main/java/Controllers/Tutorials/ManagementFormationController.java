@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 
 public class ManagementFormationController implements Initializable {
 

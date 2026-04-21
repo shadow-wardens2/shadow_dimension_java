@@ -1,6 +1,6 @@
 package Controllers.User;
 
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 import Entities.User.User;
 import Services.User.ServiceUser;
 import Utils.SessionManager;

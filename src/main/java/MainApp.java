@@ -9,10 +9,10 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/HomePage.fxml"));
+                getClass().getResource("/HomeFront.fxml"));
 
         Scene scene = new Scene(loader.load());
-        stage.setTitle("Home");
+        stage.setTitle("Shadow Dimensions - The Void");
         stage.setScene(scene);
         stage.show();
     }

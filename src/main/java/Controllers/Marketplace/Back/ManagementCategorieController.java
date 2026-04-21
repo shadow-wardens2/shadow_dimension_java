@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Categorie;
 import Services.Marketplace.ServiceCategorie;
@@ -42,7 +42,7 @@ public class ManagementCategorieController implements Initializable {
     @FXML
     void goBack(ActionEvent event) {
         if (dashboardContext != null) {
-            dashboardContext.loadPage("/Marketplace/MarketplaceSelector.fxml");
+            dashboardContext.loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
         }
     }
 
@@ -80,7 +80,7 @@ public class ManagementCategorieController implements Initializable {
         categoryTilePane.getChildren().clear();
         for (Categorie category : filteredData) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/CategoryCard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/CategoryCard.fxml"));
                 Parent card = loader.load();
                 CategoryCardController controller = loader.getController();
                 controller.setCategoryData(category, this::editCategory, this::deleteCategory);
@@ -93,7 +93,7 @@ public class ManagementCategorieController implements Initializable {
 
     private void editCategory(Categorie c) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/EditCategorie.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/EditCategorie.fxml"));
             Parent root = loader.load();
             EditCategorieController controller = loader.getController();
             controller.setCategorie(c);
@@ -137,7 +137,7 @@ public class ManagementCategorieController implements Initializable {
     @FXML
     void handleAddCategorie(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/AjouterCategorie.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/AjouterCategorie.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Add New Category");
