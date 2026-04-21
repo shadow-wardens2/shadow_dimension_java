@@ -14,6 +14,9 @@ public class AjouterCategorieController {
     @FXML
     private TextField tfDescription;
 
+    @FXML
+    private javafx.scene.control.Label errorLabel;
+
     private ServiceCategorie serviceCategorie;
 
     public AjouterCategorieController() {
@@ -25,13 +28,17 @@ public class AjouterCategorieController {
         String nom = tfNomCategorie.getText().trim();
         String description = tfDescription.getText() != null ? tfDescription.getText().trim() : "";
 
+        // Clear previous error
+        errorLabel.setVisible(false);
+        errorLabel.setText("");
+
         if (nom.isEmpty()) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie ne peut pas être vide !");
+            showError("Le nom de la catégorie ne peut pas être vide !");
             return;
         }
 
         if (nom.length() <= 3) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie doit avoir plus de 3 caractères !");
+            showError("Le nom de la catégorie doit avoir plus de 3 caractères !");
             return;
         }
 
@@ -39,7 +46,7 @@ public class AjouterCategorieController {
             // Duplicate Check
             for (Categorie existing : serviceCategorie.getAll()) {
                 if (existing.getNom().equalsIgnoreCase(nom)) {
-                    Utils.ValidationUtils.showAlert("Doublon", "Cette catégorie existe déjà !");
+                    showError("Cette catégorie existe déjà !");
                     return;
                 }
             }
@@ -50,8 +57,13 @@ public class AjouterCategorieController {
             javafx.stage.Stage stage = (javafx.stage.Stage) tfNomCategorie.getScene().getWindow();
             stage.close();
         } catch (Exception e) {
-            Utils.ValidationUtils.showAlert("Erreur", "Impossible d'ajouter la catégorie : " + e.getMessage());
+            showError("Impossible d'ajouter la catégorie : " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
     }
 
     @FXML

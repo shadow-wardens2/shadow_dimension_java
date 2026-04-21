@@ -10,15 +10,23 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="500.0" prefWidth="600.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.AjouterProduitController">
+
+<AnchorPane prefHeight="550.0" prefWidth="700.0" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.EditProduitController">
 
     <!-- Title -->
-    <Label layoutX="20" layoutY="20" styleClass="headline" text="Ajouter un Produit" />
+    <Label layoutX="30" layoutY="20" styleClass="headline" text="Editer le Produit" />
+
+    <!-- Error Label -->
+    <Label fx:id="errorLabel" layoutX="30" layoutY="65" styleClass="error-text" visible="false" />
 
     <!-- Form Grid -->
-    <GridPane hgap="10" layoutX="20" layoutY="80" vgap="15">
+    <GridPane hgap="20" layoutX="30" layoutY="100" vgap="15">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100" />
+            <ColumnConstraints minWidth="400" />
+        </columnConstraints>
         <Label styleClass="form-label" text="Nom:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="tfNom" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <TextField fx:id="tfNom" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
         <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <TextField fx:id="tfDescription" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -30,22 +38,23 @@
         <TextField fx:id="tfStock" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
         <Label styleClass="form-label" text="Categorie:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-        <ComboBox fx:id="cbCategorie" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <ComboBox fx:id="cbCategorie" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
         <Label styleClass="form-label" text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-        <ComboBox fx:id="cbType" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+        <ComboBox fx:id="cbType" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
         <Label styleClass="form-label" text="Image:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
         <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6">
-            <TextField fx:id="tfImage" prefWidth="250.0" promptText="Path or URL..." />
+            <TextField fx:id="tfImage" prefWidth="340.0" promptText="Path or URL..." />
             <Button onAction="#handleBrowseImage" styleClass="secondary-button" text="..." />
         </HBox>
     </GridPane>
 
     <!-- Buttons -->
-    <HBox alignment="CENTER_RIGHT" layoutX="400" layoutY="420" spacing="10">
-        <Button onAction="#handleAjouter" styleClass="glow-button" text="Ajouter" />
-        <Button onAction="#handleAnnuler" styleClass="secondary-button" text="Annuler" />
+    <HBox alignment="CENTER_RIGHT" layoutX="450" layoutY="470" spacing="20">
+        <Button onAction="#sauvegarder" styleClass="glow-button" text="Enregistrer" />
+        <Button onAction="#annuler" styleClass="secondary-button" text="Annuler" />
     </HBox>
 
 </AnchorPane>
+

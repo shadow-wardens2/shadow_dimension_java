@@ -35,6 +35,9 @@ public class EditProduitController {
     @FXML
     private TextField tfImage;
 
+    @FXML
+    private javafx.scene.control.Label errorLabel;
+
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ServiceCategorie serviceCategorie = new ServiceCategorie();
     private ServiceType serviceType = new ServiceType();
@@ -86,37 +89,41 @@ public class EditProduitController {
         Type type = cbType.getValue();
         String image = tfImage.getText().trim();
 
+        // Clear previous error
+        errorLabel.setVisible(false);
+        errorLabel.setText("");
+
         // Validation - Required fields
         if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty() || cat == null || type == null) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Tous les champs obligatoires (*) doivent être remplis !");
+            showError("Tous les champs obligatoires (*) doivent être remplis !");
             return;
         }
 
         // Validation - Name length
         if (nom.length() <= 3) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le nom du produit doit avoir plus de 3 caractères !");
+            showError("Le nom du produit doit avoir plus de 3 caractères !");
             return;
         }
 
         // Validation - Numeric Price
         if (!Utils.ValidationUtils.isNumeric(prixStr)) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix doit être un nombre valide (ex: 10.5) !");
+            showError("Le prix doit être un nombre valide (ex: 10.5) !");
             return;
         }
         double prix = Double.parseDouble(prixStr);
         if (prix < 0) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix ne peut pas être négatif !");
+            showError("Le prix ne peut pas être négatif !");
             return;
         }
 
         // Validation - Numeric Stock
         if (!Utils.ValidationUtils.isInteger(stockStr)) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock doit être un nombre entier !");
+            showError("Le stock doit être un nombre entier !");
             return;
         }
         int stock = Integer.parseInt(stockStr);
         if (stock < 0) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock ne peut pas être négatif !");
+            showError("Le stock ne peut pas être négatif !");
             return;
         }
 
@@ -125,7 +132,7 @@ public class EditProduitController {
             List<Produit> existingProduits = serviceProduit.getAll();
             for (Produit existing : existingProduits) {
                 if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != produit.getId()) {
-                    Utils.ValidationUtils.showAlert("Doublon", "Un autre produit porte déjà ce nom !");
+                    showError("Un autre produit porte déjà ce nom !");
                     return;
                 }
             }
@@ -142,8 +149,13 @@ public class EditProduitController {
             Utils.ValidationUtils.showSuccess("Succès", "Produit mis à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
+            showError("Impossible de mettre à jour : " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
     }
 
     @FXML
