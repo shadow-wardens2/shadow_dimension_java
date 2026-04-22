@@ -1,10 +1,10 @@
 package Controllers.User;
 
-import Controllers.Marketplace.MarketplaceSelectorController;
-import Controllers.Marketplace.ManagementCategorieController;
-import Controllers.Marketplace.ManagementProduitController;
-import Controllers.Marketplace.ManagementTypeController;
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.MarketplaceSelectorController;
+import Controllers.Marketplace.Back.ManagementCategorieController;
+import Controllers.Marketplace.Back.ManagementProduitController;
+import Controllers.Marketplace.Back.ManagementTypeController;
+import Controllers.Marketplace.Back.PageHost;
 import Controllers.event.EventSelectorController;
 import Entities.User.User;
 import Utils.SessionManager;
@@ -77,12 +77,12 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
-        loadPage("/Marketplace/MarketplaceSelector.fxml");
+        loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
     }
 
     @FXML
     void openMarketplaceStatistics(ActionEvent event) {
-        loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
+        loadPage("/Marketplace/Back/MarketplaceStatisticsContent.fxml");
     }
 
     @FXML
