@@ -13,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -73,42 +72,26 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openVault() {
-        if (!requireLoggedIn("My Vault")) {
-            return;
-        }
         loadPage("/User/VaultContent.fxml");
     }
 
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
-        if (!SessionManager.isLoggedIn()) {
-            handleAuthAction(null);
-            return;
-        }
         loadPage("/Marketplace/MarketplaceSelector.fxml");
     }
 
     @FXML
     void openMarketplaceStatistics(ActionEvent event) {
-        if (!requireLoggedIn("Marketplace Statistics")) {
-            return;
-        }
         loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
     }
 
     @FXML
     void openTutorialsManagement(ActionEvent event) {
-        if (!requireLoggedIn("Tutorials Management")) {
-            return;
-        }
         loadPage("/Tutorials/TutorialsSelector.fxml");
     }
 
     @FXML
     void openEventManagement(ActionEvent event) {
-        if (!requireLoggedIn("Event Management")) {
-            return;
-        }
         loadPage("/event/EventSelector.fxml");
     }
 
@@ -154,22 +137,6 @@ public class HomePageController implements PageHost {
     private void refreshAuthUi() {
         boolean loggedIn = SessionManager.isLoggedIn();
 
-        if (btnVault != null) {
-            btnVault.setDisable(!loggedIn);
-        }
-        if (btnMarketplaceManagement != null) {
-            btnMarketplaceManagement.setDisable(!loggedIn);
-        }
-        if (btnMarketplaceStatistics != null) {
-            btnMarketplaceStatistics.setDisable(!loggedIn);
-        }
-        if (btnTutorialsManagement != null) {
-            btnTutorialsManagement.setDisable(!loggedIn);
-        }
-        if (btnEventManagement != null) {
-            btnEventManagement.setDisable(!loggedIn);
-        }
-
         if (loggedIn) {
             User user = SessionManager.getCurrentUser();
             String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
@@ -190,26 +157,6 @@ public class HomePageController implements PageHost {
             btnUserStatistics.setVisible(false);
             btnUserStatistics.setManaged(false);
         }
-    }
-
-    // Central guard for sections that require authentication.
-    private boolean requireLoggedIn(String sectionName) {
-        if (SessionManager.isLoggedIn()) {
-            return true;
-        }
-
-        showAlert(Alert.AlertType.WARNING, "Acces restreint", "Connectez-vous pour acceder a " + sectionName + ".");
-        handleAuthAction(null);
-        return false;
-    }
-
-    // Generic blocking alert helper for home shell.
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     // Loads a center page and injects dashboard context when needed.
