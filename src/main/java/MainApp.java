@@ -1,4 +1,5 @@
 
+import Utils.AppConfig;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,6 +19,7 @@ public class MainApp extends Application {
     }
 
     public static void main(String[] args) {
+        AppConfig.loadDotEnv();
         launch(args);
     }
 }

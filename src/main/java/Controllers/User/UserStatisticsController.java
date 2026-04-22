@@ -22,6 +22,8 @@ import java.util.Map;
 
 public class UserStatisticsController {
 
+    // KPI labels.
+
     @FXML
     private Label lbTotalUsers;
 
@@ -43,8 +45,10 @@ public class UserStatisticsController {
     @FXML
     private BarChart<String, Number> barRegistrations;
 
+    // Service dependency for user dataset.
     private final ServiceUser serviceUser = new ServiceUser();
 
+    // Initializes admin-only statistics page.
     @FXML
     public void initialize() {
         User current = SessionManager.getCurrentUser();
@@ -56,11 +60,13 @@ public class UserStatisticsController {
         loadStatistics();
     }
 
+    // Manual refresh action.
     @FXML
     private void handleRefreshStats() {
         loadStatistics();
     }
 
+    // Aggregates role/status/registration data and updates charts.
     private void loadStatistics() {
         try {
             List<User> users = serviceUser.getAllUsers();
@@ -131,6 +137,7 @@ public class UserStatisticsController {
         }
     }
 
+    // Groups joined date into year-month bucket for bar chart.
     private String monthKey(String lastPresence) {
         if (lastPresence == null || lastPresence.isBlank() || "-".equals(lastPresence)) {
             return "Unknown";
@@ -144,6 +151,7 @@ public class UserStatisticsController {
         }
     }
 
+    // Generic alert helper.
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

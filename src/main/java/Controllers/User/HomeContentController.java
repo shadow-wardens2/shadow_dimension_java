@@ -14,9 +14,12 @@ import java.util.ResourceBundle;
 
 public class HomeContentController implements Initializable {
 
+    // Home dashboard chart control.
+
     @FXML
     private PieChart eventsByCategoryChart;
 
+    // Event service used to fetch chart aggregates.
     private final EventService eventService = new EventService();
 
     @Override
@@ -24,6 +27,7 @@ public class HomeContentController implements Initializable {
         loadEventsByCategoryChart();
     }
 
+    // Populates pie chart with event counts by category.
     private void loadEventsByCategoryChart() {
         ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
 
