@@ -50,9 +50,8 @@ public final class AppConfig {
                     continue;
                 }
 
-                if (System.getenv(key) == null || System.getenv(key).isBlank()) {
-                    System.setProperty(key, value);
-                }
+                // Keep .env deterministic for local development: it overrides inherited process env.
+                System.setProperty(key, value);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to read .env file: " + e.getMessage(), e);
@@ -62,14 +61,14 @@ public final class AppConfig {
     }
 
     public static String get(String key) {
-        String fromEnv = System.getenv(key);
-        if (fromEnv != null && !fromEnv.isBlank()) {
-            return fromEnv;
-        }
-
         String fromProperty = System.getProperty(key);
         if (fromProperty != null && !fromProperty.isBlank()) {
             return fromProperty;
+        }
+
+        String fromEnv = System.getenv(key);
+        if (fromEnv != null && !fromEnv.isBlank()) {
+            return fromEnv;
         }
 
         return null;

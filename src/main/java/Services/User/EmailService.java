@@ -1,8 +1,10 @@
 package Services.User;
 
 import Utils.AppConfig;
+import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
@@ -17,15 +19,21 @@ public class EmailService {
     public void sendVerificationCode(String toEmail, String username, String code) {
         String host = getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
         String port = getOrDefault("MAIL_SMTP_PORT", "587");
-        String mailUser = required("MAIL_USERNAME");
-        String mailPassword = required("MAIL_PASSWORD");
-        String from = getOrDefault("MAIL_FROM", mailUser);
+        String mailUser = required("MAIL_USERNAME").trim();
+        // Google App Password is sometimes copied with spaces (e.g. "abcd efgh ijkl mnop").
+        String mailPassword = required("MAIL_PASSWORD").replaceAll("\\s+", "");
+        String from = getOrDefault("MAIL_FROM", mailUser).trim();
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", port);
+        props.put("mail.smtp.ssl.trust", host);
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+        props.put("mail.smtp.writetimeout", "10000");
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
@@ -48,6 +56,16 @@ public class EmailService {
 
             message.setText(body);
             Transport.send(message);
+        } catch (AuthenticationFailedException e) {
+            throw new IllegalStateException(
+                    "SMTP authentication failed. Verify MAIL_USERNAME and MAIL_PASSWORD (Gmail App Password).",
+                    e
+            );
+        } catch (MessagingException e) {
+            throw new IllegalStateException(
+                    "SMTP send failed via " + host + ":" + port + ". Detail: " + e.getMessage(),
+                    e
+            );
         } catch (Exception e) {
             throw new IllegalStateException("Unable to send verification email: " + e.getMessage(), e);
         }
