@@ -1,5 +1,32 @@
 # shadow_dimension_java
 
+## Team Config With .env
+
+This project now supports loading local configuration from a `.env` file at startup.
+
+### How to use it
+
+1. Copy `.env.example` to `.env`.
+2. Fill your own local secrets in `.env`.
+3. Run the app normally.
+
+Important:
+
+- `.env` is ignored by git and must stay local.
+- `.env.example` is versioned so teammates know which keys are required.
+- Real secrets must never be committed.
+
+Supported keys in `.env`:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `MAIL_USERNAME`
+- `MAIL_PASSWORD`
+- `MAIL_FROM`
+- `MAIL_SMTP_HOST`
+- `MAIL_SMTP_PORT`
+- `OPENROUTER_API_KEY`
+
 ## Google Login / Signup Setup
 
 The app now supports `Continue with Google` from the Connect Soul page.

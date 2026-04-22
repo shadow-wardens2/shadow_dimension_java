@@ -1,5 +1,6 @@
 package Services.User;
 
+import Utils.AppConfig;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
@@ -203,37 +204,29 @@ public class GoogleOAuthService {
         return map;
     }
 
-    private String getenvRequired(String key) {
-        String value = System.getenv(key);
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Missing environment variable: " + key);
-        }
-        return value;
-    }
-
     private String resolveClientId() {
-        String fromEnv = System.getenv("GOOGLE_CLIENT_ID");
-        if (fromEnv != null && !fromEnv.isBlank()) {
-            return fromEnv;
+        String fromUnifiedConfig = AppConfig.get("GOOGLE_CLIENT_ID");
+        if (fromUnifiedConfig != null && !fromUnifiedConfig.isBlank()) {
+            return fromUnifiedConfig;
         }
 
-        String fromSystemProperty = System.getProperty("google.client.id");
-        if (fromSystemProperty != null && !fromSystemProperty.isBlank()) {
-            return fromSystemProperty;
+        String fromLegacySystemProperty = System.getProperty("google.client.id");
+        if (fromLegacySystemProperty != null && !fromLegacySystemProperty.isBlank()) {
+            return fromLegacySystemProperty;
         }
 
-        throw new IllegalStateException("Missing GOOGLE_CLIENT_ID. Set env var GOOGLE_CLIENT_ID or JVM option -Dgoogle.client.id=...");
+        throw new IllegalStateException("Missing GOOGLE_CLIENT_ID. Set it in .env, as env var, or JVM option -Dgoogle.client.id=...");
     }
 
     private String resolveOptionalClientSecret() {
-        String fromEnv = System.getenv("GOOGLE_CLIENT_SECRET");
-        if (fromEnv != null && !fromEnv.isBlank()) {
-            return fromEnv;
+        String fromUnifiedConfig = AppConfig.get("GOOGLE_CLIENT_SECRET");
+        if (fromUnifiedConfig != null && !fromUnifiedConfig.isBlank()) {
+            return fromUnifiedConfig;
         }
 
-        String fromSystemProperty = System.getProperty("google.client.secret");
-        if (fromSystemProperty != null && !fromSystemProperty.isBlank()) {
-            return fromSystemProperty;
+        String fromLegacySystemProperty = System.getProperty("google.client.secret");
+        if (fromLegacySystemProperty != null && !fromLegacySystemProperty.isBlank()) {
+            return fromLegacySystemProperty;
         }
 
         return null;
