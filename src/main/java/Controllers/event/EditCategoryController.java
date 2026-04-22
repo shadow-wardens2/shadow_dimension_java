@@ -32,7 +32,6 @@ public class EditCategoryController {
     @FXML
     private TextField tfPrix;
     @FXML
-<<<<<<< HEAD
     private Label lblNomError;
     @FXML
     private Label lblDescriptionError;
@@ -40,9 +39,8 @@ public class EditCategoryController {
     private Label lblTarificationError;
     @FXML
     private Label lblPrixError;
-=======
-    private javafx.scene.control.Label lblError;
->>>>>>> origin/gestion-produits-v5
+    @FXML
+    private Label lblFormError;
 
     // Service instance used to persist updates.
     private final CategoryService categoryService = new CategoryService();
@@ -101,7 +99,7 @@ public class EditCategoryController {
     @FXML
     private void sauvegarder() {
         // Guard when no category is loaded.
-        lblError.setVisible(false);
+        setInlineError(lblFormError, "");
         if (category == null) {
             showError("Aucune categorie a modifier.");
             return;
@@ -119,22 +117,17 @@ public class EditCategoryController {
             categoryService.update(category);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Categorie mise a jour avec succes.");
             // Clears shared edit state and returns to list page.
-<<<<<<< HEAD
             EventNavigationState.clearEditingCategory();
             navigateBackToCategoryList();
-=======
-            closeWindow();
         } catch (IllegalArgumentException e) {
             showError(e.getMessage());
->>>>>>> origin/gestion-produits-v5
         } catch (SQLException e) {
             showError("Erreur SQL: " + e.getMessage());
         }
     }
 
     private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
+        setInlineError(lblFormError, message);
     }
 
     @FXML
@@ -207,6 +200,7 @@ public class EditCategoryController {
         setInlineError(lblDescriptionError, "");
         setInlineError(lblTarificationError, "");
         setInlineError(lblPrixError, "");
+        setInlineError(lblFormError, "");
     }
 
     // Shows or hides one inline validation label.

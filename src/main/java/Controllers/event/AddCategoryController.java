@@ -49,6 +49,8 @@ public class AddCategoryController {
     private Label lblTarificationError;
     @FXML
     private Label lblPrixError;
+    @FXML
+    private Label lblFormError;
 
     // Service layer instance for category persistence.
     private final CategoryService categoryService = new CategoryService();
@@ -117,8 +119,7 @@ public class AddCategoryController {
     }
 
     private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
+        setInlineError(lblFormError, message);
     }
 
     @FXML
@@ -193,6 +194,7 @@ public class AddCategoryController {
         setInlineError(lblDescriptionError, "");
         setInlineError(lblTarificationError, "");
         setInlineError(lblPrixError, "");
+        setInlineError(lblFormError, "");
     }
 
     // Sets or hides one inline validation label.

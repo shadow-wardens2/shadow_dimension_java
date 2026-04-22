@@ -143,8 +143,7 @@ public class AddEventController {
     }
 
     private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
+        setInlineError(lblFormError, message);
     }
 
     @FXML

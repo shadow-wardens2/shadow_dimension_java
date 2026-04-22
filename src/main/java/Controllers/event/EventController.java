@@ -2,6 +2,7 @@ package Controllers.event;
 
 // Host contract used to swap center pages in the dashboard layout.
 import Controllers.Marketplace.PageHost;
+import Entities.User.User;
 // Event entity displayed and manipulated by this controller.
 import Entities.event.Event;
 // Service layer used for event CRUD and retrieval.
@@ -10,6 +11,7 @@ import Services.event.EventService;
 import Utils.EventNavigationState;
 // Utility used to export current list to styled PDF.
 import Utils.PdfExportUtil;
+import Utils.SessionManager;
 // Utility used for voice-to-text search input.
 import Utils.VoiceToTextUtil;
 // Factory helpers for observable collection creation.
@@ -96,6 +98,12 @@ public class EventController implements Initializable {
     // Voice button used to trigger speech recognition.
     @FXML
     private Button btnMic;
+    @FXML
+    private Button btnAddEvent;
+    @FXML
+    private Label lbPageTitle;
+    @FXML
+    private Label lbColumnsHeader;
 
     // Service instance that communicates with database layer.
     private final EventService eventService = new EventService();
@@ -103,6 +111,8 @@ public class EventController implements Initializable {
     private final ObservableList<Event> masterEvents = FXCollections.observableArrayList();
     // Filtered/sorted subset currently displayed in UI.
     private final ObservableList<Event> displayedEvents = FXCollections.observableArrayList();
+    // Cached role flag to control management actions.
+    private boolean isAdminUser;
 
     // Called by host to inject page navigation dependency.
     public void setDashboardContext(PageHost dashboardContext) {
@@ -113,10 +123,29 @@ public class EventController implements Initializable {
     // JavaFX lifecycle callback executed after FXML injection.
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        User currentUser = SessionManager.getCurrentUser();
+        isAdminUser = currentUser != null && currentUser.isAdmin();
+        applyRoleBasedUi();
         // Initializes filter/sort controls and listeners.
         setupSearchAndSort();
         // Loads latest events from service and renders view.
         loadEvents();
+    }
+
+    // Updates labels and action visibility according to connected role.
+    private void applyRoleBasedUi() {
+        if (lbPageTitle != null) {
+            lbPageTitle.setText(isAdminUser ? "Events Management" : "Events Viewer");
+        }
+        if (lbColumnsHeader != null) {
+            lbColumnsHeader.setText(isAdminUser
+                    ? "ID / Event / Schedule / Venue / Category / State / Actions"
+                    : "ID / Event / Schedule / Venue / Category / State");
+        }
+        if (btnAddEvent != null) {
+            btnAddEvent.setVisible(isAdminUser);
+            btnAddEvent.setManaged(isAdminUser);
+        }
     }
 
     // Configures sorting options and reactive filtering listeners.
@@ -280,6 +309,10 @@ public class EventController implements Initializable {
     // Opens add-event form inside dashboard content area.
     @FXML
     void handleAddEvent(ActionEvent event) {
+        if (!isAdminUser) {
+            showAlert(Alert.AlertType.WARNING, "Acces restreint", "Vous avez uniquement un acces en lecture.");
+            return;
+        }
         // Clears previous edit state to ensure add mode.
         EventNavigationState.clearEditingEvent();
         // Routes to AddEvent page through host.
@@ -422,19 +455,25 @@ public class EventController implements Initializable {
         // Deletes selected event and refreshes list.
         btnDelete.setOnAction(actionEvent -> deleteEvent(event));
 
-        // Groups row action buttons.
-        HBox actionsBox = new HBox(8, btnEdit, btnDelete);
-        actionsBox.setAlignment(Pos.CENTER_RIGHT);
-        actionsBox.setMinWidth(170);
-        actionsBox.setPrefWidth(170);
-        actionsBox.setMaxWidth(170);
+        HBox row;
+        if (isAdminUser) {
+            // Groups row action buttons.
+            HBox actionsBox = new HBox(8, btnEdit, btnDelete);
+            actionsBox.setAlignment(Pos.CENTER_RIGHT);
+            actionsBox.setMinWidth(170);
+            actionsBox.setPrefWidth(170);
+            actionsBox.setMaxWidth(170);
 
-        // Flexible spacer to push actions to right edge.
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+            // Flexible spacer to push actions to right edge.
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Final assembled row with all visual segments.
-        HBox row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel, spacer, actionsBox);
+            // Final assembled row with all visual segments including actions.
+            row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel, spacer, actionsBox);
+        } else {
+            // Final assembled row for viewers without management actions.
+            row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel);
+        }
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-card");
         // Returns fully configured row card.
@@ -443,6 +482,10 @@ public class EventController implements Initializable {
 
     // Saves selected event into navigation state then opens edit form.
     private void openEditEvent(Event event) {
+        if (!isAdminUser) {
+            showAlert(Alert.AlertType.WARNING, "Acces restreint", "Vous avez uniquement un acces en lecture.");
+            return;
+        }
         // Stores current event for next controller consumption.
         EventNavigationState.setEditingEvent(event);
         // Navigates to edit page inside dashboard.
@@ -453,6 +496,10 @@ public class EventController implements Initializable {
 
     // Deletes one event from persistence and refreshes UI list.
     private void deleteEvent(Event event) {
+        if (!isAdminUser) {
+            showAlert(Alert.AlertType.WARNING, "Acces restreint", "Vous avez uniquement un acces en lecture.");
+            return;
+        }
         try {
             // Executes deletion via service layer.
             eventService.delete(event);

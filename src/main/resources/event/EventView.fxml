@@ -17,11 +17,11 @@
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#handleGoBack" styleClass="secondary-button" text="← Back" />
-                  <Label styleClass="headline" text="Events Management" />
+                  <Label fx:id="lbPageTitle" styleClass="headline" text="Events Management" />
                   <Pane HBox.hgrow="ALWAYS" />
                   <Button mnemonicParsing="false" onAction="#handleOpenChatbot" styleClass="icon-button" text="Event Oracle" />
                   <Button mnemonicParsing="false" onAction="#handleExportPdf" styleClass="secondary-button" text="Export PDF" />
-                  <Button mnemonicParsing="false" onAction="#handleAddEvent" styleClass="glow-button" text="+ Add Event" />
+                  <Button fx:id="btnAddEvent" mnemonicParsing="false" onAction="#handleAddEvent" styleClass="glow-button" text="+ Add Event" />
                </children>
             </HBox>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -32,7 +32,7 @@
                   <Pane HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
-            <Label styleClass="form-label" text="ID / Event / Schedule / Venue / Category / State / Actions" />
+            <Label fx:id="lbColumnsHeader" styleClass="form-label" text="ID / Event / Schedule / Venue / Category / State / Actions" />
             <ScrollPane fitToWidth="true" prefHeight="500.0" styleClass="users-scroll" VBox.vgrow="ALWAYS">
                <content>
                   <VBox fx:id="eventsContainer" spacing="10.0" />

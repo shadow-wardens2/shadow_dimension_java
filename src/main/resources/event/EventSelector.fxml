@@ -9,7 +9,7 @@
     <Label styleClass="headline" text="Event Protocol" />
     <Label styleClass="subheadline" text="Select event module you wish to configure" />
     <HBox alignment="CENTER" spacing="25.0" style="-fx-padding: 20 0 0 0;">
-        <Button mnemonicParsing="false" onAction="#handleEvents" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Events" />
-        <Button mnemonicParsing="false" onAction="#handleEventCategories" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Categories" />
+        <Button fx:id="btnEvents" mnemonicParsing="false" onAction="#handleEvents" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Events" />
+        <Button fx:id="btnCategories" mnemonicParsing="false" onAction="#handleEventCategories" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Categories" />
     </HBox>
 </VBox>

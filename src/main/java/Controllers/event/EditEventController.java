@@ -54,7 +54,6 @@ public class EditEventController {
     @FXML
     private ComboBox<String> cbLocationType;
     @FXML
-<<<<<<< HEAD
     private Label lblTitleError;
     @FXML
     private Label lblDescriptionError;
@@ -76,9 +75,6 @@ public class EditEventController {
     private Label lblLocationTypeError;
     @FXML
     private Label lblFormError;
-=======
-    private javafx.scene.control.Label lblError;
->>>>>>> origin/gestion-produits-v5
 
     // Event persistence service.
     private final EventService eventService = new EventService();
@@ -159,7 +155,7 @@ public class EditEventController {
     @FXML
     private void sauvegarder() {
         // Guard when no event was provided for editing.
-        lblError.setVisible(false);
+        setInlineError(lblFormError, "");
         if (event == null) {
             showError("Aucun evenement a modifier.");
             return;
@@ -177,22 +173,17 @@ public class EditEventController {
             eventService.update(event);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement mis a jour avec succes.");
             // Clears shared edit state and returns to list.
-<<<<<<< HEAD
             EventNavigationState.clearEditingEvent();
             navigateBackToEventList();
-=======
-            closeWindow();
         } catch (IllegalArgumentException e) {
             showError(e.getMessage());
->>>>>>> origin/gestion-produits-v5
         } catch (SQLException e) {
             showError("Erreur SQL: " + e.getMessage());
         }
     }
 
     private void showError(String message) {
-        lblError.setText(message);
-        lblError.setVisible(true);
+        setInlineError(lblFormError, message);
     }
 
     @FXML
