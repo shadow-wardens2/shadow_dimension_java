@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Utils.SessionManager;
 import javafx.application.Platform;
@@ -15,21 +15,13 @@ import javafx.stage.Stage;
 import Entities.User.User;
 
 import java.io.IOException;
-import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
+
 import javafx.stage.FileChooser;
-import java.awt.Color;
-import java.io.FileOutputStream;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import Entities.Marketplace.Type;
+
 import Utils.PdfExporter;
-import java.sql.SQLException;
 
 public class MarketplaceManagementController implements PageHost {
 
@@ -117,7 +109,7 @@ public class MarketplaceManagementController implements PageHost {
 
     @FXML
     void openMarketplaceSelector(ActionEvent event) {
-        loadPage("/Marketplace/MarketplaceSelector.fxml");
+        loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
     }
 
     // Helper method to swap out the center FXML content dynamically
@@ -167,4 +159,16 @@ public class MarketplaceManagementController implements PageHost {
             }
         }
     }
+
+    @Override
+    public void refreshStatistics() {
+        // Implementation for refreshing statistics if needed
+    }
+
+    @FXML
+    void openStatistics(ActionEvent event) {
+        loadPage("/Marketplace/Back/MarketplaceStatisticsContent.fxml");
+    }
 }
+
+

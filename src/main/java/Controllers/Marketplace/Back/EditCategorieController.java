@@ -1,9 +1,8 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Categorie;
 import Services.Marketplace.ServiceCategorie;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -15,6 +14,10 @@ public class EditCategorieController {
     private TextField tfNom;
     @FXML
     private TextField tfDescription;
+
+
+    @FXML
+    private javafx.scene.control.Label errorLabel;
 
     private ServiceCategorie serviceCategorie = new ServiceCategorie();
     private Categorie categorie;
@@ -30,13 +33,17 @@ public class EditCategorieController {
         String nom = tfNom.getText().trim();
         String description = tfDescription.getText() != null ? tfDescription.getText().trim() : "";
 
+        // Clear previous error
+        errorLabel.setVisible(false);
+        errorLabel.setText("");
+
         if (nom.isEmpty()) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom ne peut pas être vide.");
+            showError("Le nom ne peut pas être vide.");
             return;
         }
 
         if (nom.length() <= 3) {
-            Utils.ValidationUtils.showAlert("Erreur", "Le nom de la catégorie doit avoir plus de 3 caractères !");
+            showError("Le nom de la catégorie doit avoir plus de 3 caractères !");
             return;
         }
 
@@ -44,7 +51,7 @@ public class EditCategorieController {
             // Duplicate Check
             for (Categorie existing : serviceCategorie.getAll()) {
                 if (existing.getNom().equalsIgnoreCase(nom) && existing.getId() != categorie.getId()) {
-                    Utils.ValidationUtils.showAlert("Doublon", "Une autre catégorie porte déjà ce nom !");
+                    showError("Une autre catégorie porte déjà ce nom !");
                     return;
                 }
             }
@@ -56,8 +63,13 @@ public class EditCategorieController {
             Utils.ValidationUtils.showSuccess("Succès", "Catégorie mise à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            Utils.ValidationUtils.showAlert("Erreur", "Impossible de mettre à jour : " + e.getMessage());
+            showError("Impossible de mettre à jour : " + e.getMessage());
         }
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
     }
 
     @FXML

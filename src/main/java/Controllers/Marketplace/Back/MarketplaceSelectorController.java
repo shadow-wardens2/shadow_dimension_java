@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,17 +26,17 @@ public class MarketplaceSelectorController {
 
     @FXML
     void handleCategories(ActionEvent event) {
-        dashboardContext.loadPage("/Marketplace/ManagementCategorie.fxml");
+        dashboardContext.loadPage("/Marketplace/Back/ManagementCategorie.fxml");
     }
 
     @FXML
     void handleProducts(ActionEvent event) {
-        dashboardContext.loadPage("/Marketplace/ManagementProduit.fxml");
+        dashboardContext.loadPage("/Marketplace/Back/ManagementProduit.fxml");
     }
 
     @FXML
     void handleTypes(ActionEvent event) {
-        dashboardContext.loadPage("/Marketplace/ManagementType.fxml");
+        dashboardContext.loadPage("/Marketplace/Back/ManagementType.fxml");
     }
 
     @FXML
@@ -56,6 +56,13 @@ public class MarketplaceSelectorController {
                 e.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to generate report: " + e.getMessage());
             }
+        }
+    }
+
+    @FXML
+    void handleStatistics(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/Marketplace/Back/MarketplaceStatisticsContent.fxml");
         }
     }
 

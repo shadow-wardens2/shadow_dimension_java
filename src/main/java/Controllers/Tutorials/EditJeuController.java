@@ -44,8 +44,21 @@ public class EditJeuController {
         }
 
         try {
+<<<<<<< HEAD
             jeu.setNom(nom);
             jeu.setGenre(genre);
+=======
+            boolean exists = serviceJeu.getAll().stream()
+                    .anyMatch(j -> j.getNom().equalsIgnoreCase(nom) && j.getId() != jeu.getId());
+            if (exists) {
+                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Un jeu avec ce nom existe déjà !");
+                return;
+            }
+
+            jeu.setNom(nom);
+            jeu.setGenre(genre);
+
+>>>>>>> origin/master
             serviceJeu.update(jeu);
             fermerFenetre();
         } catch (Exception e) {

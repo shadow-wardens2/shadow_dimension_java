@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="30.0" stylesheets="@../style.css" style="-fx-background-color: #050507;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.MarketplaceSelectorController">
+<VBox alignment="CENTER" spacing="30.0" stylesheets="@../../style.css" style="-fx-background-color: #050507;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.Back.MarketplaceSelectorController">
     <Label styleClass="headline" text="Marketplace Protocol" />
     <Label styleClass="subheadline" text="Select the dimensional module you wish to configure" />
     <Button mnemonicParsing="false" onAction="#goBack" styleClass="secondary-button" text="&lt; Back to Home" />

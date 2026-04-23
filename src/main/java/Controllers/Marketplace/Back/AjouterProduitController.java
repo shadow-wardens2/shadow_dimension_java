@@ -1,4 +1,4 @@
-package Controllers.Marketplace;
+package Controllers.Marketplace.Back;
 
 import Entities.Marketplace.Categorie;
 import Entities.Marketplace.Produit;
@@ -10,7 +10,9 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import java.io.File;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -24,6 +26,7 @@ public class AjouterProduitController {
     @FXML private ComboBox<Categorie> cbCategorie;
     @FXML private ComboBox<Type> cbType;
     @FXML private TextField tfImage;
+    @FXML private javafx.scene.control.Label errorLabel;
 
     private ServiceProduit sp = new ServiceProduit();
     private ServiceCategorie sc = new ServiceCategorie();
@@ -52,37 +55,41 @@ public class AjouterProduitController {
         Type type = cbType.getValue();
         String image = tfImage.getText().trim();
 
+        // Clear previous error
+        errorLabel.setVisible(false);
+        errorLabel.setText("");
+
         // Validation - Required fields
         if (nom.isEmpty() || desc.isEmpty() || prixStr.isEmpty() || stockStr.isEmpty() || cat == null || type == null) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Tous les champs doivent être remplis !");
+            showError("Tous les champs doivent être remplis !");
             return;
         }
 
         // Validation - Name length
         if (nom.length() <= 3) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le nom du produit doit avoir plus de 3 caractères !");
+            showError("Le nom du produit doit avoir plus de 3 caractères !");
             return;
         }
 
         // Validation - Numeric Price
         if (!Utils.ValidationUtils.isNumeric(prixStr)) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix doit être un nombre valide (ex: 10.5) !");
+            showError("Le prix doit être un nombre valide (ex: 10.5) !");
             return;
         }
         double prix = Double.parseDouble(prixStr);
         if (prix < 0) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le prix ne peut pas être négatif !");
+            showError("Le prix ne peut pas être négatif !");
             return;
         }
 
         // Validation - Numeric Stock
         if (!Utils.ValidationUtils.isInteger(stockStr)) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock doit être un nombre entier !");
+            showError("Le stock doit être un nombre entier !");
             return;
         }
         int stock = Integer.parseInt(stockStr);
         if (stock < 0) {
-            Utils.ValidationUtils.showAlert("Erreur de saisie", "Le stock ne peut pas être négatif !");
+            showError("Le stock ne peut pas être négatif !");
             return;
         }
 
@@ -91,7 +98,7 @@ public class AjouterProduitController {
             List<Produit> existingProduits = sp.getAll();
             for (Produit existing : existingProduits) {
                 if (existing.getNom().equalsIgnoreCase(nom)) {
-                    Utils.ValidationUtils.showAlert("Doublon", "Un produit avec ce nom existe déjà !");
+                    showError("Un produit avec ce nom existe déjà !");
                     return;
                 }
             }
@@ -101,13 +108,32 @@ public class AjouterProduitController {
             Utils.ValidationUtils.showSuccess("Succès", "Produit ajouté avec succès !");
             closeWindow();
         } catch (SQLException e) {
-            Utils.ValidationUtils.showAlert("Erreur SQL", "Une erreur est survenue lors de l'ajout : " + e.getMessage());
+            showError("Erreur lors de l'ajout : " + e.getMessage());
         }
     }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
 
     @FXML
     private void handleAnnuler() {
         closeWindow();
+    }
+
+    @FXML
+    private void handleBrowseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Product Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+        File selectedFile = fileChooser.showOpenDialog(tfNom.getScene().getWindow());
+        if (selectedFile != null) {
+            tfImage.setText(selectedFile.getAbsolutePath());
+        }
     }
 
     private void closeWindow() {

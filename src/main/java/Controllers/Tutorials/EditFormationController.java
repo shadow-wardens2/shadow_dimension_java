@@ -72,8 +72,7 @@ public class EditFormationController {
     private void sauvegarder() {
         String titre = tfTitre.getText().trim();
         String description = tfDescription.getText().trim();
-        String niveau = cbNiveau.getSelectionModel().getSelectedItem();
-        Jeu jeu = cbJeu.getSelectionModel().getSelectedItem();
+        String niveau = cbNiveau.getValue();
 
         if (titre.isEmpty() || niveau == null || jeu == null) {
             lbError.setText("Erreur: Titre, Niveau et Jeu sont obligatoires !");
@@ -81,15 +80,26 @@ public class EditFormationController {
         }
 
         try {
-            targetFormation.setTitre(titre);
-            targetFormation.setDescription(description);
-            targetFormation.setNiveau(niveau);
-            targetFormation.setJeu(jeu);
-            targetFormation.setImage(tfImage.getText().trim());
+            boolean exists = serviceFormation.getAll().stream()
+                    .anyMatch(f -> f.getTitre().equalsIgnoreCase(titre) && f.getId() != formation.getId());
+            if (exists) {
+                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Une formation avec ce titre existe déjà !");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-            serviceFormation.update(targetFormation);
-            fermerFenetre();
-        } catch (Exception e) {
+        formation.setTitre(titre);
+        formation.setDescription(description);
+        formation.setNiveau(niveau);
+        formation.setImage(tfImage.getText().trim());
+
+        try {
+            serviceFormation.update(formation);
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Formation mise à jour avec succès !");
+            closeWindow();
+        } catch (SQLException e) {
             e.printStackTrace();
             lbError.setText("Erreur: Impossible de mettre à jour la formation.");
         }

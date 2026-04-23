@@ -107,7 +107,7 @@ public class EditProfileController {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/MarketplaceManagement.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/MarketplaceManagement.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) tfEmail.getScene().getWindow();
             stage.setTitle("Gestion Produits");

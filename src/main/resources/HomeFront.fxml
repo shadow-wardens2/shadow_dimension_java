@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Rectangle?>
+
+<AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HomeController">
+    
+    <!-- Atmospheric Background Layers -->
+    <StackPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <Pane opacity="0.4">
+            <style>
+                -fx-background-color: radial-gradient(center 50% 50%, radius 80%, rgba(211, 187, 255, 0.05), transparent);
+            </style>
+        </Pane>
+    </StackPane>
+
+    <!-- Navigation Header -->
+    <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets left="60.0" right="60.0" />
+        </padding>
+        <Label styleClass="label-sigil" text="SHADOW DIMENSIONS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="30.0" alignment="CENTER">
+            <Label styleClass="body-md" text="Home" />
+            <Label onMouseClicked="#navigateToMarketplace" styleClass="body-md" text="Marketplace" style="-fx-cursor: hand;" />
+            <Label onMouseClicked="#navigateToManagement" styleClass="body-md" text="Tutorials" style="-fx-cursor: hand;" />
+            <Label styleClass="body-md" text="Forum" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="20.0" alignment="CENTER">
+            <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <Button styleClass="ethereal-button" text="Connect Soul" />
+        </HBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80">
+        <content>
+            <VBox spacing="100.0">
+                <padding>
+                    <Insets bottom="100.0" top="100.0" />
+                </padding>
+                
+                <!-- Hero Section -->
+                <VBox alignment="CENTER" spacing="20.0">
+                    <Label styleClass="label-sigil" text="THE VOID IS CALLING" />
+                    <Label alignment="CENTER" lineSpacing="-10.0" styleClass="display-lg" text="FORGE YOUR&#10;LEGEND IN ETERNAL&#10;NIGHT" textAlignment="CENTER" />
+                    <Label maxWidth="600.0" styleClass="body-md" text="Discover the premier dark fantasy marketplace and cultural hub where legends are born in shadow and rituals are tracked in real-time." textAlignment="CENTER" wrapText="true" opacity="0.7" />
+                    
+                    <HBox alignment="CENTER" spacing="20.0">
+                        <padding>
+                            <Insets top="20.0" />
+                        </padding>
+                        <Button onAction="#navigateToMarketplace" styleClass="ethereal-button" text="Marketplace" prefWidth="200" />
+                        <Button styleClass="secondary-button" text="View Chronicles" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
+                    </HBox>
+                </VBox>
+
+                <!-- Featured Section (Asymmetric) -->
+                <HBox spacing="60.0">
+                    <padding>
+                        <Insets left="100.0" right="100.0" />
+                    </padding>
+                    
+                    <VBox spacing="30.0" HBox.hgrow="ALWAYS">
+                        <Label styleClass="headline-md" text="Relics of the Void" />
+                        <Label styleClass="body-md" text="Curated acquisitions from the furthest reaches of the Shadow Dimension. Each artifact carries the weight of its previous owner's soul." maxWidth="400.0" wrapText="true" opacity="0.6" />
+                        <Button styleClass="secondary-button" text="Explore the Vault →" style="-fx-border-color: transparent; -fx-text-fill: -fx-primary;" />
+                    </VBox>
+                    
+                    <GridPane hgap="30.0" vgap="30.0">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="300" />
+                            <ColumnConstraints minWidth="300" />
+                        </columnConstraints>
+                        
+                        <!-- Mini Cards -->
+                        <VBox spacing="15.0" styleClass="artifact-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Rectangle arcHeight="20" arcWidth="20" fill="#1c1922" height="180.0" width="260.0" />
+                            <Label styleClass="title-lg" text="Eclipse Sovereign Plate" />
+                            <Label styleClass="label-sigil" text="1,240 SD" />
+                        </VBox>
+                        
+                        <VBox spacing="15.0" styleClass="artifact-card" GridPane.columnIndex="1" GridPane.rowIndex="0" translateY="40.0">
+                            <Rectangle arcHeight="20" arcWidth="20" fill="#1c1922" height="180.0" width="260.0" />
+                            <Label styleClass="title-lg" text="Shadow-Bound Dirk" />
+                            <Label styleClass="label-sigil" text="850 SD" />
+                        </VBox>
+                    </GridPane>
+                </HBox>
+
+                <!-- Statistics Banner (Tonal Shift) -->
+                <VBox spacing="40.0" styleClass="artifact-card" style="-fx-background-color: -fx-surface-container-low; -fx-background-radius: 0;">
+                    <padding>
+                        <Insets bottom="60.0" left="100.0" right="100.0" top="60.0" />
+                    </padding>
+                    <HBox alignment="CENTER" spacing="100.0">
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="12.8k" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="ACTIVE GUARDIANS" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="84k+" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="RELICS EXCHANGED" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="0.02s" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="RITUAL LATENCY" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</AnchorPane>
