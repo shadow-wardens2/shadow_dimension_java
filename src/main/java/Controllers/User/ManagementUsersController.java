@@ -21,15 +21,13 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.ComboBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
@@ -41,26 +39,10 @@ import java.util.Comparator;
 
 public class ManagementUsersController {
 
-    @FXML
-    private TableView<User> usersTable;
+    // User list container and toolbar controls.
 
     @FXML
-    private TableColumn<User, Integer> colId;
-
-    @FXML
-    private TableColumn<User, String> colUserIdentity;
-
-    @FXML
-    private TableColumn<User, String> colRank;
-
-    @FXML
-    private TableColumn<User, String> colStatus;
-
-    @FXML
-    private TableColumn<User, String> colLastPresence;
-
-    @FXML
-    private TableColumn<User, Void> colActions;
+    private VBox usersContainer;
 
     @FXML
     private TextField tfSearch;
@@ -73,6 +55,7 @@ public class ManagementUsersController {
     private final ObservableList<User> displayedUsers = FXCollections.observableArrayList();
     private boolean idAscending = false;
 
+    // Initializes admin-only user management screen.
     @FXML
     public void initialize() {
         User currentUser = SessionManager.getCurrentUser();
@@ -81,107 +64,12 @@ public class ManagementUsersController {
             return;
         }
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colUserIdentity.setCellValueFactory(new PropertyValueFactory<>("userIdentity"));
-        colRank.setCellValueFactory(new PropertyValueFactory<>("rank"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colLastPresence.setCellValueFactory(new PropertyValueFactory<>("lastPresence"));
-        colId.setStyle("-fx-alignment: CENTER;");
-        colRank.setStyle("-fx-alignment: CENTER;");
-        colStatus.setStyle("-fx-alignment: CENTER;");
-        colLastPresence.setStyle("-fx-alignment: CENTER;");
-        colActions.setStyle("-fx-alignment: CENTER;");
-        usersTable.setFixedCellSize(74);
-        usersTable.setEditable(true);
-        colRank.setEditable(true);
-
-        colRank.setCellFactory(ComboBoxTableCell.forTableColumn("USER", "ADMIN", "CREATOR"));
-        colRank.setOnEditCommit(event -> {
-            User selected = event.getRowValue();
-            String newRank = event.getNewValue();
-
-            if (selected == null || newRank == null || newRank.isBlank()) {
-                return;
-            }
-
-            try {
-                String roleToken = "ROLE_" + newRank;
-                selected.setRoles(normalizeRoles(roleToken));
-                serviceUser.updateUserByAdmin(selected);
-                usersTable.refresh();
-
-                User current = SessionManager.getCurrentUser();
-                if (current != null && current.getId() == selected.getId()) {
-                    current.setRoles(selected.getRoles());
-                    SessionManager.setCurrentUser(current);
-                }
-            } catch (SQLException e) {
-                showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
-                loadUsers();
-            }
-        });
-
-        colUserIdentity.setCellFactory(param -> new TableCell<>() {
-            private final Label usernameLabel = new Label();
-            private final Label emailLabel = new Label();
-            private final VBox identityBox = new VBox(2, usernameLabel, emailLabel);
-
-            {
-                usernameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
-                emailLabel.setStyle("-fx-text-fill: #9ea3b0; -fx-font-size: 12px;");
-            }
-
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                } else {
-                    String[] lines = item.split("\\n", 2);
-                    usernameLabel.setText(lines.length > 0 ? lines[0] : "-");
-                    emailLabel.setText(lines.length > 1 ? lines[1] : "-");
-                    setGraphic(identityBox);
-                }
-            }
-        });
-
-        colActions.setCellFactory(param -> new TableCell<>() {
-            private final Button btnLock = new Button("Lock/Unlock");
-            private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(8, btnLock, btnDelete);
-
-            {
-                pane.setAlignment(Pos.CENTER);
-                btnLock.getStyleClass().add("secondary-button");
-                btnDelete.getStyleClass().add("delete-button");
-
-                btnLock.setOnAction(event -> {
-                    User selected = getTableView().getItems().get(getIndex());
-                    handleToggleLock(selected);
-                });
-
-                btnDelete.setOnAction(event -> {
-                    User selected = getTableView().getItems().get(getIndex());
-                    handleDeleteUser(selected);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(pane);
-                }
-            }
-        });
-
         tfSearch.textProperty().addListener((obs, oldValue, newValue) -> applyFiltersAndSort());
 
         loadUsers();
     }
 
+    // Toolbar actions.
     @FXML
     private void handleRefresh() {
         loadUsers();
@@ -206,7 +94,7 @@ public class ManagementUsersController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         fileChooser.setInitialFileName("users_export_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")) + ".pdf");
 
-        Stage stage = (Stage) usersTable.getScene().getWindow();
+        Stage stage = (Stage) tfSearch.getScene().getWindow();
         java.io.File file = fileChooser.showSaveDialog(stage);
         if (file == null) {
             return;
@@ -220,6 +108,7 @@ public class ManagementUsersController {
         }
     }
 
+    // Row actions.
     private void handleToggleLock(User selected) {
         if (selected == null) {
             return;
@@ -259,6 +148,7 @@ public class ManagementUsersController {
         }
     }
 
+    // Data loading + filtering/sorting pipeline.
     private void loadUsers() {
         masterUsers.clear();
         try {
@@ -288,9 +178,91 @@ public class ManagementUsersController {
                 ? Comparator.comparingInt(User::getId)
                 : Comparator.comparingInt(User::getId).reversed());
 
-        usersTable.setItems(displayedUsers);
+        renderUsers();
     }
 
+    // Card-based rendering (non-TableView UI).
+    private void renderUsers() {
+        usersContainer.getChildren().clear();
+
+        if (displayedUsers.isEmpty()) {
+            Label empty = new Label("No users found.");
+            empty.setStyle("-fx-text-fill: #9ea3b0; -fx-font-size: 14px;");
+            usersContainer.getChildren().add(empty);
+            return;
+        }
+
+        for (User user : displayedUsers) {
+            usersContainer.getChildren().add(createUserCard(user));
+        }
+    }
+
+    // Builds one interactive card per user with rank/status/actions.
+    private HBox createUserCard(User user) {
+        Label idLabel = new Label("#" + user.getId());
+        idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700; -fx-min-width: 56;");
+
+        Label usernameLabel = new Label(safe(user.getUsername()));
+        usernameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
+        Label emailLabel = new Label(safe(user.getEmail()));
+        emailLabel.setStyle("-fx-text-fill: #9ea3b0; -fx-font-size: 12px;");
+        VBox identityBox = new VBox(2, usernameLabel, emailLabel);
+        identityBox.setMinWidth(260);
+
+        ComboBox<String> rankBox = new ComboBox<>(FXCollections.observableArrayList("USER", "ADMIN", "CREATOR"));
+        rankBox.setValue(safe(user.getRank()).isBlank() ? "USER" : user.getRank());
+        rankBox.setPrefWidth(130);
+        rankBox.setOnAction(event -> {
+            String newRank = rankBox.getValue();
+            if (newRank == null || newRank.isBlank()) {
+                return;
+            }
+
+            try {
+                String roleToken = "ROLE_" + newRank;
+                user.setRoles(normalizeRoles(roleToken));
+                serviceUser.updateUserByAdmin(user);
+
+                User current = SessionManager.getCurrentUser();
+                if (current != null && current.getId() == user.getId()) {
+                    current.setRoles(user.getRoles());
+                    SessionManager.setCurrentUser(current);
+                }
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "SQL Error", e.getMessage());
+                loadUsers();
+            }
+        });
+
+        Label statusLabel = new Label(safe(user.getStatus()));
+        statusLabel.setStyle("-fx-text-fill: #c8b3ff; -fx-font-weight: 700;");
+        statusLabel.setMinWidth(88);
+
+        Label presenceLabel = new Label(safe(user.getLastPresence()));
+        presenceLabel.setStyle("-fx-text-fill: #9ea3b0;");
+        presenceLabel.setMinWidth(110);
+
+        Button btnLock = new Button("Lock/Unlock");
+        btnLock.getStyleClass().add("secondary-button");
+        btnLock.setOnAction(event -> handleToggleLock(user));
+
+        Button btnDelete = new Button("Delete");
+        btnDelete.getStyleClass().add("delete-button");
+        btnDelete.setOnAction(event -> handleDeleteUser(user));
+
+        HBox actionsBox = new HBox(8, btnLock, btnDelete);
+        actionsBox.setAlignment(Pos.CENTER_RIGHT);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox row = new HBox(14, idLabel, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("user-row-card");
+        return row;
+    }
+
+    // Utility helpers.
     private String normalizeRoles(String rawRoles) {
         if (rawRoles == null || rawRoles.isBlank()) {
             return "[\"ROLE_USER\"]";
@@ -316,6 +288,7 @@ public class ManagementUsersController {
         alert.showAndWait();
     }
 
+    // PDF export helpers.
     private void exportUsersToPdf(String path) throws IOException, DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, new FileOutputStream(path));

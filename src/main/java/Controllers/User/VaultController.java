@@ -4,10 +4,18 @@ import Controllers.Marketplace.Back.PageHost;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class VaultController {
+
+    // Vault profile display controls.
 
     @FXML
     private Label lbVaultTitle;
@@ -39,8 +47,13 @@ public class VaultController {
     @FXML
     private Button btnEditProfile;
 
+    @FXML
+    private javafx.scene.control.ScrollPane rootNode;
+
+    // Dashboard page host to navigate to edit profile.
     private PageHost dashboardContext;
 
+    // Renders guest or authenticated vault snapshot from session user.
     @FXML
     public void initialize() {
         User user = SessionManager.getCurrentUser();
@@ -72,17 +85,34 @@ public class VaultController {
         btnEditProfile.setDisable(false);
     }
 
+    // Injected by home shell to enable in-page navigation.
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
     }
 
+    // Opens profile editor only when user is logged in.
     @FXML
     private void handleEditProfile() {
         if (dashboardContext != null && SessionManager.isLoggedIn()) {
             dashboardContext.loadPage("/User/EditProfileContent.fxml");
+            return;
+        }
+
+        if (SessionManager.isLoggedIn()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/EditProfile.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) rootNode.getScene().getWindow();
+                stage.setTitle("Edit Profile");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    // Returns fallback text when profile fields are empty.
     private String safe(String value, String fallback) {
         return (value == null || value.isBlank()) ? fallback : value;
     }

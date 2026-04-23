@@ -31,7 +31,12 @@
                     <Label styleClass="form-label" text="Full Name" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                     <TextField fx:id="tfFullName" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     <Label styleClass="form-label" text="Phone" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                    <TextField fx:id="tfPhone" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                    <VBox spacing="4.0" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                        <children>
+                            <TextField fx:id="tfPhone" />
+                            <Label fx:id="lblPhoneError" managed="false" styleClass="validation-error" visible="false" />
+                        </children>
+                    </VBox>
 
                     <Label styleClass="form-label" text="Country" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                     <TextField fx:id="tfCountry" GridPane.columnIndex="1" GridPane.rowIndex="2" />

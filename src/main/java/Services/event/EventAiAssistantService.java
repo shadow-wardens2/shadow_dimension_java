@@ -2,6 +2,7 @@ package Services.event;
 
 import Entities.event.Category;
 import Entities.event.Event;
+import Utils.AppConfig;
 
 import java.io.IOException;
 import java.net.URI;
@@ -140,7 +141,7 @@ public class EventAiAssistantService {
             return fromProperty.trim();
         }
 
-        String fromEnv = System.getenv("OPENROUTER_API_KEY");
+        String fromEnv = AppConfig.get("OPENROUTER_API_KEY");
         if (fromEnv != null && !fromEnv.isBlank()) {
             return fromEnv.trim();
         }
