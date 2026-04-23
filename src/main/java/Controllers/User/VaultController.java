@@ -4,8 +4,14 @@ import Controllers.Marketplace.Back.PageHost;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class VaultController {
 
@@ -40,6 +46,9 @@ public class VaultController {
 
     @FXML
     private Button btnEditProfile;
+
+    @FXML
+    private javafx.scene.control.ScrollPane rootNode;
 
     // Dashboard page host to navigate to edit profile.
     private PageHost dashboardContext;
@@ -86,6 +95,20 @@ public class VaultController {
     private void handleEditProfile() {
         if (dashboardContext != null && SessionManager.isLoggedIn()) {
             dashboardContext.loadPage("/User/EditProfileContent.fxml");
+            return;
+        }
+
+        if (SessionManager.isLoggedIn()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/EditProfile.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) rootNode.getScene().getWindow();
+                stage.setTitle("Edit Profile");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

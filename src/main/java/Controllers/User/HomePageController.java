@@ -66,6 +66,20 @@ public class HomePageController implements PageHost {
 
     // Sidebar navigation actions.
     @FXML
+    void openFrontOffice(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomeFront.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) contentArea.getScene().getWindow();
+            stage.setTitle("Shadow Dimensions - The Void");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void openHome(ActionEvent event) {
         loadPage("/HomeContent.fxml");
     }

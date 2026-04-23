@@ -11,6 +11,7 @@ public class HomeController {
 
     @FXML private javafx.scene.layout.AnchorPane rootNode;
     @FXML private Button btnDashboard;
+    @FXML private Button btnAuth;
 
     @FXML
     public void initialize() {
@@ -20,30 +21,39 @@ public class HomeController {
                 btnDashboard.setVisible(true);
                 btnDashboard.setManaged(true);
             }
+            if (btnAuth != null) {
+                btnAuth.setText("My Soul");
+            }
         }
     }
 
     @FXML
     void navigateToMarketplace() {
-        if (SessionManager.isLoggedIn()) {
-            loadPage("/Marketplace/Front/MarketplaceFront.fxml");
-        } else {
-            loadPage("/User/ConnectSoul.fxml");
-        }
+        loadPage("/Marketplace/Front/MarketplaceFront.fxml");
+    }
+
+    @FXML
+    void navigateToVault() {
+        loadPage("/User/VaultFront.fxml");
     }
 
     @FXML
     void navigateToManagement() {
-        if (SessionManager.isLoggedIn()) {
-            loadPage("/Marketplace/Back/MarketplaceManagement.fxml");
-        } else {
-            loadPage("/User/ConnectSoul.fxml");
-        }
+        loadPage("/Tutorials/TutorialsSelector.fxml");
     }
 
     @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
+    }
+
+    @FXML
+    void handleAuthAction() {
+        if (SessionManager.isLoggedIn()) {
+            navigateToVault();
+        } else {
+            loadPage("/User/ConnectSoul.fxml");
+        }
     }
 
     private void loadPage(String fxmlPath) {

@@ -18,8 +18,6 @@ import java.sql.SQLException;
 
 public class EditProfileController {
 
-    // Header and profile form controls.
-
     @FXML
     private Label lbWelcome;
 
@@ -47,10 +45,8 @@ public class EditProfileController {
     @FXML
     private TextArea taBio;
 
-    // Service dependency for profile persistence.
     private final ServiceUser serviceUser = new ServiceUser();
 
-    // Initializes profile form from current session user.
     @FXML
     public void initialize() {
         User user = SessionManager.getCurrentUser();
@@ -70,7 +66,6 @@ public class EditProfileController {
         tfPhone.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblPhoneError, ""));
     }
 
-    // Saves edited profile values.
     @FXML
     private void handleSaveProfile() {
         User user = SessionManager.getCurrentUser();
@@ -97,7 +92,8 @@ public class EditProfileController {
             user.setBio(taBio.getText().trim());
 
             serviceUser.updateProfile(user);
-            showAlert(Alert.AlertType.INFORMATION, "Succes", "Profil mis a jour.");
+            SessionManager.setCurrentUser(user);
+            openVaultPage();
         } catch (IllegalArgumentException e) {
             String msg = e.getMessage() == null ? "Erreur de validation." : e.getMessage();
             if (msg.toLowerCase().contains("telephone")) {
@@ -110,15 +106,17 @@ public class EditProfileController {
         }
     }
 
-    // Logs user out and returns to Connect Soul screen.
     @FXML
-    private void handleLogout() {
-        SessionManager.clear();
+    private void handleCancel() {
+        openVaultPage();
+    }
+
+    private void openVaultPage() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/ConnectSoul.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/VaultFront.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) tfEmail.getScene().getWindow();
-            stage.setTitle("Connect Soul");
+            stage.setTitle("Shadow Dimensions - The Void");
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -126,26 +124,6 @@ public class EditProfileController {
         }
     }
 
-    // Opens marketplace management when user is authenticated.
-    @FXML
-    private void handleOpenMarketplace() {
-        if (!SessionManager.isLoggedIn()) {
-            showAlert(Alert.AlertType.ERROR, "Accès Refusé", "Vous devez être connecté pour accéder au Marketplace.");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/MarketplaceManagement.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) tfEmail.getScene().getWindow();
-            stage.setTitle("Gestion Produits");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
-        }
-    }
-
-    // Generic blocking alert helper.
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -154,7 +132,6 @@ public class EditProfileController {
         alert.showAndWait();
     }
 
-    // Replaces null DB values by empty text for UI binding.
     private String emptyIfNull(String value) {
         return value == null ? "" : value;
     }

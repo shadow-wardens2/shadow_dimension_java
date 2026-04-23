@@ -57,8 +57,7 @@
 
                         <HBox alignment="CENTER_RIGHT" spacing="10.0">
                             <children>
-                                <Button onAction="#handleOpenMarketplace" styleClass="secondary-button" text="Open Marketplace" />
-                                <Button onAction="#handleLogout" styleClass="secondary-button" text="Logout" />
+                                <Button onAction="#handleCancel" styleClass="secondary-button" text="Cancel" />
                                 <Button onAction="#handleSaveProfile" styleClass="glow-button" text="Save Profile" />
                             </children>
                         </HBox>

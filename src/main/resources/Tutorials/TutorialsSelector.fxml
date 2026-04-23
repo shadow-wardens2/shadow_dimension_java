@@ -5,7 +5,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="40.0" stylesheets="@../style.css" style="-fx-background-color: #050507;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.TutorialsSelectorController">
+<VBox fx:id="rootNode" alignment="CENTER" spacing="40.0" stylesheets="@../style.css" style="-fx-background-color: #050507;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.TutorialsSelectorController">
+    <HBox alignment="CENTER_LEFT" maxWidth="900.0">
+        <children>
+            <Button mnemonicParsing="false" onAction="#handleBackHome" styleClass="secondary-button" text="Back Home" />
+        </children>
+    </HBox>
+
     <VBox alignment="CENTER" spacing="10">
         <Label styleClass="headline" text="Tutorials Protocol" />
         <Label styleClass="subheadline" text="Select the knowledge module you wish to configure" />

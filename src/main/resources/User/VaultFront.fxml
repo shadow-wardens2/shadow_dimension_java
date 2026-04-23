@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.FrontVaultController">
+    <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Pane opacity="0.4">
+            <style>
+                -fx-background-color: radial-gradient(center 50% 20%, radius 80%, rgba(211, 187, 255, 0.08), transparent);
+            </style>
+        </Pane>
+    </StackPane>
+
+    <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <padding>
+            <Insets left="60.0" right="60.0" />
+        </padding>
+        <Label onMouseClicked="#navigateToHome" style="-fx-cursor: hand;" styleClass="label-sigil" text="SHADOW DIMENSIONS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox alignment="CENTER" spacing="30.0">
+            <Label onMouseClicked="#navigateToHome" style="-fx-cursor: hand;" styleClass="body-md" text="Home" />
+            <Label onMouseClicked="#navigateToMarketplace" style="-fx-cursor: hand;" styleClass="body-md" text="Marketplace" />
+            <Label style="-fx-text-fill: -fx-primary;" styleClass="body-md" text="My Vault" />
+            <Label onMouseClicked="#navigateToManagement" style="-fx-cursor: hand;" styleClass="body-md" text="Tutorials" />
+            <Label styleClass="body-md" text="Forum" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox alignment="CENTER" spacing="20.0">
+            <Button fx:id="btnDashboard" managed="false" onAction="#handleOpenDashboard" style="-fx-border-radius: 30; -fx-background-radius: 30;" styleClass="secondary-button" text="Dashboard" visible="false" />
+            <Button fx:id="btnAuth" onAction="#handleAuthAction" styleClass="ethereal-button" text="Edit Profile" />
+        </HBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0">
+        <content>
+            <VBox spacing="40.0">
+                <padding>
+                    <Insets bottom="60.0" left="60.0" right="60.0" top="40.0" />
+                </padding>
+
+                <HBox spacing="30.0">
+                    <VBox spacing="16.0" HBox.hgrow="ALWAYS">
+                        <Label styleClass="label-sigil" text="PERSONAL SANCTUM" />
+                        <Label fx:id="lbVaultTitle" styleClass="display-lg" text="My Vault" />
+                        <Label fx:id="lbAuthState" maxWidth="620.0" opacity="0.8" styleClass="body-md" text="Soul synchronized." wrapText="true" />
+                        <HBox spacing="14.0">
+                            <Button onAction="#handleEditProfile" styleClass="ethereal-button" text="Edit Profile" />
+                            <Button onAction="#navigateToMarketplace" styleClass="secondary-button" text="Browse Marketplace" />
+                        </HBox>
+                    </VBox>
+
+                    <VBox prefWidth="360.0" spacing="18.0" styleClass="artifact-card">
+                        <Label styleClass="label-sigil" text="SOUL STATUS" />
+                        <GridPane hgap="12.0" vgap="14.0">
+                            <columnConstraints>
+                                <ColumnConstraints prefWidth="120.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                            <children>
+                                <Label styleClass="body-md" text="Access" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label style="-fx-text-fill: -fx-primary;" styleClass="label-sigil" text="BOUND" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                <Label styleClass="body-md" text="Username" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label fx:id="lbSummaryUsername" styleClass="title-lg" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label styleClass="body-md" text="Region" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <Label fx:id="lbSummaryCountry" styleClass="body-md" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            </children>
+                        </GridPane>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="30.0">
+                    <VBox spacing="20.0" styleClass="artifact-card" HBox.hgrow="ALWAYS">
+                        <Label styleClass="headline-md" text="Identity Seal" />
+                        <GridPane hgap="20.0" vgap="18.0">
+                            <columnConstraints>
+                                <ColumnConstraints prefWidth="160.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                            <children>
+                                <Label styleClass="label-sigil" text="Username" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label fx:id="lbUsername" styleClass="title-lg" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                <Label styleClass="label-sigil" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label fx:id="lbEmail" styleClass="body-md" text="-" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label styleClass="label-sigil" text="Full Name" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <Label fx:id="lbFullName" styleClass="body-md" text="-" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <Label styleClass="label-sigil" text="City" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                <Label fx:id="lbCity" styleClass="body-md" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                            </children>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox prefWidth="520.0" spacing="20.0" styleClass="artifact-card">
+                        <Label styleClass="headline-md" text="Profile Details" />
+                        <GridPane hgap="20.0" vgap="18.0">
+                            <columnConstraints>
+                                <ColumnConstraints prefWidth="160.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                            <children>
+                                <Label styleClass="label-sigil" text="Phone" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label fx:id="lbPhone" styleClass="body-md" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                <Label styleClass="label-sigil" text="Country" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label fx:id="lbCountry" styleClass="body-md" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label styleClass="label-sigil" text="Bio" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <Label fx:id="lbBio" maxWidth="280.0" styleClass="body-md" text="-" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            </children>
+                        </GridPane>
+                        <Region VBox.vgrow="ALWAYS" />
+                    </VBox>
+                </HBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>
