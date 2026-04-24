@@ -12,6 +12,7 @@ import Controllers.event.EventController;
 import Controllers.event.EventSelectorController;
 import Controllers.event.EditCategoryController;
 import Controllers.event.EditEventController;
+import Controllers.event.ReservationController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -246,6 +247,9 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EditCategoryController) {
                 ((EditCategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof ReservationController) {
+                ((ReservationController) controller).setDashboardContext(this);
             }
             if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);

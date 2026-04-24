@@ -5,6 +5,7 @@ import Controllers.Marketplace.PageHost;
 import Entities.User.User;
 // Event entity displayed and manipulated by this controller.
 import Entities.event.Event;
+import Services.event.EventReservationService;
 // Service layer used for event CRUD and retrieval.
 import Services.event.EventService;
 // Shared navigation state used to pass edited entity between pages.
@@ -107,6 +108,7 @@ public class EventController implements Initializable {
 
     // Service instance that communicates with database layer.
     private final EventService eventService = new EventService();
+    private final EventReservationService reservationService = new EventReservationService();
     // Complete event dataset loaded from backend.
     private final ObservableList<Event> masterEvents = FXCollections.observableArrayList();
     // Filtered/sorted subset currently displayed in UI.
@@ -180,6 +182,10 @@ public class EventController implements Initializable {
         displayedEvents.clear();
         // Iterates over all loaded events.
         for (Event event : masterEvents) {
+            if (!isAdminUser && !isFrontOfficeVisible(event)) {
+                continue;
+            }
+
             // Fast path: when search is empty, keep all events.
             if (search.isEmpty()) {
                 // Adds event without additional checks.
@@ -471,8 +477,25 @@ public class EventController implements Initializable {
             // Final assembled row with all visual segments including actions.
             row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel, spacer, actionsBox);
         } else {
-            // Final assembled row for viewers without management actions.
-            row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel);
+            Button btnOpen = new Button("Open");
+            btnOpen.getStyleClass().add("secondary-button");
+            btnOpen.setOnAction(actionEvent -> openEventDetails(event));
+
+            Button btnReserve = new Button("Reserve Spot");
+            btnReserve.getStyleClass().add("glow-button");
+            btnReserve.setDisable(!canReserve(event));
+            btnReserve.setOnAction(actionEvent -> reserveSpot(event));
+
+            HBox actionsBox = new HBox(8, btnOpen, btnReserve);
+            actionsBox.setAlignment(Pos.CENTER_RIGHT);
+            actionsBox.setMinWidth(220);
+            actionsBox.setPrefWidth(220);
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            // Final assembled row for viewers with open/reserve actions.
+            row = new HBox(14, idLabel, identityBox, scheduleLabel, locationLabel, categoryLabel, statusLabel, spacer, actionsBox);
         }
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-card");
@@ -511,6 +534,79 @@ public class EventController implements Initializable {
             // Displays deletion error from backend.
             showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
         }
+    }
+
+    private void openEventDetails(Event event) {
+        int available = getAvailableSlots(event);
+        String message = "Title: " + safeDisplay(event.getTitle()) + "\n"
+                + "Description: " + safeDisplay(event.getDescription()) + "\n"
+                + "Location: " + safeDisplay(event.getLocation()) + " (" + safeDisplay(event.getLocationType()) + ")\n"
+                + "Start: " + formatTimestamp(event.getStartDate()) + "\n"
+                + "End: " + formatTimestamp(event.getEndDate()) + "\n"
+                + "Status: " + safeDisplay(event.getStatus()) + "\n"
+                + "Available Spots: " + available;
+
+        showAlert(Alert.AlertType.INFORMATION, "Event Details", message);
+    }
+
+    private void reserveSpot(Event event) {
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null) {
+            showAlert(Alert.AlertType.WARNING, "Acces restreint", "Connectez-vous pour reserver une place.");
+            return;
+        }
+
+        if (!canReserve(event)) {
+            showAlert(Alert.AlertType.WARNING, "Reservation indisponible", "Cet evenement ne peut pas etre reserve pour le moment.");
+            return;
+        }
+
+        try {
+            reservationService.reserveSpot(currentUser.getId(), event.getId());
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "Reservation envoyee. En attente de validation par l'admin.");
+            loadEvents();
+        } catch (SQLException | IllegalArgumentException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
+        }
+    }
+
+    private boolean canReserve(Event event) {
+        if (!isFrontOfficeVisible(event)) {
+            return false;
+        }
+
+        User currentUser = SessionManager.getCurrentUser();
+        if (currentUser == null) {
+            return false;
+        }
+
+        try {
+            if (reservationService.hasActiveReservation(currentUser.getId(), event.getId())) {
+                return false;
+            }
+            return getAvailableSlots(event) > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private int getAvailableSlots(Event event) {
+        try {
+            int reserved = reservationService.countReservedSlots(event.getId());
+            return Math.max(0, event.getCapacity() - reserved);
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
+
+    private boolean isFrontOfficeVisible(Event event) {
+        if (event == null) {
+            return false;
+        }
+        boolean active = "ACTIVE".equalsIgnoreCase(safeDisplay(event.getStatus()));
+        Timestamp start = event.getStartDate();
+        boolean upcoming = start != null && start.after(new Timestamp(System.currentTimeMillis()));
+        return active && upcoming;
     }
 
     // Formats timestamp for compact display in row card.

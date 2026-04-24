@@ -20,6 +20,8 @@ public class EventSelectorController {
     private Button btnEvents;
     @FXML
     private Button btnCategories;
+    @FXML
+    private Button btnReservations;
 
     @FXML
     private void initialize() {
@@ -29,6 +31,10 @@ public class EventSelectorController {
         if (btnCategories != null) {
             btnCategories.setVisible(isAdmin);
             btnCategories.setManaged(isAdmin);
+        }
+        if (btnReservations != null) {
+            btnReservations.setVisible(isAdmin);
+            btnReservations.setManaged(isAdmin);
         }
     }
 
@@ -53,6 +59,13 @@ public class EventSelectorController {
         // Loads category list page into main content area.
         if (dashboardContext != null) {
             dashboardContext.loadPage("/event/CategoryView.fxml");
+        }
+    }
+
+    @FXML
+    void handleReservations(ActionEvent event) {
+        if (dashboardContext != null) {
+            dashboardContext.loadPage("/event/ReservationView.fxml");
         }
     }
 }
