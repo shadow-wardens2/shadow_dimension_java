@@ -56,15 +56,6 @@ public class ConnectSoulController {
     private Label lblLoginPasswordError;
 
     @FXML
-    private Canvas loginCaptchaCanvas;
-
-    @FXML
-    private TextField tfLoginCaptcha;
-
-    @FXML
-    private Label lblLoginCaptchaError;
-
-    @FXML
     private TextField tfSignupEmail;
 
     @FXML
@@ -155,7 +146,6 @@ public class ConnectSoulController {
     private boolean signupPasswordVisible;
     private boolean resetPasswordVisible;
     private String pendingResetEmail;
-    private String loginCaptchaAnswer;
     private String signupCaptchaAnswer;
     private String resetCaptchaAnswer;
 
@@ -164,8 +154,6 @@ public class ConnectSoulController {
         tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
         pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
         tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
-        tfLoginCaptcha.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginCaptchaError, ""));
-
         tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
         tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
         pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
@@ -205,10 +193,6 @@ public class ConnectSoulController {
             }
 
             if (hasInputError) {
-                return;
-            }
-
-            if (!validateCaptcha(loginCaptchaAnswer, tfLoginCaptcha, lblLoginCaptchaError, this::refreshLoginCaptcha)) {
                 return;
             }
 
@@ -320,10 +304,6 @@ public class ConnectSoulController {
             String identity = value(tfLoginIdentity).trim();
             if (identity.isBlank()) {
                 setInlineError(lblLoginIdentityError, "Entrez votre email ou username pour reinitialiser le mot de passe");
-                return;
-            }
-
-            if (!validateCaptcha(loginCaptchaAnswer, tfLoginCaptcha, lblLoginCaptchaError, this::refreshLoginCaptcha)) {
                 return;
             }
 
@@ -488,9 +468,6 @@ public class ConnectSoulController {
                 }
             } else {
                 clearLoginInlineErrors();
-                if (!validateCaptcha(loginCaptchaAnswer, tfLoginCaptcha, lblLoginCaptchaError, this::refreshLoginCaptcha)) {
-                    return;
-                }
             }
 
             GoogleOAuthService.GoogleProfile profile = googleOAuthService.authenticate();
@@ -509,10 +486,6 @@ public class ConnectSoulController {
         try {
             clearLoginInlineErrors();
 
-            if (!validateCaptcha(loginCaptchaAnswer, tfLoginCaptcha, lblLoginCaptchaError, this::refreshLoginCaptcha)) {
-                return;
-            }
-
             Stage owner = (Stage) tfLoginIdentity.getScene().getWindow();
             User user = FaceCaptureUtil.recognizeFace(
                     owner,
@@ -529,7 +502,6 @@ public class ConnectSoulController {
             );
             if (user == null) {
                 setInlineError(lblLoginIdentityError, "Aucune Face ID reconnue. Essayez a nouveau.");
-                refreshLoginCaptcha();
                 return;
             }
 
@@ -567,8 +539,6 @@ public class ConnectSoulController {
         resetBox.setManaged(false);
         loginBox.setVisible(true);
         loginBox.setManaged(true);
-        tfLoginCaptcha.clear();
-        refreshLoginCaptcha();
     }
 
     @FXML
@@ -617,13 +587,6 @@ public class ConnectSoulController {
     }
 
     @FXML
-    private void refreshLoginCaptcha() {
-        loginCaptchaAnswer = refreshCaptcha(loginCaptchaCanvas);
-        tfLoginCaptcha.clear();
-        setInlineError(lblLoginCaptchaError, "");
-    }
-
-    @FXML
     private void refreshSignupCaptcha() {
         signupCaptchaAnswer = refreshCaptcha(signupCaptchaCanvas);
         tfSignupCaptcha.clear();
@@ -638,7 +601,6 @@ public class ConnectSoulController {
     }
 
     private void refreshAllCaptchas() {
-        refreshLoginCaptcha();
         refreshSignupCaptcha();
         refreshResetCaptcha();
     }
@@ -709,7 +671,6 @@ public class ConnectSoulController {
     private void clearLoginInlineErrors() {
         setInlineError(lblLoginIdentityError, "");
         setInlineError(lblLoginPasswordError, "");
-        setInlineError(lblLoginCaptchaError, "");
     }
 
     private void clearResetInlineErrors() {

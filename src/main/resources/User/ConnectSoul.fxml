@@ -98,22 +98,6 @@
                                         <Label fx:id="lblLoginPasswordError" managed="false" styleClass="validation-error" visible="false" />
                                     </VBox>
 
-                                    <VBox spacing="8.0">
-                                        <Label styleClass="form-label" text="Captcha Seal" />
-                                        <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                            <children>
-                                                <StackPane prefHeight="102.0" prefWidth="400.0" styleClass="captcha-surface" HBox.hgrow="ALWAYS">
-                                                    <children>
-                                                        <Canvas fx:id="loginCaptchaCanvas" height="76.0" width="360.0" />
-                                                    </children>
-                                                </StackPane>
-                                                <Button onAction="#refreshLoginCaptcha" styleClass="secondary-button" text="Refresh" />
-                                            </children>
-                                        </HBox>
-                                        <TextField fx:id="tfLoginCaptcha" promptText="Type the captcha above" />
-                                        <Label fx:id="lblLoginCaptchaError" managed="false" styleClass="validation-error" visible="false" />
-                                    </VBox>
-
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleForgotPassword" styleClass="secondary-button" text="Forgot Password?" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect Soul" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleFaceLogin" styleClass="secondary-button" text="Login with Face" />
