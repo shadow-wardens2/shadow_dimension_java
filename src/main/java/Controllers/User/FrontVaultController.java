@@ -1,17 +1,22 @@
 package Controllers.User;
 
 import Entities.User.User;
+import Services.User.ServiceUser;
+import Utils.FaceCaptureUtil;
 import Utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class FrontVaultController {
 
@@ -58,6 +63,20 @@ public class FrontVaultController {
     private Label lbBio;
 
     @FXML
+    private Label lbFaceIdStatus;
+
+    @FXML
+    private Label lbFaceIdHint;
+
+    @FXML
+    private Button btnFaceIdAction;
+
+    @FXML
+    private Button btnDisableFaceId;
+
+    private final ServiceUser serviceUser = new ServiceUser();
+
+    @FXML
     public void initialize() {
         if (!SessionManager.isLoggedIn()) {
             if (btnAuth != null) {
@@ -74,6 +93,7 @@ public class FrontVaultController {
             lbSummaryCountry.setText("-");
             lbCity.setText("-");
             lbBio.setText("No soul record detected.");
+            applyGuestFaceIdState();
             return;
         }
 
@@ -99,6 +119,7 @@ public class FrontVaultController {
         lbSummaryCountry.setText(safe(user.getCountry(), "-"));
         lbCity.setText(safe(user.getCity(), "-"));
         lbBio.setText(safe(user.getBio(), "No bio engraved yet."));
+        refreshFaceIdState(user);
     }
 
     @FXML
@@ -139,6 +160,52 @@ public class FrontVaultController {
         }
     }
 
+    @FXML
+    private void handleFaceIdAction() {
+        User user = SessionManager.getCurrentUser();
+        if (user == null) {
+            loadPage("/User/ConnectSoul.fxml");
+            return;
+        }
+
+        try {
+            Stage owner = (Stage) rootNode.getScene().getWindow();
+            BufferedImage capture = FaceCaptureUtil.captureFace(
+                    owner,
+                    "Enable Face ID",
+                    "Capture a clear frontal face image to bind Face ID to your vault."
+            );
+            if (capture == null) {
+                return;
+            }
+
+            String signature = serviceUser.buildFaceSignature(capture);
+            serviceUser.enrollFaceId(user.getId(), signature);
+            refreshFaceIdState(serviceUser.getById(user.getId()));
+            showAlert(Alert.AlertType.INFORMATION, "Face ID", "Face ID activee pour ce compte.");
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            showAlert(Alert.AlertType.WARNING, "Face ID", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleDisableFaceId() {
+        User user = SessionManager.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        try {
+            serviceUser.disableFaceId(user.getId());
+            refreshFaceIdState(serviceUser.getById(user.getId()));
+            showAlert(Alert.AlertType.INFORMATION, "Face ID", "Face ID desactivee.");
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
+        }
+    }
+
     private void openEditProfile() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/EditProfile.fxml"));
@@ -163,5 +230,39 @@ public class FrontVaultController {
 
     private String safe(String value, String fallback) {
         return (value == null || value.isBlank()) ? fallback : value;
+    }
+
+    private void refreshFaceIdState(User user) {
+        try {
+            boolean enabled = serviceUser.isFaceIdEnabled(user.getId());
+            lbFaceIdStatus.setText(enabled ? "Face ID enabled" : "Face ID disabled");
+            lbFaceIdHint.setText(enabled
+                    ? "Your face signature is ready for quick access from the login screen."
+                    : "Enable Face ID to capture your face from this vault and unlock biometric login.");
+            btnFaceIdAction.setText(enabled ? "Re-enroll Face ID" : "Enable Face ID");
+            btnFaceIdAction.setDisable(false);
+            btnDisableFaceId.setDisable(!enabled);
+        } catch (SQLException e) {
+            lbFaceIdStatus.setText("Face ID unavailable");
+            lbFaceIdHint.setText("The biometric profile could not be loaded right now.");
+            btnFaceIdAction.setDisable(true);
+            btnDisableFaceId.setDisable(true);
+        }
+    }
+
+    private void applyGuestFaceIdState() {
+        lbFaceIdStatus.setText("Face ID locked");
+        lbFaceIdHint.setText("Connect Soul first, then enable Face ID from your vault.");
+        btnFaceIdAction.setText("Enable Face ID");
+        btnFaceIdAction.setDisable(true);
+        btnDisableFaceId.setDisable(true);
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

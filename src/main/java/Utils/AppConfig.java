@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class AppConfig {
 
@@ -19,8 +20,8 @@ public final class AppConfig {
             return;
         }
 
-        Path dotEnvPath = Path.of(".env");
-        if (!Files.exists(dotEnvPath)) {
+        Path dotEnvPath = findDotEnvPath();
+        if (dotEnvPath == null) {
             dotEnvLoaded = true;
             return;
         }
@@ -58,6 +59,21 @@ public final class AppConfig {
         }
 
         dotEnvLoaded = true;
+    }
+
+    private static Path findDotEnvPath() {
+        Path start = Paths.get("").toAbsolutePath().normalize();
+        Path current = start;
+
+        while (current != null) {
+            Path candidate = current.resolve(".env");
+            if (Files.exists(candidate) && Files.isRegularFile(candidate)) {
+                return candidate;
+            }
+            current = current.getParent();
+        }
+
+        return null;
     }
 
     public static String get(String key) {
