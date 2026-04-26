@@ -10,9 +10,12 @@ import java.util.List;
 
 public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
+    private final ShadowDimensionsDB MyConnection;
     private Connection cnx;
 
     public ServiceProduit() {
+        ShadowDimensionsDB myConnection = null;
+        MyConnection = myConnection;
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 

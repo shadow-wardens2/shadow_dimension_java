@@ -19,15 +19,10 @@ import javafx.collections.transformation.SortedList;
 import java.util.Comparator;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
-import javafx.concurrent.Task;
-import javafx.application.Platform;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class ManagementProduitController implements Initializable {
@@ -46,7 +41,6 @@ public class ManagementProduitController implements Initializable {
     private FilteredList<Produit> filteredData;
     private SortedList<Produit> sortedData;
     private PageHost dashboardContext;
-    private PauseTransition searchDebounce = new PauseTransition(Duration.millis(300));
 
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
@@ -68,34 +62,23 @@ public class ManagementProduitController implements Initializable {
         sortComboBox.setValue("Default (ID)");
         sortComboBox.setOnAction(e -> applySortAndFilter());
 
-        searchDebounce.setOnFinished(e -> applySortAndFilter());
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> searchDebounce.playFromStart());
+        // Listen for changes in the sorted/filtered list to update the UI
+        sortedData.addListener((ListChangeListener<Produit>) c -> refreshGrid());
+
+        // Initial display
+        refreshGrid();
     }
 
     private void setupData() {
-        Task<List<Produit>> loadTask = new Task<List<Produit>>() {
-            @Override
-            protected List<Produit> call() throws Exception {
-                return serviceProduit.getAll();
-            }
-
-            @Override
-            protected void succeeded() {
-                List<Produit> products = getValue();
-                Platform.runLater(() -> {
-                    observableProducts.setAll(products);
-                    filteredData = new FilteredList<>(observableProducts, p -> true);
-                    sortedData = new SortedList<>(filteredData);
-                    refreshGrid();
-                });
-            }
-
-            @Override
-            protected void failed() {
-                getException().printStackTrace();
-            }
-        };
-        new Thread(loadTask).start();
+        try {
+            observableProducts.setAll(serviceProduit.getAll());
+            filteredData = new FilteredList<>(observableProducts, p -> true);
+            sortedData = new SortedList<>(filteredData);
+            
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> applySortAndFilter());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void applySortAndFilter() {
@@ -123,39 +106,19 @@ public class ManagementProduitController implements Initializable {
         refreshGrid(); // Explicitly refresh after sorting
     }
 
-    private Thread currentDisplayThread;
-
     private void refreshGrid() {
-        if (currentDisplayThread != null && currentDisplayThread.isAlive()) {
-            currentDisplayThread.interrupt();
-        }
-
         productsTilePane.getChildren().clear();
-        
-        Task<Void> displayTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                for (Produit product : sortedData) {
-                    if (Thread.currentThread().isInterrupted()) break;
-                    
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/ProductCard.fxml"));
-                    Parent card = loader.load();
-                    ProductCardController controller = loader.getController();
-                    
-                    Platform.runLater(() -> {
-                        controller.setProductData(product, ManagementProduitController.this::editProduct, ManagementProduitController.this::deleteProduct);
-                        productsTilePane.getChildren().add(card);
-                    });
-                    
-                    Thread.sleep(20);
-                }
-                return null;
+        for (Produit product : sortedData) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/ProductCard.fxml"));
+                Parent card = loader.load();
+                ProductCardController controller = loader.getController();
+                controller.setProductData(product, this::editProduct, this::deleteProduct);
+                productsTilePane.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
-
-        currentDisplayThread = new Thread(displayTask);
-        currentDisplayThread.setDaemon(true);
-        currentDisplayThread.start();
+        }
     }
 
     private void editProduct(Produit p) {

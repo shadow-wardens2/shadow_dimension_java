@@ -19,10 +19,6 @@ import java.util.stream.Collectors;
 import Utils.SessionManager;
 import Entities.User.User;
 import javafx.scene.control.Button;
-import javafx.concurrent.Task;
-import javafx.application.Platform;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
 
 public class MarketplaceFrontController {
 
@@ -38,8 +34,6 @@ public class MarketplaceFrontController {
     
     private List<Produit> allProducts = new ArrayList<>();
     private List<Categorie> allCategories = new ArrayList<>();
-    private PauseTransition searchDebounce = new PauseTransition(Duration.millis(300));
-    private Thread currentDisplayThread;
 
     @FXML
     public void initialize() {
@@ -51,59 +45,32 @@ public class MarketplaceFrontController {
             }
         }
         
-        searchDebounce.setOnFinished(e -> executeSearch());
-        loadData();
-    }
-
-    private void loadData() {
-        lbProductCount.setText("CONSULTING THE ARCHIVES...");
+        try {
+            allProducts = sp.getAll();
+            allCategories = sc.getAll();
+            
+            categoryFilter.getItems().add("All Categories");
+            for (Categorie c : allCategories) {
+                categoryFilter.getItems().add(c.getNom());
+            }
+            categoryFilter.getSelectionModel().selectFirst();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         
-        Task<Void> loadTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                allProducts = sp.getAll();
-                allCategories = sc.getAll();
-                return null;
-            }
-
-            @Override
-            protected void succeeded() {
-                Platform.runLater(() -> {
-                    categoryFilter.getItems().clear();
-                    categoryFilter.getItems().add("All Categories");
-                    for (Categorie c : allCategories) {
-                        categoryFilter.getItems().add(c.getNom());
-                    }
-                    categoryFilter.getSelectionModel().selectFirst();
-                    displayProducts(allProducts);
-                });
-            }
-
-            @Override
-            protected void failed() {
-                getException().printStackTrace();
-                Platform.runLater(() -> lbProductCount.setText("ERROR RETRIEVING ARTIFACTS"));
-            }
-        };
-        
-        Thread thread = new Thread(loadTask);
-        thread.setDaemon(true);
-        thread.start();
+        displayProducts(allProducts);
     }
 
     @FXML
     void handleSearch() {
-        searchDebounce.playFromStart();
-    }
-
-    private void executeSearch() {
         String searchText = searchField.getText().toLowerCase().trim();
         String selectedCategory = categoryFilter.getValue();
         
         List<Produit> filtered = allProducts.stream()
             .filter(p -> {
                 boolean matchesSearch = p.getNom().toLowerCase().contains(searchText) || 
-                                       p.getDescription().toLowerCase().contains(searchText);
+                                      p.getDescription().toLowerCase().contains(searchText);
                 
                 boolean matchesCategory = true;
                 if (selectedCategory != null && !selectedCategory.equals("All Categories")) {
@@ -119,44 +86,27 @@ public class MarketplaceFrontController {
     }
 
     private void displayProducts(List<Produit> products) {
-        if (currentDisplayThread != null && currentDisplayThread.isAlive()) {
-            currentDisplayThread.interrupt();
-        }
-
         productsGrid.getChildren().clear();
         lbProductCount.setText(products.size() + " ARTIFACTS DISCOVERED");
         
-        Task<Void> displayTask = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                for (Produit p : products) {
-                    if (Thread.currentThread().isInterrupted()) break;
-                    
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Front/FrontProductCard.fxml"));
-                    VBox card = loader.load();
+        for (Produit p : products) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Front/FrontProductCard.fxml"));
+                VBox card = loader.load();
 
-                    FrontProductCardController controller = loader.getController();
-                    String catName = allCategories.stream()
-                            .filter(c -> c.getId() == p.getCategorieId())
-                            .findFirst()
-                            .map(Categorie::getNom)
-                            .orElse("Unknown Tier");
+                FrontProductCardController controller = loader.getController();
+                String catName = allCategories.stream()
+                        .filter(c -> c.getId() == p.getCategorieId())
+                        .findFirst()
+                        .map(Categorie::getNom)
+                        .orElse("Unknown Tier");
 
-                    Platform.runLater(() -> {
-                        controller.setData(p, catName);
-                        productsGrid.getChildren().add(card);
-                    });
-                    
-                    // Give the UI thread some time to render
-                    Thread.sleep(20); 
-                }
-                return null;
+                controller.setData(p, catName);
+                productsGrid.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
-        
-        currentDisplayThread = new Thread(displayTask);
-        currentDisplayThread.setDaemon(true);
-        currentDisplayThread.start();
+        }
     }
 
     @FXML
