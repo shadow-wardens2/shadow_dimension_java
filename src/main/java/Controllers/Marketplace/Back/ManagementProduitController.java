@@ -66,7 +66,7 @@ public class ManagementProduitController implements Initializable {
         sortedData.addListener((ListChangeListener<Produit>) c -> refreshGrid());
 
         // Initial display
-        refreshGrid();
+        // refreshGrid() is called via listeners after setupData()
     }
 
     private void setupData() {
@@ -103,7 +103,6 @@ public class ManagementProduitController implements Initializable {
         };
 
         sortedData.setComparator(comparator);
-        refreshGrid(); // Explicitly refresh after sorting
     }
 
     private void refreshGrid() {

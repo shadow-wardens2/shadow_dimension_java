@@ -37,13 +37,13 @@ public class MarketplaceFrontController {
 
     @FXML
     public void initialize() {
+        boolean isAdmin = false;
         if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
-            if (user.isAdmin()) {
-                btnDashboard.setVisible(true);
-                btnDashboard.setManaged(true);
-            }
+            isAdmin = user.isAdmin();
         }
+        btnDashboard.setVisible(isAdmin);
+        btnDashboard.setManaged(isAdmin);
         
         try {
             allProducts = sp.getAll();
@@ -103,7 +103,8 @@ public class MarketplaceFrontController {
 
                 controller.setData(p, catName);
                 productsGrid.getChildren().add(card);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                System.err.println("Error loading product card for: " + p.getNom());
                 e.printStackTrace();
             }
         }

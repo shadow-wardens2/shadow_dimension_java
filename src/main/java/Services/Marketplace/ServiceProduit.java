@@ -14,9 +14,8 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
     private Connection cnx;
 
     public ServiceProduit() {
-        ShadowDimensionsDB myConnection = null;
-        MyConnection = myConnection;
         cnx = ShadowDimensionsDB.getInstance().getConnection();
+        MyConnection = ShadowDimensionsDB.getInstance();
     }
 
     @Override
