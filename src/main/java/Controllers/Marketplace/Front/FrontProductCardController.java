@@ -33,7 +33,7 @@ public class FrontProductCardController {
                     image = new Image(p.getImage(), true);
                 } else {
                     File file = new File(p.getImage());
-                    image = new Image(file.toURI().toString());
+                    image = new Image(file.toURI().toString(), true);
                 }
                 if (ivProduct != null) ivProduct.setImage(image);
                 if (imagePlaceholder != null) imagePlaceholder.setVisible(false);

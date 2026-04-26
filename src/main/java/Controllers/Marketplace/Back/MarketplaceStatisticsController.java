@@ -11,6 +11,8 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.concurrent.Task;
+import javafx.application.Platform;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -58,52 +60,62 @@ public class MarketplaceStatisticsController {
     }
 
     private void loadStatistics() {
-        try {
-            List<Produit> produits = serviceProduit.getAll();
-            List<Categorie> categories = serviceCategorie.getAll();
-            List<Type> types = serviceType.getAll();
+        Task<Void> statsTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                List<Produit> produits = serviceProduit.getAll();
+                List<Categorie> categories = serviceCategorie.getAll();
+                List<Type> types = serviceType.getAll();
 
-            // Total Stats
-            int totalProducts = produits.size();
-            int totalCategories = categories.size();
-            int totalStock = produits.stream().mapToInt(Produit::getStock).sum();
-            double avgPrice = produits.isEmpty() ? 0 : produits.stream().mapToDouble(Produit::getPrix).average().orElse(0.0);
+                // Total Stats
+                int totalProducts = produits.size();
+                int totalCategories = categories.size();
+                int totalStock = produits.stream().mapToInt(Produit::getStock).sum();
+                double avgPrice = produits.isEmpty() ? 0 : produits.stream().mapToDouble(Produit::getPrix).average().orElse(0.0);
 
-            lbTotalProducts.setText(String.valueOf(totalProducts));
-            lbTotalCategories.setText(String.valueOf(totalCategories));
-            lbTotalStock.setText(String.valueOf(totalStock));
-            lbAveragePrice.setText(String.format("%.2f", avgPrice));
+                // Pie Chart: Products by Category
+                Map<Integer, String> categoryNames = categories.stream()
+                        .collect(Collectors.toMap(Categorie::getId, Categorie::getNom));
+                
+                Map<String, Long> productCountByCategory = produits.stream()
+                        .collect(Collectors.groupingBy(p -> categoryNames.getOrDefault(p.getCategorieId(), "Unknown"), Collectors.counting()));
 
-            // Pie Chart: Products by Category
-            Map<Integer, String> categoryNames = categories.stream()
-                    .collect(Collectors.toMap(Categorie::getId, Categorie::getNom));
-            
-            Map<String, Long> productCountByCategory = produits.stream()
-                    .collect(Collectors.groupingBy(p -> categoryNames.getOrDefault(p.getCategorieId(), "Unknown"), Collectors.counting()));
+                // Pie Chart: Stock by Type
+                Map<Integer, String> typeNames = types.stream()
+                        .collect(Collectors.toMap(Type::getId, Type::getNom));
 
-            pieCategories.setData(FXCollections.observableArrayList(
-                    productCountByCategory.entrySet().stream()
-                            .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
-                            .collect(Collectors.toList())
-            ));
+                Map<String, Integer> stockByType = produits.stream()
+                        .collect(Collectors.groupingBy(p -> typeNames.getOrDefault(p.getTypeId(), "Unknown"), 
+                                Collectors.summingInt(Produit::getStock)));
 
-            // Pie Chart: Stock by Type
-            Map<Integer, String> typeNames = types.stream()
-                    .collect(Collectors.toMap(Type::getId, Type::getNom));
+                Platform.runLater(() -> {
+                    lbTotalProducts.setText(String.valueOf(totalProducts));
+                    lbTotalCategories.setText(String.valueOf(totalCategories));
+                    lbTotalStock.setText(String.valueOf(totalStock));
+                    lbAveragePrice.setText(String.format("%.2f", avgPrice));
 
-            Map<String, Integer> stockByType = produits.stream()
-                    .collect(Collectors.groupingBy(p -> typeNames.getOrDefault(p.getTypeId(), "Unknown"), 
-                            Collectors.summingInt(Produit::getStock)));
+                    pieCategories.setData(FXCollections.observableArrayList(
+                            productCountByCategory.entrySet().stream()
+                                    .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
+                                    .collect(Collectors.toList())
+                    ));
 
-            pieStockByType.setData(FXCollections.observableArrayList(
-                    stockByType.entrySet().stream()
-                            .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
-                            .collect(Collectors.toList())
-            ));
+                    pieStockByType.setData(FXCollections.observableArrayList(
+                            stockByType.entrySet().stream()
+                                    .map(entry -> new PieChart.Data(entry.getKey(), entry.getValue()))
+                                    .collect(Collectors.toList())
+                    ));
+                });
+                return null;
+            }
 
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not load statistics: " + e.getMessage());
-        }
+            @Override
+            protected void failed() {
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Error", "Could not load statistics: " + getException().getMessage()));
+            }
+        };
+
+        new Thread(statsTask).start();
     }
 
     private void showAlert(Alert.AlertType type, String title, String msg) {
