@@ -67,6 +67,20 @@
                                 </GridPane>
                             </children>
                         </VBox>
+
+                        <VBox prefWidth="430.0" spacing="12.0" styleClass="panel-card">
+                            <children>
+                                <Label styleClass="bento-title" text="Face ID" />
+                                <Label fx:id="lbFaceIdStatus" styleClass="title-lg" text="Face ID disabled" />
+                                <Label fx:id="lbFaceIdHint" styleClass="subheadline" text="Enable Face ID to capture your face and use it later on the login screen." wrapText="true" />
+                                <HBox spacing="10.0">
+                                    <children>
+                                        <Button fx:id="btnFaceIdAction" onAction="#handleFaceIdAction" styleClass="glow-button" text="Enable Face ID" />
+                                        <Button fx:id="btnDisableFaceId" onAction="#handleDisableFaceId" styleClass="secondary-button" text="Disable" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
             </children>

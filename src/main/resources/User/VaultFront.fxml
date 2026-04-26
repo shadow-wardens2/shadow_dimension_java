@@ -120,6 +120,16 @@
                         <Region VBox.vgrow="ALWAYS" />
                     </VBox>
                 </HBox>
+
+                <VBox spacing="18.0" styleClass="artifact-card">
+                    <Label styleClass="headline-md" text="Face ID Access" />
+                    <Label fx:id="lbFaceIdStatus" styleClass="title-lg" text="Face ID disabled" />
+                    <Label fx:id="lbFaceIdHint" maxWidth="640.0" styleClass="body-md" text="Enable Face ID to capture your face and use it later from the login screen." wrapText="true" />
+                    <HBox spacing="14.0">
+                        <Button fx:id="btnFaceIdAction" onAction="#handleFaceIdAction" styleClass="ethereal-button" text="Enable Face ID" />
+                        <Button fx:id="btnDisableFaceId" onAction="#handleDisableFaceId" styleClass="secondary-button" text="Disable Face ID" />
+                    </HBox>
+                </VBox>
             </VBox>
         </content>
     </ScrollPane>
