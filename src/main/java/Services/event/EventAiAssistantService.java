@@ -6,9 +6,11 @@ import Utils.AppConfig;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -92,6 +94,78 @@ public class EventAiAssistantService {
                 "Which categories have no events yet?",
                 "Suggest how to improve event capacity planning"
         };
+    }
+
+    public String generateEventDescription(String title) {
+        if (title == null || title.isBlank()) {
+            return "Title is required to generate an AI description.";
+        }
+
+        String apiKey = resolveApiKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            return "AI key missing. Set OPENROUTER_API_KEY (or JVM property openrouter.api.key), then try again.";
+        }
+
+        String systemPrompt = "You are an event copywriter for Shadow Dimensions. "
+                + "Write one concise, attractive event description between 45 and 90 words. "
+                + "Use plain text only (no markdown, no bullets).";
+        String userPrompt = "Generate a compelling event description for this title: " + title.trim();
+
+        String payload = "{" +
+                "\"model\":\"" + escapeJson(MODEL) + "\"," +
+                "\"temperature\":0.7," +
+                "\"messages\":[" +
+                "{\"role\":\"system\",\"content\":\"" + escapeJson(systemPrompt) + "\"}," +
+                "{\"role\":\"user\",\"content\":\"" + escapeJson(userPrompt) + "\"}" +
+                "]}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(OPENROUTER_URL))
+                .timeout(Duration.ofSeconds(45))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .header("HTTP-Referer", "https://shadowdimensions.local")
+                .header("X-Title", "ShadowDimensions Event Generator")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return "AI service error (" + response.statusCode() + ").";
+            }
+
+            String content = extractAssistantContent(response.body());
+            if (content == null || content.isBlank()) {
+                return "No description was returned by AI.";
+            }
+            return content.trim();
+        } catch (IOException | InterruptedException e) {
+            return "Failed to call AI service: " + e.getMessage();
+        }
+    }
+
+    public String buildPollinationsImageUrl(String title, String description) {
+        String effectiveTitle = title == null ? "" : title.trim();
+        String effectiveDescription = description == null ? "" : description.trim();
+        String prompt = ("dark fantasy cinematic event poster " + effectiveTitle + " " + effectiveDescription).trim();
+        if (prompt.isBlank()) {
+            prompt = "dark fantasy event poster";
+        }
+
+        String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
+        long seed = System.currentTimeMillis();
+        StringBuilder url = new StringBuilder("https://image.pollinations.ai/prompt/")
+                .append(encodedPrompt)
+                .append("?model=flux&width=1024&height=768&nologo=true&seed=")
+                .append(seed);
+
+        String apiKey = AppConfig.get("POLLINATIONS_API_KEY");
+        if (apiKey != null && !apiKey.isBlank()) {
+            url.append("&api_key=").append(URLEncoder.encode(apiKey.trim(), StandardCharsets.UTF_8));
+        }
+
+        return url.toString();
     }
 
     private String buildDataContext() throws SQLException {

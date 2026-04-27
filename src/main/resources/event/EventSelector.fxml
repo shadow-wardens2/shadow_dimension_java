@@ -11,5 +11,8 @@
     <HBox alignment="CENTER" spacing="25.0" style="-fx-padding: 20 0 0 0;">
         <Button mnemonicParsing="false" onAction="#handleEvents" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Events" />
         <Button mnemonicParsing="false" onAction="#handleEventCategories" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Categories" />
+        <Button mnemonicParsing="false" onAction="#handleReservations" prefHeight="70.0" prefWidth="220.0" styleClass="secondary-button" text="Manage Reservations" />
+        <Button mnemonicParsing="false" onAction="#handleReclamations" prefHeight="70.0" prefWidth="220.0" styleClass="secondary-button" text="Manage Reclamations" />
+        <Button mnemonicParsing="false" onAction="#handleReviews" prefHeight="70.0" prefWidth="220.0" styleClass="secondary-button" text="Manage Reviews" />
     </HBox>
 </VBox>

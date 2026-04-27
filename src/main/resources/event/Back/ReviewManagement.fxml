@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="720.0" prefWidth="1200.0" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.Back.ReviewManagementController">
+    <children>
+        <VBox spacing="12.0" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="16.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="16.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <Label styleClass="headline" text="Review Management" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <TextField fx:id="tfSearch" prefWidth="260.0" promptText="Search user/event/comment..." />
+                        <ComboBox fx:id="cbSort" prefWidth="170.0" />
+                    </children>
+                </HBox>
+
+                <TableView fx:id="reviewTable" prefHeight="600.0" styleClass="table-view" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId" prefWidth="70.0" text="ID" />
+                        <TableColumn fx:id="colUser" prefWidth="170.0" text="User" />
+                        <TableColumn fx:id="colEvent" prefWidth="220.0" text="Event" />
+                        <TableColumn fx:id="colRating" prefWidth="90.0" text="Rating" />
+                        <TableColumn fx:id="colComment" prefWidth="360.0" text="Comment" />
+                        <TableColumn fx:id="colCreatedAt" prefWidth="180.0" text="Created At" />
+                        <TableColumn fx:id="colActions" prefWidth="110.0" text="Actions" />
+                    </columns>
+                </TableView>
+
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <children>
+                        <Label fx:id="lbPageInfo" text="Page 1 / 1" />
+                        <Button onAction="#handlePrevPage" styleClass="secondary-button" text="Prev" />
+                        <Button onAction="#handleNextPage" styleClass="glow-button" text="Next" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

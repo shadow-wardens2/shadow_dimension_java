@@ -43,6 +43,11 @@ public class HomeController {
     }
 
     @FXML
+    void navigateToEvents() {
+        loadPage("/event/Front/EventFront.fxml");
+    }
+
+    @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
     }

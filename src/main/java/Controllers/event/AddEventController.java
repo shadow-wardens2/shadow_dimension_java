@@ -3,11 +3,14 @@ package Controllers.event;
 import Entities.event.Category;
 import Entities.event.Event;
 import Services.event.CategoryService;
+import Services.event.EventAiAssistantService;
 import Services.event.EventService;
 import Utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextArea;
@@ -19,6 +22,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.concurrent.CompletableFuture;
 
 public class AddEventController {
 
@@ -42,9 +46,14 @@ public class AddEventController {
     private ComboBox<String> cbStatus;
     @FXML
     private ComboBox<String> cbLocationType;
+    @FXML
+    private Button btnGenerateDescription;
+    @FXML
+    private Button btnGenerateImage;
 
     private final EventService eventService = new EventService();
     private final CategoryService categoryService = new CategoryService();
+    private final EventAiAssistantService aiAssistantService = new EventAiAssistantService();
 
     @FXML
     public void initialize() {
@@ -76,6 +85,67 @@ public class AddEventController {
     @FXML
     private void handleAnnuler() {
         closeWindow();
+    }
+
+    @FXML
+    private void handleGenerateDescription() {
+        String title = tfTitle.getText() != null ? tfTitle.getText().trim() : "";
+        if (title.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Validation", "Enter the title first to generate a description.");
+            return;
+        }
+
+        btnGenerateDescription.setDisable(true);
+        String originalText = btnGenerateDescription.getText();
+        btnGenerateDescription.setText("Generating...");
+
+        CompletableFuture
+                .supplyAsync(() -> aiAssistantService.generateEventDescription(title))
+                .thenAccept(generatedDescription -> Platform.runLater(() -> {
+                    btnGenerateDescription.setDisable(false);
+                    btnGenerateDescription.setText(originalText);
+
+                    if (generatedDescription == null || generatedDescription.isBlank()) {
+                        showAlert(Alert.AlertType.WARNING, "AI", "No description was generated.");
+                        return;
+                    }
+
+                    if (generatedDescription.startsWith("AI key missing")
+                            || generatedDescription.startsWith("AI service error")
+                            || generatedDescription.startsWith("Failed to call AI service")
+                            || generatedDescription.startsWith("Title is required")) {
+                        showAlert(Alert.AlertType.WARNING, "AI", generatedDescription);
+                        return;
+                    }
+
+                    taDescription.setText(generatedDescription);
+
+                    String imageUrl = aiAssistantService.buildPollinationsImageUrl(title, generatedDescription);
+                    tfImage.setText(imageUrl);
+                }));
+    }
+
+    @FXML
+    private void handleGenerateImageUrl() {
+        String title = tfTitle.getText() != null ? tfTitle.getText().trim() : "";
+        String description = taDescription.getText() != null ? taDescription.getText().trim() : "";
+
+        if (title.isBlank() && description.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Validation", "Enter a title or description first to generate an image URL.");
+            return;
+        }
+
+        btnGenerateImage.setDisable(true);
+        String previousText = btnGenerateImage.getText();
+        btnGenerateImage.setText("Generating...");
+
+        CompletableFuture
+                .supplyAsync(() -> aiAssistantService.buildPollinationsImageUrl(title, description))
+                .thenAccept(url -> Platform.runLater(() -> {
+                    btnGenerateImage.setDisable(false);
+                    btnGenerateImage.setText(previousText);
+                    tfImage.setText(url);
+                }));
     }
 
     private Event buildAndValidateEvent() {
