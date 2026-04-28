@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 public class FrontVaultController {
 
@@ -28,6 +29,9 @@ public class FrontVaultController {
 
     @FXML
     private Button btnAuth;
+
+    @FXML
+    private Button btnLogout;
 
     @FXML
     private Label lbVaultTitle;
@@ -82,6 +86,10 @@ public class FrontVaultController {
             if (btnAuth != null) {
                 btnAuth.setText("Connect Soul");
             }
+            if (btnLogout != null) {
+                btnLogout.setVisible(false);
+                btnLogout.setManaged(false);
+            }
             lbVaultTitle.setText("Guest Vault");
             lbAuthState.setText("Enter the void freely. Connect your soul whenever you want to bind your identity.");
             lbUsername.setText("Shadow Dweller");
@@ -105,6 +113,10 @@ public class FrontVaultController {
 
         if (btnAuth != null) {
             btnAuth.setText("Edit Profile");
+        }
+        if (btnLogout != null) {
+            btnLogout.setVisible(true);
+            btnLogout.setManaged(true);
         }
 
         String username = safe(user.getUsername(), "Shadow Dweller");
@@ -170,16 +182,16 @@ public class FrontVaultController {
 
         try {
             Stage owner = (Stage) rootNode.getScene().getWindow();
-            BufferedImage capture = FaceCaptureUtil.captureFace(
+            List<BufferedImage> captures = FaceCaptureUtil.captureFaceProfile(
                     owner,
                     "Enable Face ID",
-                    "Capture a clear frontal face image to bind Face ID to your vault."
+                    "Capture your biometric profile. Stay centered and move slightly so Face ID remains stable even if your position changes later."
             );
-            if (capture == null) {
+            if (captures == null || captures.isEmpty()) {
                 return;
             }
 
-            String signature = serviceUser.buildFaceSignature(capture);
+            String signature = serviceUser.buildFaceSignature(captures);
             serviceUser.enrollFaceId(user.getId(), signature);
             refreshFaceIdState(serviceUser.getById(user.getId()));
             showAlert(Alert.AlertType.INFORMATION, "Face ID", "Face ID activee pour ce compte.");
@@ -204,6 +216,12 @@ public class FrontVaultController {
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
         }
+    }
+
+    @FXML
+    private void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 
     private void openEditProfile() {

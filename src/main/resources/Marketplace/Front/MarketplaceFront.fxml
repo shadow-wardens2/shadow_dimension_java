@@ -23,6 +23,7 @@
         <HBox spacing="20.0" alignment="CENTER">
             <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
             <Button styleClass="ethereal-button" text="Enter the Night" />
+            <Button fx:id="btnLogout" onAction="#handleLogout" styleClass="secondary-button" text="Logout" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
         </HBox>
     </HBox>
 

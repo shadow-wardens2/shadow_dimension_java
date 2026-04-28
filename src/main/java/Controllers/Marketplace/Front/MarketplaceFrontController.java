@@ -25,6 +25,7 @@ public class MarketplaceFrontController {
     @FXML private TilePane productsGrid;
     @FXML private AnchorPane rootNode;
     @FXML private Button btnDashboard;
+    @FXML private Button btnLogout;
     @FXML private javafx.scene.control.Label lbProductCount;
     @FXML private javafx.scene.control.TextField searchField;
     @FXML private javafx.scene.control.ComboBox<String> categoryFilter;
@@ -42,6 +43,10 @@ public class MarketplaceFrontController {
             if (user.isAdmin()) {
                 btnDashboard.setVisible(true);
                 btnDashboard.setManaged(true);
+            }
+            if (btnLogout != null) {
+                btnLogout.setVisible(true);
+                btnLogout.setManaged(true);
             }
         }
         
@@ -121,6 +126,12 @@ public class MarketplaceFrontController {
     @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
+    }
+
+    @FXML
+    void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 
     private void loadPage(String fxmlPath) {

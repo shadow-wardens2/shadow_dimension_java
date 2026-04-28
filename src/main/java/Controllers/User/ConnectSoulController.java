@@ -4,6 +4,7 @@ import Entities.User.User;
 import Services.User.GoogleOAuthService;
 import Services.User.ServiceUser;
 import Utils.FaceCaptureUtil;
+import Utils.FaceCaptureUtil.RecognitionFeedback;
 import Utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -493,8 +494,14 @@ public class ConnectSoulController {
                     "Look at the camera and the app will recognize your enrolled face automatically.",
                     frame -> {
                         try {
-                            String signature = serviceUser.buildFaceSignature(frame);
-                            return serviceUser.loginWithFace(signature);
+                            ServiceUser.FaceLoginAttempt attempt = serviceUser.analyzeFaceLogin(frame);
+                            if (!attempt.faceDetected()) {
+                                return RecognitionFeedback.noFace("No face detected");
+                            }
+                            if (attempt.matchedUser() != null) {
+                                return RecognitionFeedback.matched(attempt.matchedUser(), attempt.faceBounds(), "Recognized");
+                            }
+                            return RecognitionFeedback.scanning(attempt.faceBounds(), "Face detected");
                         } catch (SQLException e) {
                             throw new IllegalStateException("Erreur SQL: " + e.getMessage(), e);
                         }

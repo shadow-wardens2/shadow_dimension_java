@@ -12,6 +12,7 @@ public class HomeController {
     @FXML private javafx.scene.layout.AnchorPane rootNode;
     @FXML private Button btnDashboard;
     @FXML private Button btnAuth;
+    @FXML private Button btnLogout;
 
     @FXML
     public void initialize() {
@@ -23,6 +24,10 @@ public class HomeController {
             }
             if (btnAuth != null) {
                 btnAuth.setText("My Soul");
+            }
+            if (btnLogout != null) {
+                btnLogout.setVisible(true);
+                btnLogout.setManaged(true);
             }
         }
     }
@@ -54,6 +59,12 @@ public class HomeController {
         } else {
             loadPage("/User/ConnectSoul.fxml");
         }
+    }
+
+    @FXML
+    void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 
     private void loadPage(String fxmlPath) {
