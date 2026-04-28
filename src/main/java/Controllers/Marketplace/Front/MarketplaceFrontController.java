@@ -16,6 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import Services.Marketplace.AiRecommendationService;
+import Services.Marketplace.ServiceCommande;
+import javafx.scene.layout.HBox;
+import javafx.application.Platform;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import Utils.SessionManager;
 import Entities.User.User;
 import javafx.scene.control.Button;
@@ -28,6 +36,8 @@ public class MarketplaceFrontController {
     @FXML private javafx.scene.control.Label lbProductCount;
     @FXML private javafx.scene.control.TextField searchField;
     @FXML private javafx.scene.control.ComboBox<String> categoryFilter;
+    @FXML private VBox recommendationBox;
+    @FXML private HBox recommendationsContainer;
 
     private ServiceProduit sp = new ServiceProduit();
     private ServiceCategorie sc = new ServiceCategorie();
@@ -141,5 +151,10 @@ public class MarketplaceFrontController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void handleOpenCart() {
+        loadPage("/Marketplace/Front/CartView.fxml");
     }
 }

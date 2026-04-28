@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.collections.transformation.FilteredList;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 
@@ -34,6 +36,7 @@ public class ManagementCategorieController implements Initializable {
     private ObservableList<Categorie> observableCategories = FXCollections.observableArrayList();
     private FilteredList<Categorie> filteredData;
     private PageHost dashboardContext;
+    private Map<Categorie, Parent> cardCache = new HashMap<>();
 
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
@@ -79,15 +82,20 @@ public class ManagementCategorieController implements Initializable {
     private void refreshGrid() {
         categoryTilePane.getChildren().clear();
         for (Categorie category : filteredData) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/CategoryCard.fxml"));
-                Parent card = loader.load();
-                CategoryCardController controller = loader.getController();
-                controller.setCategoryData(category, this::editCategory, this::deleteCategory);
-                categoryTilePane.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+            Parent card = cardCache.get(category);
+            if (card == null) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/CategoryCard.fxml"));
+                    card = loader.load();
+                    CategoryCardController controller = loader.getController();
+                    controller.setCategoryData(category, this::editCategory, this::deleteCategory);
+                    cardCache.put(category, card);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    continue;
+                }
             }
+            categoryTilePane.getChildren().add(card);
         }
     }
 
@@ -128,6 +136,7 @@ public class ManagementCategorieController implements Initializable {
 
     private void loadCategories() {
         try {
+            cardCache.clear();
             observableCategories.setAll(serviceCategorie.getAll());
         } catch (SQLException e) {
             e.printStackTrace();
