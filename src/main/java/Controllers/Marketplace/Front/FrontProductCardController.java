@@ -1,6 +1,7 @@
 package Controllers.Marketplace.Front;
 
 import Entities.Marketplace.Produit;
+import Services.Marketplace.CurrencyConverterService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -24,7 +25,14 @@ public class FrontProductCardController {
     public void setData(Produit p, String categoryName) {
         this.currentProduct = p;
         if (lbName != null) lbName.setText(p.getNom());
-        if (lbPrice != null) lbPrice.setText(String.format("%.2f TND", p.getPrix()));
+        
+        // Use CurrencyConverterService for price display
+        double price = p.getPrix();
+        String currency = CurrencyConverterService.getCurrentCurrency();
+        double convertedPrice = CurrencyConverterService.convert(price, currency);
+        String symbol = CurrencyConverterService.getCurrencySymbol(currency);
+        
+        if (lbPrice != null) lbPrice.setText(String.format("%.2f %s", convertedPrice, symbol));
         if (lbStock != null) lbStock.setText(String.valueOf(p.getStock()));
         if (lbCategory != null) lbCategory.setText(categoryName.toUpperCase());
         if (lbDescription != null) lbDescription.setText(p.getDescription());

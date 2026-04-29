@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 import Utils.SessionManager;
 import Entities.User.User;
 import javafx.scene.control.Button;
+import Services.Marketplace.CurrencyConverterService;
+import javafx.scene.control.ComboBox;
 
 public class MarketplaceFrontController {
 
@@ -36,6 +38,7 @@ public class MarketplaceFrontController {
     @FXML private javafx.scene.control.Label lbProductCount;
     @FXML private javafx.scene.control.TextField searchField;
     @FXML private javafx.scene.control.ComboBox<String> categoryFilter;
+    @FXML private javafx.scene.control.ComboBox<String> currencySelector;
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
 
@@ -64,6 +67,10 @@ public class MarketplaceFrontController {
                 categoryFilter.getItems().add(c.getNom());
             }
             categoryFilter.getSelectionModel().selectFirst();
+
+            // Initialize Currency Selector
+            currencySelector.getItems().addAll("TND", "EUR", "USD");
+            currencySelector.setValue(CurrencyConverterService.getCurrentCurrency());
             
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,6 +100,16 @@ public class MarketplaceFrontController {
             .collect(Collectors.toList());
             
         displayProducts(filtered);
+    }
+
+    @FXML
+    void handleCurrencyChange() {
+        String selected = currencySelector.getValue();
+        if (selected != null) {
+            CurrencyConverterService.setCurrentCurrency(selected);
+            // Refresh the grid to update prices
+            handleSearch(); // This will trigger displayProducts with current filters
+        }
     }
 
     private void displayProducts(List<Produit> products) {
