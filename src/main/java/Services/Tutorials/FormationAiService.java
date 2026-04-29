@@ -148,13 +148,17 @@ public class FormationAiService {
         if (key != null && !key.isBlank())
             return key.trim();
 
-        // 3. Try local file (api_key.txt)
-        java.io.File file = new java.io.File("api_key.txt");
-        if (file.exists()) {
+        // 3. Try local file (.env)
+        java.io.File envFile = new java.io.File(".env");
+        if (envFile.exists()) {
             try {
-                return java.nio.file.Files.readString(file.toPath()).trim();
+                return java.nio.file.Files.readAllLines(envFile.toPath()).stream()
+                        .filter(l -> l.startsWith("OPENROUTER_API_KEY="))
+                        .map(l -> l.substring("OPENROUTER_API_KEY=".length()).trim())
+                        .findFirst()
+                        .orElse(null);
             } catch (java.io.IOException e) {
-                System.err.println("Shadow Oracle: Could not read api_key.txt");
+                System.err.println("Shadow Oracle: Could not read .env");
             }
         }
         return null;

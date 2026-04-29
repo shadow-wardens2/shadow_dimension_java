@@ -176,12 +176,16 @@ public class AiQuizService {
         if (key != null && !key.isBlank())
             return key.trim();
 
-        java.io.File file = new java.io.File("api_key.txt");
-        if (file.exists()) {
+        java.io.File envFile = new java.io.File(".env");
+        if (envFile.exists()) {
             try {
-                return Files.readString(file.toPath()).trim();
+                return java.nio.file.Files.readAllLines(envFile.toPath()).stream()
+                        .filter(l -> l.startsWith("OPENROUTER_API_KEY="))
+                        .map(l -> l.substring("OPENROUTER_API_KEY=".length()).trim())
+                        .findFirst()
+                        .orElse(null);
             } catch (IOException e) {
-                System.err.println("AI Quiz Forge: Could not read api_key.txt");
+                System.err.println("AI Quiz Forge: Could not read .env");
             }
         }
         return null;
