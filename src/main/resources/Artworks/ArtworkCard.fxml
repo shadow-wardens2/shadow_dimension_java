@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox fx:id="cardContainer" onMouseClicked="#handleCardClick" prefWidth="280.0" spacing="0" styleClass="artwork-card" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.ArtworkCardController">
+    <children>
+        <StackPane styleClass="artwork-image-container">
+            <ImageView fx:id="artworkImage" fitHeight="180.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="true">
+                <!-- Placeholder if image fails -->
+            </ImageView>
+            <Pane fx:id="statusContainer" StackPane.alignment="TOP_RIGHT">
+                <children>
+                    <Label fx:id="statusBadge" layoutX="10.0" layoutY="10.0" styleClass="artwork-status-badge" text="AVAILABLE" />
+                </children>
+            </Pane>
+        </StackPane>
+        
+        <VBox spacing="12" style="-fx-padding: 20;">
+            <VBox spacing="4">
+                <Text fx:id="titleText" styleClass="artwork-title" text="Artwork Title" wrappingWidth="240" />
+                <Label fx:id="categoryLabel" style="-fx-text-fill: #8b5cf6; -fx-font-size: 12px; -fx-font-weight: bold;" text="CATEGORY" />
+            </VBox>
+            
+            <Label fx:id="descriptionLabel" style="-fx-text-fill: #adaaae; -fx-font-size: 13px;" text="Brief description of the artwork goes here..." wrapText="true" minHeight="40" alignment="TOP_LEFT" />
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Text fx:id="priceText" styleClass="artwork-price" text="250 DT" />
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox spacing="8">
+                    <Button onAction="#handleEdit" styleClass="icon-button" text="✎" />
+                    <Button onAction="#handleDelete" styleClass="icon-button" style="-fx-text-fill: #ef4444;" text="🗑" />
+                </HBox>
+            </HBox>
+        </VBox>
+    </children>
+</VBox>
