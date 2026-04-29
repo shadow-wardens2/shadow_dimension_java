@@ -4,18 +4,24 @@ import Entities.Artworks.Artworks;
 import Services.Artworks.ServiceArtworks;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class DetailArtworkController {
 
+    @FXML private HBox adminActions;
+    @FXML private Button backButton;
     @FXML private ImageView artworkImage;
     @FXML private Label statusBadge;
     @FXML private Label categoryLabel;
@@ -27,9 +33,17 @@ public class DetailArtworkController {
     private Artworks artwork;
     private ServiceArtworks serviceArtworks = new ServiceArtworks();
     private PageHost dashboardContext;
+    private boolean isFrontOffice = false;
 
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
+        this.isFrontOffice = false;
+        if (adminActions != null) adminActions.setVisible(true);
+    }
+
+    public void setIsFrontOffice(boolean isFrontOffice) {
+        this.isFrontOffice = isFrontOffice;
+        if (adminActions != null) adminActions.setVisible(!isFrontOffice);
     }
 
     public void setArtworkData(Artworks artwork) {
@@ -73,7 +87,7 @@ public class DetailArtworkController {
     @FXML
     private void handleEdit(ActionEvent event) {
         if (dashboardContext != null) {
-            Object controller = dashboardContext.loadPage("/Artworks/AjouterArtwork.fxml");
+            Object controller = dashboardContext;
             if (controller instanceof AjouterArtworkController) {
                 ((AjouterArtworkController) controller).setArtworkData(artwork);
             }
@@ -102,6 +116,13 @@ public class DetailArtworkController {
     private void navigateToGallery() {
         if (dashboardContext != null) {
             dashboardContext.loadPage("/Artworks/ListerArtworks.fxml");
+        } else if (isFrontOffice) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Artworks/ArtworksFront.fxml"));
+                artworkImage.getScene().setRoot(loader.load());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else if (artworkImage.getScene().getWindow() instanceof javafx.stage.Stage) {
              ((javafx.stage.Stage) artworkImage.getScene().getWindow()).close();
         }

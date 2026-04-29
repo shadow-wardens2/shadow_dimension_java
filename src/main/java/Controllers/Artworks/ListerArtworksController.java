@@ -18,7 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;

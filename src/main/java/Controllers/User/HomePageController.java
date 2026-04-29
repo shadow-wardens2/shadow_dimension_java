@@ -92,6 +92,11 @@ public class HomePageController implements PageHost {
     }
 
     @FXML
+    void openArtworksManagement(ActionEvent event) {
+        loadPage("/Artworks/ListerArtworks.fxml");
+    }
+
+    @FXML
     void openUserManagement(ActionEvent event) {
         User user = SessionManager.getCurrentUser();
         if (user != null && user.isAdmin()) {
@@ -151,7 +156,7 @@ public class HomePageController implements PageHost {
         }
     }
 
-    public void loadPage(String fxmlPath) {
+    public Object loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -199,11 +204,28 @@ public class HomePageController implements PageHost {
             if (controller instanceof Controllers.Tutorials.ManagementLeconController) {
                 ((Controllers.Tutorials.ManagementLeconController) controller).setDashboardContext(this);
             }
+            if (controller instanceof Controllers.Artworks.ListerArtworksController) {
+                ((Controllers.Artworks.ListerArtworksController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterArtworkController) {
+                ((Controllers.Artworks.AjouterArtworkController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.DetailArtworkController) {
+                ((Controllers.Artworks.DetailArtworkController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.ListerCategoriesController) {
+                ((Controllers.Artworks.ListerCategoriesController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterCategoryController) {
+                ((Controllers.Artworks.AjouterCategoryController) controller).setDashboardContext(this);
+            }
 
             contentArea.getChildren().clear();
             contentArea.getChildren().add(root);
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

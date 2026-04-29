@@ -9,9 +9,9 @@
     <VBox spacing="40" style="-fx-background-color: #050507; -fx-padding: 48;">
         <!-- Back Button & Header -->
         <HBox alignment="CENTER_LEFT" spacing="20">
-            <Button onAction="#handleBack" styleClass="secondary-button" text="← Back to Gallery" />
+            <Button fx:id="backButton" onAction="#handleBack" styleClass="secondary-button" text="← Back to Gallery" />
             <Region HBox.hgrow="ALWAYS" />
-            <HBox spacing="12">
+            <HBox fx:id="adminActions" spacing="12">
                 <Button onAction="#handleEdit" styleClass="glow-button" text="Edit Artwork" />
                 <Button onAction="#handleDelete" styleClass="delete-button" text="Delete" />
             </HBox>

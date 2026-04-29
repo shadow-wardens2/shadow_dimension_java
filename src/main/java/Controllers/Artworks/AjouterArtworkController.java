@@ -14,7 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.PageHost;
 import Entities.Artworks.PriceAnalysis;
 import java.net.URL;
 import java.sql.SQLException;

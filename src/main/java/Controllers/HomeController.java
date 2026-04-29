@@ -91,6 +91,11 @@ public class HomeController {
     }
 
     @FXML
+    void navigateToArtworks() {
+        loadPage("/Artworks/ArtworksFront.fxml");
+    }
+
+    @FXML
     void navigateToManagement() {
         if (SessionManager.isLoggedIn()) {
             loadPage("/Marketplace/Back/MarketplaceManagement.fxml");
