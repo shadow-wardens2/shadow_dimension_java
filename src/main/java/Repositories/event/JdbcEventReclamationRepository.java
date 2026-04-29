@@ -187,6 +187,15 @@ public class JdbcEventReclamationRepository implements EventReclamationRepositor
         }
     }
 
+    @Override
+    public void deleteById(int reclamationId) throws SQLException {
+        String sql = "DELETE FROM evt_reclamation WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, reclamationId);
+            ps.executeUpdate();
+        }
+    }
+
     private String baseSelect() {
         return "SELECT r.*, u.username, u.email, e.title AS event_title FROM evt_reclamation r "
                 + "JOIN `user` u ON u.id = r.user_id "

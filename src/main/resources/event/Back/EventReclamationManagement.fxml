@@ -35,6 +35,7 @@
                         <TableColumn fx:id="colCreatedAt" prefWidth="170.0" text="Created" />
                         <TableColumn fx:id="colClaim" prefWidth="260.0" text="Message" />
                         <TableColumn fx:id="colAiSummary" prefWidth="250.0" text="AI Response" />
+                        <TableColumn fx:id="colActions" prefWidth="80.0" text="Actions" />
                     </columns>
                 </TableView>
 

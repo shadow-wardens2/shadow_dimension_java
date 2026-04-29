@@ -95,4 +95,52 @@ class EventReclamationServiceTest {
 
         verify(reclamationRepository, never()).adminRespond(anyInt(), any(), any());
     }
+
+    @Test
+    void onlyAdminCanDeleteReclamation() throws Exception {
+        EventReclamationRepository reclamationRepository = mock(EventReclamationRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        EventAiAssistantService aiAssistantService = mock(EventAiAssistantService.class);
+
+        EventReclamationService service = new EventReclamationService(reclamationRepository, reservationRepository, aiAssistantService);
+
+        User regularUser = new User();
+        regularUser.setId(5);
+        regularUser.setRoles("[\"ROLE_USER\"]");
+
+        assertThrows(EventModuleException.class, () -> service.deleteReclamation(10, regularUser));
+        verify(reclamationRepository, never()).deleteById(anyInt());
+    }
+
+    @Test
+    void adminCanDeleteReclamation() throws Exception {
+        EventReclamationRepository reclamationRepository = mock(EventReclamationRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        EventAiAssistantService aiAssistantService = mock(EventAiAssistantService.class);
+
+        EventReclamationService service = new EventReclamationService(reclamationRepository, reservationRepository, aiAssistantService);
+
+        User admin = new User();
+        admin.setId(1);
+        admin.setRoles("[\"ROLE_ADMIN\"]");
+
+        service.deleteReclamation(10, admin);
+        verify(reclamationRepository, times(1)).deleteById(10);
+    }
+
+    @Test
+    void invalidReclamationIdRejected() throws Exception {
+        EventReclamationRepository reclamationRepository = mock(EventReclamationRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        EventAiAssistantService aiAssistantService = mock(EventAiAssistantService.class);
+
+        EventReclamationService service = new EventReclamationService(reclamationRepository, reservationRepository, aiAssistantService);
+
+        User admin = new User();
+        admin.setId(1);
+        admin.setRoles("[\"ROLE_ADMIN\"]");
+
+        assertThrows(EventModuleException.class, () -> service.deleteReclamation(-1, admin));
+        verify(reclamationRepository, never()).deleteById(anyInt());
+    }
 }

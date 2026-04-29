@@ -177,6 +177,18 @@ public class EventReclamationService {
         return raw.trim();
     }
 
+    public void deleteReclamation(int reclamationId, User actor) {
+        enforceAdmin(actor);
+        if (reclamationId <= 0) {
+            throw new EventModuleException("Invalid reclamation ID.");
+        }
+        try {
+            reclamationRepository.deleteById(reclamationId);
+        } catch (SQLException e) {
+            throw new EventModuleException("Unable to delete reclamation: " + e.getMessage(), e);
+        }
+    }
+
     private String buildAiSummaryFallback(String subject, String message, String eventTitle) {
         String prompt = "Summarize this event reclamation in one sentence for admins. Event='" + safe(eventTitle)
                 + "', Subject='" + safe(subject) + "', Message='" + safe(message) + "'.";

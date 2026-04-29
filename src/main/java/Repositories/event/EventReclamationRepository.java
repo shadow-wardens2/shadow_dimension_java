@@ -23,4 +23,6 @@ public interface EventReclamationRepository {
     void escalate(int reclamationId) throws SQLException;
 
     void adminRespond(int reclamationId, EventReclamationStatus status, String adminResponse) throws SQLException;
+
+    void deleteById(int reclamationId) throws SQLException;
 }

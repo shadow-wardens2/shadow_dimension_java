@@ -13,6 +13,7 @@ import jakarta.mail.internet.MimeMessage;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -25,6 +26,10 @@ import java.util.Properties;
 public class ReservationNotifierService implements ReservationNotificationGateway {
 
     private final HttpClient client = HttpClient.newHttpClient();
+
+    public ReservationNotifierService() {
+        AppConfig.loadDotEnv();
+    }
 
     @Override
     public void notifyReservationDecision(Reservation reservation, ReservationStatus newStatus) {
@@ -58,6 +63,8 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", smtpHost);
         props.put("mail.smtp.port", smtpPort);
+        props.put("mail.smtp.ssl.trust", smtpHost);
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
         String finalUsername = username;
         String finalPassword = password.replaceAll("\\s+", "");
@@ -69,22 +76,40 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
         });
 
         String safeName = reservation.getUsername() == null || reservation.getUsername().isBlank()
-                ? "Shadow Dweller"
-                : reservation.getUsername();
-        String body = "Hello " + safeName + ",\n\n"
+            ? "Shadow Dweller"
+            : reservation.getUsername();
+
+        String subject;
+        String body;
+        if (status == ReservationStatus.ACCEPTED) {
+            subject = "Reservation Approved";
+            body = "Hello " + safeName + ",\n\n"
+                + "Your reservation for the event '" + reservation.getEventTitle() + "' has been approved successfully. "
+                + "We look forward to seeing you.\n\n"
+                + "Thank you for using Shadow Dimensions.";
+        } else if (status == ReservationStatus.DENIED) {
+            subject = "Reservation Update";
+            body = "Hello " + safeName + ",\n\n"
+                + "Your reservation for the event '" + reservation.getEventTitle() + "' could not be approved at this time. "
+                + "Please contact our team for more information.\n\n"
+                + "Thank you for using Shadow Dimensions.";
+        } else {
+            subject = "Shadow Dimensions - Reservation " + status.name();
+            body = "Hello " + safeName + ",\n\n"
                 + "Your reservation status has been updated for event: " + reservation.getEventTitle() + "\n"
                 + "New status: " + status.name() + "\n\n"
                 + "Thank you for using Shadow Dimensions.";
+        }
 
         try {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(finalUsername));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(reservation.getUserEmail()));
-            message.setSubject("Shadow Dimensions - Reservation " + status.name());
+            message.setSubject(subject);
             message.setText(body);
             Transport.send(message);
-        } catch (Exception ignored) {
-            // Notifications are best-effort and should not block moderation actions.
+        } catch (Exception e) {
+            System.err.println("Reservation email failed: " + e.getMessage());
         }
     }
 
@@ -102,7 +127,18 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
             return;
         }
 
-        String body = "Shadow Dimensions: your reservation for '" + reservation.getEventTitle() + "' is now " + status.name() + ".";
+        String safeName = reservation.getUsername() == null || reservation.getUsername().isBlank()
+                ? "there"
+                : reservation.getUsername();
+
+        String body;
+        if (status == ReservationStatus.ACCEPTED) {
+            body = "Hello " + safeName + "! Your reservation for '" + reservation.getEventTitle() + "' has been approved successfully! We look forward to seeing you.";
+        } else if (status == ReservationStatus.DENIED) {
+            body = "Hello " + safeName + ". Unfortunately, your reservation for '" + reservation.getEventTitle() + "' could not be approved at this time. Please contact us for more information.";
+        } else {
+            body = "Shadow Dimensions: your reservation for '" + reservation.getEventTitle() + "' is now " + status.name() + ".";
+        }
 
         String payload = "To=" + urlEncode(to)
                 + "&From=" + urlEncode(from)
@@ -146,7 +182,11 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
 
         String user = credentials.substring(0, sep);
         String pass = credentials.substring(sep + 1);
-        return new ParsedMailer(user, pass);
+        return new ParsedMailer(urlDecode(user), urlDecode(pass));
+    }
+
+    private String urlDecode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
     private record ParsedMailer(String username, String password) {

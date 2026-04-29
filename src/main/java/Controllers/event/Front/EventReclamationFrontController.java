@@ -124,13 +124,48 @@ public class EventReclamationFrontController implements Initializable {
         }
 
         try {
-            reclamationService.create(user.getId(), eventId, tfSubject.getText(), taClaim.getText());
+            EventReclamation created = reclamationService.create(user.getId(), eventId, tfSubject.getText(), taClaim.getText());
             tfSubject.clear();
             taClaim.clear();
             loadMyRows();
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Reclamation submitted.");
+
+            showAiResponseDialog(created);
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Reclamation", e.getMessage());
+        }
+    }
+
+    private void showAiResponseDialog(EventReclamation reclamation) {
+        Alert dialog = new Alert(Alert.AlertType.INFORMATION);
+        dialog.setTitle("AI Response Generated");
+        dialog.setHeaderText("Your Reclamation - AI Analysis");
+        dialog.setContentText("AI Response:\n\n" + (reclamation.getAiResponse() != null ? reclamation.getAiResponse() : "No response available"));
+        dialog.getDialogPane().setStyle("-fx-font-size: 12;");
+
+        javafx.scene.control.ButtonType escalateBtn = new javafx.scene.control.ButtonType("Escalate to Admin", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        javafx.scene.control.ButtonType acceptBtn = new javafx.scene.control.ButtonType("Accept Response", javafx.scene.control.ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        dialog.getButtonTypes().setAll(escalateBtn, acceptBtn);
+
+        java.util.Optional<javafx.scene.control.ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == escalateBtn) {
+            handleEscalateFromDialog(reclamation);
+        }
+    }
+
+    private void handleEscalateFromDialog(EventReclamation reclamation) {
+        User user = SessionManager.getCurrentUser();
+        if (user == null) {
+            showAlert(Alert.AlertType.WARNING, "Authentication", "Please login first.");
+            return;
+        }
+        try {
+            reclamationService.escalate(reclamation.getId(), user);
+            loadMyRows();
+            showAlert(Alert.AlertType.INFORMATION, "Escalated", "Your reclamation has been escalated to admin. They will review and respond shortly.");
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Escalation", e.getMessage());
         }
     }
 

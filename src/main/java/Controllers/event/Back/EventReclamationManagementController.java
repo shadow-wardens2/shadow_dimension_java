@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -42,6 +43,8 @@ public class EventReclamationManagementController implements Initializable {
     @FXML
     private TableColumn<EventReclamation, String> colAiSummary;
     @FXML
+    private TableColumn<EventReclamation, String> colActions;
+    @FXML
     private TextField tfSearch;
     @FXML
     private ComboBox<String> cbSort;
@@ -72,6 +75,26 @@ public class EventReclamationManagementController implements Initializable {
         colCreatedAt.setCellValueFactory(cell -> new ReadOnlyStringWrapper(String.valueOf(cell.getValue().getCreatedAt())));
         colClaim.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getMessage()));
         colAiSummary.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getAiResponse()));
+
+        colActions.setCellFactory(param -> new javafx.scene.control.TableCell<>() {
+            private final javafx.scene.control.Button btnDelete = new javafx.scene.control.Button("Delete");
+            private final javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(8, btnDelete);
+
+            {
+                btnDelete.getStyleClass().add("delete-button");
+                btnDelete.setOnAction(event -> handleDeleteReclamation(getTableView().getItems().get(getIndex())));
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(box);
+                }
+            }
+        });
 
         cbSort.setItems(FXCollections.observableArrayList("Newest", "Oldest", "User", "Event", "Status"));
         cbSort.getSelectionModel().selectFirst();
@@ -150,6 +173,30 @@ public class EventReclamationManagementController implements Initializable {
             showAlert(Alert.AlertType.INFORMATION, "Moderation", "Reclamation updated.");
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Moderation", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleDeleteReclamation(EventReclamation reclamation) {
+        if (reclamation == null) {
+            showAlert(Alert.AlertType.WARNING, "Selection", "Invalid reclamation.");
+            return;
+        }
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Delete Reclamation");
+        confirmation.setHeaderText("Confirm Deletion");
+        confirmation.setContentText("Are you sure you want to delete reclamation #" + reclamation.getId() + " from user " + reclamation.getUsername() + "?");
+
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            User actor = SessionManager.getCurrentUser();
+            try {
+                reclamationService.deleteReclamation(reclamation.getId(), actor);
+                loadRows();
+                showAlert(Alert.AlertType.INFORMATION, "Deletion", "Reclamation deleted successfully.");
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Deletion", e.getMessage());
+            }
         }
     }
 
