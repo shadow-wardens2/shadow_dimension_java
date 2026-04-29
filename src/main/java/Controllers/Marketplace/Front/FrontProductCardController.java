@@ -19,6 +19,7 @@ public class FrontProductCardController {
     @FXML private Label lbCategory;
     @FXML private Label lbDescription;
     @FXML private Rectangle imagePlaceholder;
+    @FXML private javafx.scene.control.Button btnAddToCart;
 
     private Produit currentProduct;
 
@@ -33,7 +34,27 @@ public class FrontProductCardController {
         String symbol = CurrencyConverterService.getCurrencySymbol(currency);
         
         if (lbPrice != null) lbPrice.setText(String.format("%.2f %s", convertedPrice, symbol));
-        if (lbStock != null) lbStock.setText(String.valueOf(p.getStock()));
+        
+        if (lbStock != null) {
+            if (p.getStock() <= 0) {
+                lbStock.setText("OUT OF STOCK");
+                lbStock.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
+                if (btnAddToCart != null) {
+                    btnAddToCart.setDisable(true);
+                    btnAddToCart.setOpacity(0.5);
+                    btnAddToCart.setText("Voided");
+                }
+            } else {
+                lbStock.setText(String.valueOf(p.getStock()));
+                lbStock.setStyle("-fx-text-fill: -fx-primary;");
+                if (btnAddToCart != null) {
+                    btnAddToCart.setDisable(false);
+                    btnAddToCart.setOpacity(1.0);
+                    btnAddToCart.setText("Cart +");
+                }
+            }
+        }
+        
         if (lbCategory != null) lbCategory.setText(categoryName.toUpperCase());
         if (lbDescription != null) lbDescription.setText(p.getDescription());
 
