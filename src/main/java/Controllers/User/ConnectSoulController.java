@@ -210,7 +210,20 @@ public class ConnectSoulController {
         } catch (IllegalArgumentException e) {
             String msg = fallbackMessage(e);
             String lower = msg.toLowerCase();
-            if (lower.contains("mot de passe") || lower.contains("password") || lower.contains("obligatoire")) {
+            if (lower.contains("non verifie")) {
+                try {
+                    User existingUser = serviceUser.getByIdentity(value(tfLoginIdentity).trim());
+                    if (existingUser != null && existingUser.getEmail() != null && !existingUser.getEmail().isBlank()) {
+                        showAlert(Alert.AlertType.INFORMATION, "Verification", "Ce compte existe deja mais n'est pas encore verifie. Entrez ou redemandez votre code.");
+                        startVerificationDialog(existingUser.getEmail());
+                        return;
+                    }
+                } catch (SQLException sqlException) {
+                    showAlert(Alert.AlertType.ERROR, "Erreur SQL", sqlException.getMessage());
+                    return;
+                }
+                setInlineError(lblLoginIdentityError, msg);
+            } else if (lower.contains("mot de passe") || lower.contains("password") || lower.contains("obligatoire")) {
                 setInlineError(lblLoginPasswordError, msg);
             } else {
                 setInlineError(lblLoginIdentityError, msg);
