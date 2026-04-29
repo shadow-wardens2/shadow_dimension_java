@@ -13,10 +13,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import Utils.EnvConfig;
 
 public class AiRecommendationService {
-
-    private static final String API_KEY = "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"; // REPLACE THIS
+    
+    private static final String API_KEY = EnvConfig.get("OPENROUTER_API_KEY");
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
     private static final String[] MODELS = {
@@ -38,7 +39,7 @@ public class AiRecommendationService {
         Collections.shuffle(available);
         List<Produit> subset = available.subList(0, Math.min(50, available.size()));
 
-        if (API_KEY.equals("YOUR_OPENROUTER_API_KEY")) {
+        if (API_KEY == null || API_KEY.isEmpty() || API_KEY.equals("YOUR_OPENROUTER_API_KEY")) {
             System.err.println("API Key not set for OpenRouter. Using fallback.");
             return getFallback(available, 4);
         }
