@@ -227,8 +227,6 @@ public class HomePageController implements PageHost {
         }
     }
 
-    @Override
-
     // PageHost hook (currently no-op).
     public void refreshStatistics() {
         // Implementation for refreshing statistics if needed

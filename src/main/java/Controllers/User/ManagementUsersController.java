@@ -78,7 +78,7 @@ public class ManagementUsersController {
     @FXML
     private void handleToggleSortById() {
         idAscending = !idAscending;
-        btnSortId.setText(idAscending ? "ID ASC" : "ID DESC");
+        btnSortId.setText(idAscending ? "Oldest First" : "Newest First");
         applyFiltersAndSort();
     }
 
@@ -167,9 +167,9 @@ public class ManagementUsersController {
             String name = safe(user.getUsername()).toLowerCase();
             String email = safe(user.getEmail()).toLowerCase();
             String rank = safe(user.getRank()).toLowerCase();
-            String id = String.valueOf(user.getId());
+            String status = safe(user.getStatus()).toLowerCase();
 
-            if (search.isBlank() || name.contains(search) || email.contains(search) || rank.contains(search) || id.contains(search)) {
+            if (search.isBlank() || name.contains(search) || email.contains(search) || rank.contains(search) || status.contains(search)) {
                 displayedUsers.add(user);
             }
         }
@@ -199,9 +199,6 @@ public class ManagementUsersController {
 
     // Builds one interactive card per user with rank/status/actions.
     private HBox createUserCard(User user) {
-        Label idLabel = new Label("#" + user.getId());
-        idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700; -fx-min-width: 56;");
-
         Label usernameLabel = new Label(safe(user.getUsername()));
         usernameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
         Label emailLabel = new Label(safe(user.getEmail()));
@@ -256,7 +253,7 @@ public class ManagementUsersController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox row = new HBox(14, idLabel, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
+        HBox row = new HBox(14, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-card");
         return row;
@@ -301,11 +298,10 @@ public class ManagementUsersController {
         document.add(generated);
         document.add(new Paragraph(" "));
 
-        PdfPTable table = new PdfPTable(6);
+        PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{0.9f, 2.7f, 3.8f, 2.0f, 1.5f, 2.1f});
+        table.setWidths(new float[]{2.9f, 4.0f, 2.0f, 1.6f, 2.3f});
 
-        addHeaderCell(table, "ID");
         addHeaderCell(table, "IDENTITY");
         addHeaderCell(table, "EMAIL");
         addHeaderCell(table, "RANK");
@@ -313,7 +309,6 @@ public class ManagementUsersController {
         addHeaderCell(table, "JOINED");
 
         for (User user : displayedUsers) {
-            addDataCell(table, String.valueOf(user.getId()), Element.ALIGN_LEFT);
             addDataCell(table, safe(user.getUsername()), Element.ALIGN_LEFT);
             addDataCell(table, safe(user.getEmail()), Element.ALIGN_LEFT);
             addBadgeCell(table, safe(user.getRank()), rankColor(safe(user.getRank())), new GrayColor(1f));
