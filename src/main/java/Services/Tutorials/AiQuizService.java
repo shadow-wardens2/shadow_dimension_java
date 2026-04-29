@@ -168,22 +168,6 @@ public class AiQuizService {
     }
 
     private String resolveApiKey() {
-        String key = System.getenv("OPENROUTER_API_KEY");
-        if (key != null && !key.isBlank())
-            return key.trim();
-
-        key = System.getProperty("openrouter.api.key");
-        if (key != null && !key.isBlank())
-            return key.trim();
-
-        java.io.File file = new java.io.File("api_key.txt");
-        if (file.exists()) {
-            try {
-                return Files.readString(file.toPath()).trim();
-            } catch (IOException e) {
-                System.err.println("AI Quiz Forge: Could not read api_key.txt");
-            }
-        }
-        return null;
+        return Utils.EnvConfig.get("OPENROUTER_API_KEY");
     }
 }

@@ -138,26 +138,7 @@ public class FormationAiService {
     }
 
     private String resolveApiKey() {
-        // 1. Try Environment Variable
-        String key = System.getenv("OPENROUTER_API_KEY");
-        if (key != null && !key.isBlank())
-            return key.trim();
-
-        // 2. Try JVM Property
-        key = System.getProperty("openrouter.api.key");
-        if (key != null && !key.isBlank())
-            return key.trim();
-
-        // 3. Try local file (api_key.txt)
-        java.io.File file = new java.io.File("api_key.txt");
-        if (file.exists()) {
-            try {
-                return java.nio.file.Files.readString(file.toPath()).trim();
-            } catch (java.io.IOException e) {
-                System.err.println("Shadow Oracle: Could not read api_key.txt");
-            }
-        }
-        return null;
+        return Utils.EnvConfig.get("OPENROUTER_API_KEY");
     }
 
     private String escapeJson(String value) {
