@@ -115,18 +115,7 @@ public class ConnectSoulController {
     @FXML
     private VBox signupBox;
 
-    @FXML
-    private Label lblLoginIdentityError;
-    @FXML
-    private Label lblLoginPasswordError;
-    @FXML
-    private Label lblSignupEmailError;
-    @FXML
-    private Label lblSignupUsernameError;
-    @FXML
-    private Label lblSignupPasswordError;
-    @FXML
-    private Label lblSignupConfirmPasswordError;
+
 
     @FXML
     private VBox resetBox;

@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public class ShadowDimensionsDB {
 
-    public String Path = EnvConfig.get("DB_URL", "jdbc:mysql://localhost:3306/shadow_dimensions");
-    public String User = EnvConfig.get("DB_USER", "root");
-    public String Password = EnvConfig.get("DB_PASSWORD", "");
+    public String Path ="jdbc:mysql://localhost:3306/shadow_dimensions";
+    public String User ="root";
+    public String Password ="";
     public Connection connection;
     public static ShadowDimensionsDB instance;
     public ShadowDimensionsDB(){
@@ -16,7 +16,7 @@ public class ShadowDimensionsDB {
             connection= DriverManager.getConnection(Path,User,Password);
             System.out.println("ShadowDimensionsDB connection established");
         } catch (SQLException e) {
-            System.err.println("ShadowDimensionsDB Connection Failed: " + e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
     public static ShadowDimensionsDB getInstance(){

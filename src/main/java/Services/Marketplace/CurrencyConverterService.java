@@ -7,12 +7,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import Utils.EnvConfig;
 
 public class CurrencyConverterService {
     // --- CONFIGURATION ---
     // Get your free API key at: https://www.exchangerate-api.com/
-    private static final String API_KEY = EnvConfig.get("EXCHANGERATE_API_KEY");
+    private static final String API_KEY = "7b9ddaa1b52ad6d36640a83e";
     private static final String BASE_CURRENCY = "TND";
     private static final String API_URL_TEMPLATE = "https://v6.exchangerate-api.com/v6/%s/latest/%s";
     private static final long CACHE_TTL_MS = 3600 * 1000; // 1 hour

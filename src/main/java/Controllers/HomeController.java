@@ -106,14 +106,7 @@ public class HomeController {
         }
     }
 
-    @FXML
-    void navigateToTutorials() {
-        if (SessionManager.isLoggedIn()) {
-            loadPage("/Tutorials/TutorialsFront.fxml");
-        } else {
-            loadPage("/User/ConnectSoul.fxml");
-        }
-    }
+
 
     @FXML
     void navigateToManagement() {
