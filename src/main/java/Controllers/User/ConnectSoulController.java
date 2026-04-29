@@ -418,11 +418,7 @@ public class ConnectSoulController {
             }
 
             tfLoginIdentity.setText(pendingResetEmail);
-            setLoginPasswordValue(password);
-            if (!loginPasswordVisible) {
-                loginPasswordVisible = true;
-                applyLoginPasswordVisibility();
-            }
+            clearLoginPasswordValue();
 
             showAlert(Alert.AlertType.INFORMATION, "Reset Password", "Mot de passe reinitialise. Vous pouvez maintenant vous connecter.");
             showLogin();
@@ -683,9 +679,9 @@ public class ConnectSoulController {
         updateSignupPasswordStrength();
     }
 
-    private void setLoginPasswordValue(String password) {
-        pfLoginPassword.setText(password);
-        tfLoginPasswordVisible.setText(password);
+    private void clearLoginPasswordValue() {
+        pfLoginPassword.clear();
+        tfLoginPasswordVisible.clear();
     }
 
     private void setResetPasswordValue(String password) {
@@ -900,6 +896,7 @@ public class ConnectSoulController {
 
                 showAlert(Alert.AlertType.INFORMATION, "Verification", "Email verifie. Vous pouvez maintenant vous connecter.");
                 tfLoginIdentity.setText(email);
+                clearLoginPasswordValue();
                 showLogin();
                 return;
             } catch (SQLException e) {
