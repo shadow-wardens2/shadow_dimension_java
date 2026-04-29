@@ -3,7 +3,7 @@ package Controllers.Tutorials;
 import Entities.Tutorials.Quiz;
 import Services.Tutorials.ServiceQuiz;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -15,6 +15,8 @@ public class EditQuizController {
     private TextField tfTitre;
     @FXML
     private TextField tfOrdre;
+    @FXML
+    private Label lbError;
 
     private ServiceQuiz serviceQuiz = new ServiceQuiz();
     private Quiz quiz;
@@ -31,7 +33,7 @@ public class EditQuizController {
         String ordreStr = tfOrdre.getText().trim();
 
         if (titre.isEmpty() || ordreStr.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Les champs obligatoires ne peuvent pas être vides.");
+            lbError.setText("Erreur: Les champs obligatoires ne peuvent pas être vides.");
             return;
         }
 
@@ -39,7 +41,7 @@ public class EditQuizController {
         try {
             ordre = Integer.parseInt(ordreStr);
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "L'ordre doit être un nombre valide.");
+            lbError.setText("Erreur: L'ordre doit être un nombre valide.");
             return;
         }
 
@@ -48,11 +50,10 @@ public class EditQuizController {
 
         try {
             serviceQuiz.update(quiz);
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Quiz mis à jour avec succès !");
             closeWindow();
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de mettre à jour le quiz.");
+            lbError.setText("Erreur: Impossible de mettre à jour le quiz.");
         }
     }
 
@@ -64,13 +65,5 @@ public class EditQuizController {
     private void closeWindow() {
         Stage stage = (Stage) tfTitre.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

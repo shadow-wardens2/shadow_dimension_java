@@ -17,6 +17,8 @@
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="&lt; Back" />
                <Label fx:id="lbQuizTitle" styleClass="headline" text="Configuring details for Quiz" />
+               <Pane HBox.hgrow="ALWAYS" />
+               <Button fx:id="btnForgeAi" mnemonicParsing="false" onAction="#handleForgeAi" styleClass="glow-button" text="🔮 FORGE WITH AI" style="-fx-font-size: 11px;" />
             </HBox>
             <HBox spacing="30.0" VBox.vgrow="ALWAYS">
                 <!-- COLONNE QUESTION -->

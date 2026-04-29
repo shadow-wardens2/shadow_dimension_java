@@ -6,8 +6,8 @@ import Services.Tutorials.ServiceQuestion;
 import Services.Tutorials.ServiceQuiz;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
@@ -22,6 +22,9 @@ public class AjouterQuestionController {
     @FXML
     private ComboBox<Quiz> cbQuiz;
 
+    @FXML
+    private Label lbError;
+
     private ServiceQuestion serviceQuestion;
     private ServiceQuiz serviceQuiz;
 
@@ -32,24 +35,18 @@ public class AjouterQuestionController {
 
     @FXML
     public void initialize() {
+        lbError.setText("");
         try {
             List<Quiz> quizzes = serviceQuiz.getAll();
             cbQuiz.setItems(FXCollections.observableArrayList(quizzes));
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les quizzes.");
+            lbError.setText("Erreur: Impossible de charger les quizzes.");
         }
     }
 
     public void setPreselectedQuiz(Quiz quiz) {
-        if (quiz != null && cbQuiz.getItems() != null) {
-            for (Quiz q : cbQuiz.getItems()) {
-                if (q.getId() == quiz.getId()) {
-                    cbQuiz.getSelectionModel().select(q);
-                    break;
-                }
-            }
-        }
+        cbQuiz.setValue(quiz);
     }
 
     @FXML
@@ -58,19 +55,17 @@ public class AjouterQuestionController {
         Quiz quiz = cbQuiz.getSelectionModel().getSelectedItem();
 
         if (texte.isEmpty() || quiz == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Le texte et le quiz sont obligatoires !");
+            lbError.setText("Erreur: Le texte et le quiz sont obligatoires !");
             return;
         }
 
         try {
             Question question = new Question(0, texte, quiz);
             serviceQuestion.add(question);
-
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "La question a été ajoutée avec succès !");
             fermerFenetre();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ajouter la question.");
+            lbError.setText("Erreur: Impossible d'ajouter la question.");
         }
     }
 
@@ -82,13 +77,5 @@ public class AjouterQuestionController {
     private void fermerFenetre() {
         Stage stage = (Stage) taTexte.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

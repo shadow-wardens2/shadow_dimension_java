@@ -87,7 +87,8 @@
                                     </VBox>
 
                                     <VBox spacing="8.0">
-                                        <Label styleClass="form-label" text="Password" />
+                                        <Label fx:id="lblLoginIdentityError" managed="false" styleClass="error-text" visible="false" />
+                        <Label styleClass="form-label" text="Password" />
                                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                                             <children>
                                                 <PasswordField fx:id="pfLoginPassword" promptText="********" HBox.hgrow="ALWAYS" />
@@ -99,7 +100,8 @@
                                     </VBox>
 
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleForgotPassword" styleClass="secondary-button" text="Forgot Password?" />
-                                    <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect Soul" />
+                                    <Label fx:id="lblLoginPasswordError" managed="false" styleClass="error-text" visible="false" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="glow-button" text="Connect Soul" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleFaceLogin" styleClass="secondary-button" text="Login with Face" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleGoogleAuth" styleClass="secondary-button" text="Continue with Google" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#showSignup" styleClass="secondary-button" text="Create a New Seal" />
@@ -119,13 +121,15 @@
                                     </VBox>
 
                                     <VBox spacing="8.0">
-                                        <Label styleClass="form-label" text="Username" />
+                                        <Label fx:id="lblSignupEmailError" managed="false" styleClass="error-text" visible="false" />
+                        <Label styleClass="form-label" text="Username" />
                                         <TextField fx:id="tfSignupUsername" promptText="your username" />
                                         <Label fx:id="lblSignupUsernameError" managed="false" styleClass="validation-error" visible="false" />
                                     </VBox>
 
                                     <VBox spacing="8.0">
-                                        <Label styleClass="form-label" text="Password" />
+                                        <Label fx:id="lblSignupUsernameError" managed="false" styleClass="error-text" visible="false" />
+                        <Label styleClass="form-label" text="Password" />
                                         <HBox alignment="CENTER_LEFT" spacing="8.0">
                                             <children>
                                                 <PasswordField fx:id="pfSignupPassword" promptText="********" HBox.hgrow="ALWAYS" />
@@ -139,7 +143,8 @@
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleSuggestPassword" styleClass="secondary-button" text="Suggest Password" />
 
                                     <VBox spacing="8.0">
-                                        <Label styleClass="form-label" text="Confirm Password" />
+                                        <Label fx:id="lblSignupPasswordError" managed="false" styleClass="error-text" visible="false" />
+                        <Label styleClass="form-label" text="Confirm Password" />
                                         <PasswordField fx:id="pfSignupConfirmPassword" promptText="********" />
                                         <Label fx:id="lblSignupConfirmPasswordError" managed="false" styleClass="validation-error" visible="false" />
                                     </VBox>
@@ -160,7 +165,8 @@
                                         <Label fx:id="lblSignupCaptchaError" managed="false" styleClass="validation-error" visible="false" />
                                     </VBox>
 
-                                    <Button maxWidth="1.7976931348623157E308" onAction="#handleSignup" styleClass="glow-button" text="Create Account" />
+                                    <Label fx:id="lblSignupConfirmPasswordError" managed="false" styleClass="error-text" visible="false" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#handleSignup" styleClass="glow-button" text="Create Account" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#handleGoogleAuth" styleClass="secondary-button" text="Continue with Google" />
                                     <Button maxWidth="1.7976931348623157E308" onAction="#showLogin" styleClass="secondary-button" text="Back to Login" />
                                 </children>
