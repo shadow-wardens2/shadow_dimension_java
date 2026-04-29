@@ -47,15 +47,8 @@
                             <PieChart fx:id="categoryPieChart" VBox.vgrow="ALWAYS" />
                         </VBox>
                         <VBox styleClass="artifact-card" HBox.hgrow="ALWAYS" spacing="15.0" style="-fx-padding: 20;">
-                            <Label styleClass="headline-md" text="Low Stock Alerts" />
-                            <BarChart fx:id="stockBarChart">
-                                <xAxis>
-                                    <CategoryAxis side="BOTTOM" />
-                                </xAxis>
-                                <yAxis>
-                                    <NumberAxis side="LEFT" />
-                                </yAxis>
-                            </BarChart>
+                            <Label styleClass="headline-md" text="Product Type Distribution" />
+                            <PieChart fx:id="typePieChart" VBox.vgrow="ALWAYS" />
                         </VBox>
                     </children>
                 </HBox>

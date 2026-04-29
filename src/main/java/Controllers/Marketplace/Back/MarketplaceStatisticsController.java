@@ -3,7 +3,9 @@ package Controllers.Marketplace.Back;
 import Entities.Marketplace.Categorie;
 import Entities.Marketplace.Produit;
 import Entities.Marketplace.Commande;
+import Entities.Marketplace.Type;
 import Services.Marketplace.ServiceCategorie;
+import Services.Marketplace.ServiceType;
 import Services.Marketplace.ServiceProduit;
 import Services.Marketplace.ServiceCommande;
 import javafx.event.ActionEvent;
@@ -23,7 +25,7 @@ public class MarketplaceStatisticsController {
     @FXML private Label lbTotalOrders;
     @FXML private Label lbTotalRevenue;
     @FXML private PieChart categoryPieChart;
-    @FXML private BarChart<String, Number> stockBarChart;
+    @FXML private PieChart typePieChart;
 
     private PageHost dashboardContext;
 
@@ -64,20 +66,19 @@ public class MarketplaceStatisticsController {
                 }
             }
 
-            // Bar Chart: Low Stock Products
-            stockBarChart.getData().clear();
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("Stock Level");
-            
-            List<Produit> lowStock = products.stream()
-                    .filter(p -> p.getStock() < 10)
-                    .limit(8)
-                    .collect(Collectors.toList());
+            // Pie Chart: Products per Type
+            ServiceType stype = new ServiceType();
+            List<Type> types = stype.getAll();
+            Map<Integer, Long> prodCountByType = products.stream()
+                    .collect(Collectors.groupingBy(Produit::getTypeId, Collectors.counting()));
 
-            for (Produit p : lowStock) {
-                series.getData().add(new XYChart.Data<>(p.getNom(), p.getStock()));
+            typePieChart.getData().clear();
+            for (Type t : types) {
+                long count = prodCountByType.getOrDefault(t.getId(), 0L);
+                if (count > 0) {
+                    typePieChart.getData().add(new PieChart.Data(t.getNom(), count));
+                }
             }
-            stockBarChart.getData().add(series);
 
         } catch (SQLException e) {
             e.printStackTrace();

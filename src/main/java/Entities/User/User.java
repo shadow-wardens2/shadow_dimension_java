@@ -171,7 +171,7 @@ public class User {
     public String getAvatarStyle() {
         String source = (username == null || username.isBlank()) ? "shadow-dweller" : username;
         int hue = Math.floorMod(source.toLowerCase().hashCode(), 360);
-        return "-fx-background-color: hsb(" + hue + ", 0.55, 0.82);"
+        return "-fx-background-color: hsb(" + hue + ", 55%, 82%);"
                 + "-fx-background-radius: 999;"
                 + "-fx-text-fill: white;"
                 + "-fx-font-weight: bold;"

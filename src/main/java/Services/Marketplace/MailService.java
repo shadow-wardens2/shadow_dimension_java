@@ -2,9 +2,9 @@ package Services.Marketplace;
 
 import Utils.EnvConfig;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
 public class MailService {
@@ -26,11 +26,15 @@ public class MailService {
         props.put("mail.smtp.ssl.trust", host);
         props.put("mail.smtp.connectiontimeout", "10000");
         props.put("mail.smtp.timeout", "10000");
+        props.put("mail.debug", "true");
 
+        System.out.println("[MailService] Attempting to send email to: " + to);
+        
         final String finalUser = username;
         final String finalPass = password;
 
-        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(finalUser, finalPass);
             }

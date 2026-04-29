@@ -101,11 +101,13 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
     private void checkStockAndNotify(Produit p) {
         if (p.getStock() < 5) {
+            System.out.println("[ServiceProduit] Low stock alert triggered for: " + p.getNom() + " (Stock: " + p.getStock() + ")");
             new Thread(() -> {
                 try {
                     ServiceUser su = new ServiceUser();
                     User admin = su.getFirstActiveAdmin();
                     if (admin != null) {
+                        System.out.println("[ServiceProduit] Admin found: " + admin.getEmail());
                         String subject = "Low Stock Alert: " + p.getNom();
                         String body = "Hello " + admin.getUsername() + ",\n\n" +
                                       "The product '" + p.getNom() + "' (ID: " + p.getId() + ") is running low on stock.\n" +
@@ -115,6 +117,8 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
                                       "Shadow Dimensions Inventory System";
                         
                         MailService.sendMail(admin.getEmail(), subject, body);
+                    } else {
+                        System.out.println("[ServiceProduit] No active admin found to notify.");
                     }
                 } catch (SQLException e) {
                     System.err.println("Failed to check admin for stock alert: " + e.getMessage());

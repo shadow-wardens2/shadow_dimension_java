@@ -1,10 +1,16 @@
 package Controllers.User;
 
+import Entities.Marketplace.Commande;
 import Entities.User.User;
+import Services.Marketplace.ServiceCommande;
+import Services.Marketplace.MailService;
 import Services.User.ServiceUser;
 import Utils.FaceCaptureUtil;
 import Utils.SessionManager;
 import Utils.AvatarUtil;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +18,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -86,7 +96,16 @@ public class FrontVaultController {
     @FXML
     private Button btnDisableFaceId;
 
+    @FXML private TableView<Commande> ordersTable;
+    @FXML private TableColumn<Commande, Integer> colOrderId;
+    @FXML private TableColumn<Commande, String> colDate;
+    @FXML private TableColumn<Commande, String> colTotal;
+    @FXML private TableColumn<Commande, String> colStatus;
+    @FXML private TableColumn<Commande, Void> colAction;
+
     private final ServiceUser serviceUser = new ServiceUser();
+    private final ServiceCommande serviceCommande = new ServiceCommande();
+    private ObservableList<Commande> userOrders = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -142,6 +161,81 @@ public class FrontVaultController {
         lbCity.setText(safe(user.getCity(), "-"));
         lbBio.setText(safe(user.getBio(), "No bio engraved yet."));
         refreshFaceIdState(user);
+        setupOrdersTable();
+        loadUserOrders(user.getId());
+    }
+
+    private void setupOrdersTable() {
+        colOrderId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colDate.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDateCommande().toString()));
+        colTotal.setCellValueFactory(cellData -> new SimpleStringProperty(String.format("%.2f TND", cellData.getValue().getTotalAmount())));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        colAction.setCellFactory(param -> new TableCell<>() {
+            private final Button btnCancel = new Button("Request Cancellation");
+            {
+                btnCancel.getStyleClass().add("secondary-button");
+                btnCancel.setStyle("-fx-background-color: rgba(239, 68, 68, 0.1); -fx-text-fill: #ef4444; -fx-font-size: 11px;");
+                btnCancel.setOnAction(event -> {
+                    Commande c = getTableView().getItems().get(getIndex());
+                    handleCancelRequest(c);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Commande c = getTableView().getItems().get(getIndex());
+                    if ("CANCEL_REQUESTED".equals(c.getStatus()) || "CANCELLED".equals(c.getStatus())) {
+                        setGraphic(new Label(c.getStatus().replace("_", " ")));
+                    } else {
+                        setGraphic(btnCancel);
+                    }
+                }
+            }
+        });
+
+        ordersTable.setItems(userOrders);
+    }
+
+    private void loadUserOrders(int userId) {
+        try {
+            userOrders.setAll(serviceCommande.getByUserId(userId));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleCancelRequest(Commande c) {
+        try {
+            serviceCommande.updateStatus(c.getId(), "CANCEL_REQUESTED");
+            showAlert(Alert.AlertType.INFORMATION, "Cancellation Requested", "The admin has been notified of your cancellation request.");
+            loadUserOrders(c.getUserId());
+
+            // Notify Admin via Email
+            new Thread(() -> {
+                try {
+                    User admin = serviceUser.getFirstActiveAdmin();
+                    if (admin != null) {
+                        String subject = "Order Cancellation Request: #" + c.getId();
+                        String body = "Hello " + admin.getUsername() + ",\n\n" +
+                                      "User " + c.getPrenom() + " " + c.getNom() + " (ID: " + c.getUserId() + ") has requested to cancel order #" + c.getId() + ".\n\n" +
+                                      "Please review this request in the dashboard.\n\n" +
+                                      "Regards,\n" +
+                                      "Shadow Dimensions System";
+                        MailService.sendMail(admin.getEmail(), subject, body);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not process cancellation request: " + e.getMessage());
+        }
     }
 
     @FXML

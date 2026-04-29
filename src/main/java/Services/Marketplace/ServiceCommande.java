@@ -86,10 +86,23 @@ public class ServiceCommande {
     }
 
     public List<Commande> getAll() throws SQLException {
+        return getByUserId(-1); // -1 means all users
+    }
+
+    public List<Commande> getByUserId(int userId) throws SQLException {
         List<Commande> commandes = new ArrayList<>();
-        String query = "SELECT * FROM mkt_commande ORDER BY date_commande DESC";
-        Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery(query);
+        String query = "SELECT * FROM mkt_commande";
+        if (userId != -1) {
+            query += " WHERE user_id = ?";
+        }
+        query += " ORDER BY date_commande DESC";
+        
+        PreparedStatement pst = conn.prepareStatement(query);
+        if (userId != -1) {
+            pst.setInt(1, userId);
+        }
+        
+        ResultSet rs = pst.executeQuery();
         while (rs.next()) {
             Commande c = new Commande();
             c.setId(rs.getInt("id"));
@@ -108,6 +121,15 @@ public class ServiceCommande {
             commandes.add(c);
         }
         return commandes;
+    }
+
+    public void updateStatus(int id, String status) throws SQLException {
+        String query = "UPDATE mkt_commande SET status = ?, updated_at = ? WHERE id = ?";
+        PreparedStatement pst = conn.prepareStatement(query);
+        pst.setString(1, status);
+        pst.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+        pst.setInt(3, id);
+        pst.executeUpdate();
     }
 
     public void delete(Commande c) throws SQLException {

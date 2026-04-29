@@ -87,13 +87,33 @@ public class ManagementCommandeController {
             totalLbl.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
             
             Label statusLbl = new Label(c.getStatus());
-            statusLbl.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 4;");
+            if ("CANCEL_REQUESTED".equals(c.getStatus())) {
+                statusLbl.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 4;");
+                statusLbl.setText("⚠ CANCEL REQUESTED");
+            } else {
+                statusLbl.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 4;");
+            }
             
             Button deleteBtn = new Button("Delete");
             deleteBtn.setStyle("-fx-background-color: rgba(239, 68, 68, 0.2); -fx-text-fill: #ef4444; -fx-background-radius: 6; -fx-cursor: hand;");
             deleteBtn.setOnAction(e -> deleteOrder(c));
-            
-            row.getChildren().addAll(info, spacer, totalLbl, statusLbl, deleteBtn);
+
+            if ("CANCEL_REQUESTED".equals(c.getStatus())) {
+                Button approveBtn = new Button("Approve Cancel");
+                approveBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;");
+                approveBtn.setOnAction(e -> {
+                    try {
+                        serviceCommande.updateStatus(c.getId(), "CANCELLED");
+                        setupData();
+                        refreshList();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+                row.getChildren().addAll(info, spacer, totalLbl, statusLbl, approveBtn, deleteBtn);
+            } else {
+                row.getChildren().addAll(info, spacer, totalLbl, statusLbl, deleteBtn);
+            }
             ordersContainer.getChildren().add(row);
         }
     }
