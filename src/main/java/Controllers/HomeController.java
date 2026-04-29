@@ -25,6 +25,7 @@ public class HomeController {
     @FXML
     private Button btnDashboard;
     @FXML private Button btnAuth;
+    @FXML private Button btnLogout;
 
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
@@ -41,6 +42,10 @@ public class HomeController {
                 btnAuth.setText("My Soul");
             }
             loadAiRecommendations();
+            if (btnLogout != null) {
+                btnLogout.setVisible(true);
+                btnLogout.setManaged(true);
+            }
         }
     }
 
@@ -123,6 +128,12 @@ public class HomeController {
         } else {
             loadPage("/User/ConnectSoul.fxml");
         }
+    }
+
+    @FXML
+    void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 
     private void loadPage(String fxmlPath) {

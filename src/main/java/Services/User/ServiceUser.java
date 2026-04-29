@@ -6,6 +6,7 @@ import Utils.OpenCvFaceAuthUtil;
 import Utils.ShadowDimensionsDB;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -392,8 +393,77 @@ public class ServiceUser implements InterfaceServiceUser {
         return null;
     }
 
+    public User loginWithFaceImage(BufferedImage image) throws SQLException {
+        FaceLoginAttempt attempt = analyzeFaceLogin(image);
+        return attempt.matchedUser();
+    }
+
+    public FaceLoginAttempt analyzeFaceLogin(BufferedImage image) throws SQLException {
+        if (image == null) {
+            throw new IllegalArgumentException("Capture faciale invalide.");
+        }
+
+        OpenCvFaceAuthUtil.FaceAnalysis analysis = OpenCvFaceAuthUtil.analyzeFace(image);
+        if (!analysis.faceDetected()) {
+            return FaceLoginAttempt.noFace();
+        }
+
+        String sql = "SELECT u.id, u.email, u.username, u.roles, u.password, u.full_name, u.phone, u.country, u.city, u.bio, u.created_at, u.is_active, u.is_locked, u.is_verified, ufa.face_signature " +
+                "FROM user_face_auth ufa " +
+                "JOIN `user` u ON u.id = ufa.user_id " +
+                "WHERE ufa.enabled = 1";
+        PreparedStatement ps = cnx.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        User bestUser = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+
+        while (rs.next()) {
+            String storedSignature = rs.getString("face_signature");
+            OpenCvFaceAuthUtil.MatchResult match = OpenCvFaceAuthUtil.matchStoredSignature(storedSignature, analysis, image);
+            if (!match.matched() || match.score() <= bestScore) {
+                continue;
+            }
+
+            bestScore = match.score();
+            bestUser = mapUser(rs);
+        }
+
+        if (bestUser == null) {
+            return FaceLoginAttempt.detected(analysis.faceBounds());
+        }
+
+        if (bestUser.getIsLocked() == 1) {
+            throw new IllegalArgumentException("Ce compte est verrouille.");
+        }
+
+        if (bestUser.getIsVerified() == 0) {
+            throw new IllegalArgumentException("Email non verifie. Entrez le code recu par mail.");
+        }
+
+        return FaceLoginAttempt.matched(bestUser, analysis.faceBounds(), bestScore);
+    }
+
     public String buildFaceSignature(BufferedImage image) {
         return OpenCvFaceAuthUtil.buildFaceSignature(image);
+    }
+
+    public String buildFaceSignature(List<BufferedImage> images) {
+        return OpenCvFaceAuthUtil.buildFaceSignature(images);
+    }
+
+    public record FaceLoginAttempt(User matchedUser, Rectangle faceBounds, boolean faceDetected, double similarityScore) {
+        public static FaceLoginAttempt noFace() {
+            return new FaceLoginAttempt(null, null, false, Double.NEGATIVE_INFINITY);
+        }
+
+        public static FaceLoginAttempt detected(Rectangle faceBounds) {
+            return new FaceLoginAttempt(null, faceBounds, true, Double.NEGATIVE_INFINITY);
+        }
+
+        public static FaceLoginAttempt matched(User user, Rectangle faceBounds, double similarityScore) {
+            return new FaceLoginAttempt(user, faceBounds, true, similarityScore);
+        }
     }
 
     public String getPasswordPolicyMessage(String password) {

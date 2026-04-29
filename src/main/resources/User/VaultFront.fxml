@@ -40,6 +40,7 @@
         <HBox alignment="CENTER" spacing="20.0">
             <Button fx:id="btnDashboard" managed="false" onAction="#handleOpenDashboard" style="-fx-border-radius: 30; -fx-background-radius: 30;" styleClass="secondary-button" text="Dashboard" visible="false" />
             <Button fx:id="btnAuth" onAction="#handleAuthAction" styleClass="ethereal-button" text="Edit Profile" />
+            <Button fx:id="btnLogout" managed="false" onAction="#handleLogout" style="-fx-border-radius: 30; -fx-background-radius: 30;" styleClass="secondary-button" text="Logout" visible="false" />
         </HBox>
     </HBox>
 

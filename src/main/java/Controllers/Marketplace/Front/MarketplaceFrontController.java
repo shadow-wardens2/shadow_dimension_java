@@ -6,39 +6,35 @@ import Services.Marketplace.ServiceCategorie;
 import Services.Marketplace.ServiceProduit;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import Services.Marketplace.AiRecommendationService;
-import Services.Marketplace.ServiceCommande;
-import javafx.scene.layout.HBox;
-import javafx.application.Platform;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import Utils.SessionManager;
 import Entities.User.User;
-import javafx.scene.control.Button;
 import Services.Marketplace.CurrencyConverterService;
-import javafx.scene.control.ComboBox;
+import Utils.SessionManager;
 
 public class MarketplaceFrontController {
 
     @FXML private TilePane productsGrid;
     @FXML private AnchorPane rootNode;
     @FXML private Button btnDashboard;
-    @FXML private javafx.scene.control.Label lbProductCount;
-    @FXML private javafx.scene.control.TextField searchField;
-    @FXML private javafx.scene.control.ComboBox<String> categoryFilter;
-    @FXML private javafx.scene.control.ComboBox<String> currencySelector;
+    @FXML private Button btnLogout;
+    @FXML private Label lbProductCount;
+    @FXML private TextField searchField;
+    @FXML private ComboBox<String> categoryFilter;
+    @FXML private ComboBox<String> currencySelector;
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
 
@@ -54,6 +50,10 @@ public class MarketplaceFrontController {
         if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
             isAdmin = user.isAdmin();
+            if (btnLogout != null) {
+                btnLogout.setVisible(true);
+                btnLogout.setManaged(true);
+            }
         }
         btnDashboard.setVisible(isAdmin);
         btnDashboard.setManaged(isAdmin);
@@ -149,6 +149,12 @@ public class MarketplaceFrontController {
     @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
+    }
+
+    @FXML
+    void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 
     private void loadPage(String fxmlPath) {

@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 public class VaultController {
 
@@ -143,16 +144,16 @@ public class VaultController {
 
         try {
             Stage owner = (Stage) rootNode.getScene().getWindow();
-            BufferedImage capture = FaceCaptureUtil.captureFace(
+            List<BufferedImage> captures = FaceCaptureUtil.captureFaceProfile(
                     owner,
                     "Enable Face ID",
-                    "Capture a clear frontal face image to bind Face ID to your vault."
+                    "Capture your biometric profile. Stay centered and move slightly so Face ID remains stable even if your position changes later."
             );
-            if (capture == null) {
+            if (captures == null || captures.isEmpty()) {
                 return;
             }
 
-            String signature = serviceUser.buildFaceSignature(capture);
+            String signature = serviceUser.buildFaceSignature(captures);
             serviceUser.enrollFaceId(user.getId(), signature);
             refreshFaceIdState(serviceUser.getById(user.getId()));
             showAlert(Alert.AlertType.INFORMATION, "Face ID", "Face ID activee pour ce compte.");
