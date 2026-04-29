@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.UUID;
 
 public class ServiceUser implements InterfaceServiceUser {
+    private static final int MAX_FAILED_LOGIN_ATTEMPTS = 3;
     private static final String UPPERCASE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String LOWERCASE_CHARS = "abcdefghijklmnopqrstuvwxyz";
     private static final String DIGIT_CHARS = "0123456789";
@@ -41,6 +42,7 @@ public class ServiceUser implements InterfaceServiceUser {
 
     public ServiceUser() {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
+        ensureFailedLoginAttemptsColumn();
         ensureVerificationTable();
         ensurePasswordResetTable();
         ensureFaceIdTable();
@@ -106,7 +108,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
         }
 
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ? OR username = ?";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified, failed_login_attempts FROM `user` WHERE email = ? OR username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, emailOrUsername.trim());
         ps.setString(2, emailOrUsername.trim());
@@ -128,10 +130,19 @@ public class ServiceUser implements InterfaceServiceUser {
 
         String storedPassword = rs.getString("password");
         if (!isPasswordValid(plainPassword, storedPassword)) {
-            return null;
+            int failedAttempts = rs.getInt("failed_login_attempts") + 1;
+            if (failedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+                lockUserAfterFailedAttempts(rs.getInt("id"), failedAttempts);
+                throw new IllegalArgumentException("Compte bloque apres 3 tentatives echouees. Seul un admin peut le debloquer.");
+            }
+
+            updateFailedLoginAttempts(rs.getInt("id"), failedAttempts);
+            int remainingAttempts = MAX_FAILED_LOGIN_ATTEMPTS - failedAttempts;
+            throw new IllegalArgumentException("Mot de passe incorrect. Il reste " + remainingAttempts + " tentative(s) avant blocage.");
         }
 
-        return mapUser(rs);
+        resetFailedLoginAttempts(rs.getInt("id"));
+        return getById(rs.getInt("id"));
     }
 
     // Google auth flow: login existing, link by email, or create a new user.
@@ -566,6 +577,12 @@ public class ServiceUser implements InterfaceServiceUser {
         ps.executeUpdate();
     }
 
+    public void resetFailedLoginAttempts(int userId) throws SQLException {
+        PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = 0 WHERE id = ?");
+        ps.setInt(1, userId);
+        ps.executeUpdate();
+    }
+
     public void deleteUserById(int userId) throws SQLException {
         String sql = "DELETE FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -670,7 +687,7 @@ public class ServiceUser implements InterfaceServiceUser {
     // Verification-code persistence + outbound email send.
     private void sendVerificationCode(User user) throws SQLException {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
-        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(10));
+        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(1));
 
         PreparedStatement invalidatePs = cnx.prepareStatement("UPDATE user_verification_codes SET consumed = 1 WHERE user_id = ? AND consumed = 0");
         invalidatePs.setInt(1, user.getId());
@@ -687,7 +704,7 @@ public class ServiceUser implements InterfaceServiceUser {
 
     private void persistAndSendPasswordResetCode(User user) throws SQLException {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
-        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(10));
+        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(1));
 
         PreparedStatement invalidatePs = cnx.prepareStatement("UPDATE user_password_reset_codes SET consumed = 1 WHERE user_id = ? AND consumed = 0");
         invalidatePs.setInt(1, user.getId());
@@ -782,6 +799,15 @@ public class ServiceUser implements InterfaceServiceUser {
         }
     }
 
+    private void ensureFailedLoginAttemptsColumn() {
+        String sql = "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0";
+        try (Statement st = cnx.createStatement()) {
+            st.execute(sql);
+        } catch (SQLException ignored) {
+            // Keep startup resilient; login still works when the schema is already up to date.
+        }
+    }
+
     private void ensureFaceIdTable() {
         String sql = "CREATE TABLE IF NOT EXISTS user_face_auth ("
                 + "user_id INT NOT NULL PRIMARY KEY, "
@@ -812,5 +838,19 @@ public class ServiceUser implements InterfaceServiceUser {
             value.setCharAt(i, value.charAt(swapIndex));
             value.setCharAt(swapIndex, current);
         }
+    }
+
+    private void updateFailedLoginAttempts(int userId, int failedAttempts) throws SQLException {
+        PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = ? WHERE id = ?");
+        ps.setInt(1, failedAttempts);
+        ps.setInt(2, userId);
+        ps.executeUpdate();
+    }
+
+    private void lockUserAfterFailedAttempts(int userId, int failedAttempts) throws SQLException {
+        PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = ?, is_locked = 1 WHERE id = ?");
+        ps.setInt(1, failedAttempts);
+        ps.setInt(2, userId);
+        ps.executeUpdate();
     }
 }

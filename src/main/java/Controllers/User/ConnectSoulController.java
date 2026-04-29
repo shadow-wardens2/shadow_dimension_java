@@ -18,6 +18,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.paint.Color;
@@ -77,6 +78,12 @@ public class ConnectSoulController {
 
     @FXML
     private Label lblSignupPasswordError;
+
+    @FXML
+    private ProgressBar pbSignupPasswordStrength;
+
+    @FXML
+    private Label lblSignupPasswordStrength;
 
     @FXML
     private Label lblSignupConfirmPasswordError;
@@ -159,8 +166,14 @@ public class ConnectSoulController {
         tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
         tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
         tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
-        pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
-        tfSignupPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> {
+            setInlineError(lblSignupPasswordError, "");
+            updateSignupPasswordStrength();
+        });
+        tfSignupPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> {
+            setInlineError(lblSignupPasswordError, "");
+            updateSignupPasswordStrength();
+        });
         pfSignupConfirmPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
         tfSignupCaptcha.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupCaptchaError, ""));
 
@@ -173,6 +186,7 @@ public class ConnectSoulController {
         applyLoginPasswordVisibility();
         applySignupPasswordVisibility();
         applyResetPasswordVisibility();
+        updateSignupPasswordStrength();
         refreshAllCaptchas();
     }
 
@@ -225,7 +239,8 @@ public class ConnectSoulController {
                     return;
                 }
                 setInlineError(lblLoginIdentityError, msg);
-            } else if (lower.contains("mot de passe") || lower.contains("password") || lower.contains("obligatoire")) {
+            } else if (lower.contains("mot de passe") || lower.contains("password") || lower.contains("obligatoire")
+                    || lower.contains("tentative") || lower.contains("incorrect") || lower.contains("bloque")) {
                 setInlineError(lblLoginPasswordError, msg);
             } else {
                 setInlineError(lblLoginIdentityError, msg);
@@ -404,11 +419,7 @@ public class ConnectSoulController {
             }
 
             tfLoginIdentity.setText(pendingResetEmail);
-            setLoginPasswordValue(password);
-            if (!loginPasswordVisible) {
-                loginPasswordVisible = true;
-                applyLoginPasswordVisibility();
-            }
+            clearLoginPasswordValue();
 
             showAlert(Alert.AlertType.INFORMATION, "Reset Password", "Mot de passe reinitialise. Vous pouvez maintenant vous connecter.");
             showLogin();
@@ -666,11 +677,12 @@ public class ConnectSoulController {
     private void setSignupPasswordValue(String password) {
         pfSignupPassword.setText(password);
         tfSignupPasswordVisible.setText(password);
+        updateSignupPasswordStrength();
     }
 
-    private void setLoginPasswordValue(String password) {
-        pfLoginPassword.setText(password);
-        tfLoginPasswordVisible.setText(password);
+    private void clearLoginPasswordValue() {
+        pfLoginPassword.clear();
+        tfLoginPasswordVisible.clear();
     }
 
     private void setResetPasswordValue(String password) {
@@ -710,6 +722,60 @@ public class ConnectSoulController {
         label.setText(show ? message : "");
         label.setVisible(show);
         label.setManaged(show);
+    }
+
+    private void updateSignupPasswordStrength() {
+        if (pbSignupPasswordStrength == null || lblSignupPasswordStrength == null) {
+            return;
+        }
+
+        String password = getSignupPassword();
+        if (password == null || password.isBlank()) {
+            pbSignupPasswordStrength.setProgress(0);
+            pbSignupPasswordStrength.getStyleClass().removeAll("strength-weak", "strength-medium", "strength-strong");
+            lblSignupPasswordStrength.setText("Password strength: empty");
+            lblSignupPasswordStrength.setStyle("-fx-text-fill: #7f7b87;");
+            return;
+        }
+
+        int score = 0;
+        if (password.length() >= 8) {
+            score++;
+        }
+        if (password.matches(".*[A-Z].*")) {
+            score++;
+        }
+        if (password.matches(".*[a-z].*")) {
+            score++;
+        }
+        if (password.matches(".*\\d.*")) {
+            score++;
+        }
+        if (password.matches(".*[^a-zA-Z0-9].*")) {
+            score++;
+        }
+        if (password.length() >= 12) {
+            score++;
+        }
+
+        pbSignupPasswordStrength.getStyleClass().removeAll("strength-weak", "strength-medium", "strength-strong");
+
+        if (score <= 2) {
+            pbSignupPasswordStrength.setProgress(0.33);
+            pbSignupPasswordStrength.getStyleClass().add("strength-weak");
+            lblSignupPasswordStrength.setText("Password strength: weak");
+            lblSignupPasswordStrength.setStyle("-fx-text-fill: #ff7c9d;");
+        } else if (score <= 4) {
+            pbSignupPasswordStrength.setProgress(0.66);
+            pbSignupPasswordStrength.getStyleClass().add("strength-medium");
+            lblSignupPasswordStrength.setText("Password strength: medium");
+            lblSignupPasswordStrength.setStyle("-fx-text-fill: #ffcc66;");
+        } else {
+            pbSignupPasswordStrength.setProgress(1.0);
+            pbSignupPasswordStrength.getStyleClass().add("strength-strong");
+            lblSignupPasswordStrength.setText("Password strength: strong");
+            lblSignupPasswordStrength.setStyle("-fx-text-fill: #7dffa6;");
+        }
     }
 
     private boolean validateCaptcha(String expected, TextField input, Label errorLabel, Runnable refreshAction) {
@@ -831,6 +897,7 @@ public class ConnectSoulController {
 
                 showAlert(Alert.AlertType.INFORMATION, "Verification", "Email verifie. Vous pouvez maintenant vous connecter.");
                 tfLoginIdentity.setText(email);
+                clearLoginPasswordValue();
                 showLogin();
                 return;
             } catch (SQLException e) {
