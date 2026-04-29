@@ -1,10 +1,8 @@
 package Controllers;
 
 import Utils.SessionManager;
+import Utils.AvatarUtil;
 import Entities.User.User;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
 import Entities.Marketplace.Categorie;
 import Entities.Marketplace.Produit;
 import Services.Marketplace.AiRecommendationService;
@@ -13,10 +11,15 @@ import Services.Marketplace.ServiceCommande;
 import Services.Marketplace.ServiceProduit;
 import Controllers.Marketplace.Front.FrontProductCardController;
 import javafx.application.Platform;
-import javafx.scene.layout.VBox;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import java.util.List;
+import javafx.scene.layout.VBox;
 import java.io.IOException;
+import java.util.List;
 
 public class HomeController {
 
@@ -26,6 +29,8 @@ public class HomeController {
     private Button btnDashboard;
     @FXML private Button btnAuth;
     @FXML private Button btnLogout;
+    @FXML private ImageView imgUserAvatar;
+    @FXML private Label lbUserAvatar;
 
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
@@ -41,11 +46,23 @@ public class HomeController {
             if (btnAuth != null) {
                 btnAuth.setText("My Soul");
             }
+            if (imgUserAvatar != null && lbUserAvatar != null) {
+                AvatarUtil.applyDiceBearAvatar(imgUserAvatar, lbUserAvatar, user, 42);
+                imgUserAvatar.setVisible(true);
+                imgUserAvatar.setManaged(true);
+                lbUserAvatar.setVisible(true);
+                lbUserAvatar.setManaged(true);
+            }
             loadAiRecommendations();
             if (btnLogout != null) {
                 btnLogout.setVisible(true);
                 btnLogout.setManaged(true);
             }
+        } else if (lbUserAvatar != null && imgUserAvatar != null) {
+            lbUserAvatar.setVisible(false);
+            lbUserAvatar.setManaged(false);
+            imgUserAvatar.setVisible(false);
+            imgUserAvatar.setManaged(false);
         }
     }
 

@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public final class VoiceToTextUtil {
+    private static final String NO_RECOGNIZER_TOKEN = "__VOICE_NO_RECOGNIZER__";
 
     private VoiceToTextUtil() {
     }
@@ -15,18 +16,26 @@ public final class VoiceToTextUtil {
             return "";
         }
 
-        String script = "$ErrorActionPreference='SilentlyContinue';"
+        String script = "$ErrorActionPreference='Stop';"
                 + "Add-Type -AssemblyName System.Speech;"
-                + "$r=New-Object System.Speech.Recognition.SpeechRecognitionEngine;"
+                + "$recognizers=[System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers();"
+                + "if(-not $recognizers -or $recognizers.Count -eq 0){Write-Output '" + NO_RECOGNIZER_TOKEN + "'; exit 0};"
+                + "$recognizerInfo=$recognizers | Select-Object -First 1;"
+                + "$r=New-Object System.Speech.Recognition.SpeechRecognitionEngine($recognizerInfo);"
+                + "$r.InitialSilenceTimeout=[TimeSpan]::FromSeconds(4);"
+                + "$r.BabbleTimeout=[TimeSpan]::FromSeconds(2);"
+                + "$r.EndSilenceTimeout=[TimeSpan]::FromSeconds(1);"
+                + "$r.EndSilenceTimeoutAmbiguous=[TimeSpan]::FromSeconds(1);"
                 + "$r.SetInputToDefaultAudioDevice();"
                 + "$r.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar));"
                 + "$res=$r.Recognize([TimeSpan]::FromSeconds(" + timeoutSeconds + "));"
-                + "if($res){$res.Text}";
+                + "if($res -and $res.Text){Write-Output $res.Text}";
 
-        ProcessBuilder pb = new ProcessBuilder("powershell", "-NoProfile", "-Command", script);
+        ProcessBuilder pb = new ProcessBuilder("powershell", "-NoProfile", "-STA", "-Command", script);
         Process process = pb.start();
 
         StringBuilder output = new StringBuilder();
+        StringBuilder errorOutput = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
@@ -36,9 +45,30 @@ public final class VoiceToTextUtil {
                 }
             }
         }
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isBlank()) {
+                    errorOutput.append(line).append(' ');
+                }
+            }
+        }
 
-        process.waitFor();
-        return output.toString().trim();
+        int exitCode = process.waitFor();
+        String recognized = output.toString().trim();
+        if (recognized.equals(NO_RECOGNIZER_TOKEN)) {
+            throw new IOException("No Windows speech recognizer is installed on this machine.");
+        }
+        if (exitCode != 0) {
+            String detail = errorOutput.toString().trim();
+            if (detail.isBlank()) {
+                detail = "Speech recognition process failed.";
+            }
+            throw new IOException(detail);
+        }
+
+        return recognized;
     }
 
     private static boolean isWindows() {

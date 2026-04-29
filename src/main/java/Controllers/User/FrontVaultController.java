@@ -4,6 +4,7 @@ import Entities.User.User;
 import Services.User.ServiceUser;
 import Utils.FaceCaptureUtil;
 import Utils.SessionManager;
+import Utils.AvatarUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -38,6 +40,12 @@ public class FrontVaultController {
 
     @FXML
     private Label lbAuthState;
+
+    @FXML
+    private Label lbAvatar;
+
+    @FXML
+    private ImageView imgAvatar;
 
     @FXML
     private Label lbUsername;
@@ -92,6 +100,7 @@ public class FrontVaultController {
             }
             lbVaultTitle.setText("Guest Vault");
             lbAuthState.setText("Enter the void freely. Connect your soul whenever you want to bind your identity.");
+            AvatarUtil.applyDiceBearAvatar(imgAvatar, lbAvatar, null, 52);
             lbUsername.setText("Shadow Dweller");
             lbSummaryUsername.setText("Shadow Dweller");
             lbEmail.setText("-");
@@ -122,6 +131,7 @@ public class FrontVaultController {
         String username = safe(user.getUsername(), "Shadow Dweller");
         lbVaultTitle.setText(username + " Vault");
         lbAuthState.setText("Soul synchronized. Your identity and relic trail are bound to the void.");
+        AvatarUtil.applyDiceBearAvatar(imgAvatar, lbAvatar, user, 52);
         lbUsername.setText(username);
         lbSummaryUsername.setText(username);
         lbEmail.setText(safe(user.getEmail(), "-"));

@@ -12,6 +12,7 @@ import Controllers.User.EditProfileContentController;
 import Controllers.User.ManagementUsersController;
 import Entities.User.User;
 import Utils.SessionManager;
+import Utils.AvatarUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +20,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -32,6 +34,12 @@ public class HomePageController implements PageHost {
 
     @FXML
     private Label lbUserName;
+
+    @FXML
+    private Label lbUserAvatar;
+
+    @FXML
+    private ImageView imgUserAvatar;
 
     @FXML
     private Button btnTopAuth;
@@ -159,6 +167,7 @@ public class HomePageController implements PageHost {
             String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
                     : user.getUsername();
             lbUserName.setText(username);
+            AvatarUtil.applyDiceBearAvatar(imgUserAvatar, lbUserAvatar, user, 40);
             btnTopAuth.setText("Logout");
             btnBottomAuth.setText("Logout");
             btnUserManagement.setVisible(user.isAdmin());
@@ -167,6 +176,7 @@ public class HomePageController implements PageHost {
             btnUserStatistics.setManaged(user.isAdmin());
         } else {
             lbUserName.setText("Shadow Dweller");
+            AvatarUtil.applyDiceBearAvatar(imgUserAvatar, lbUserAvatar, null, 40);
             btnTopAuth.setText("Connect Soul");
             btnBottomAuth.setText("Connect Soul");
             btnUserManagement.setVisible(false);

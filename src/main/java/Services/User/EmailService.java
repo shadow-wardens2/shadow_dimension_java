@@ -23,7 +23,7 @@ public class EmailService {
                 "Shadow Dimension - Email Verification",
                 "Hello " + safeName + ",\n\n"
                         + "Your verification code is: " + code + "\n\n"
-                        + "This code expires in 10 minutes.\n\n"
+                        + "This code expires in 1 minute.\n\n"
                         + "If you did not create this account, ignore this email."
         );
     }
@@ -35,7 +35,7 @@ public class EmailService {
                 "Shadow Dimension - Password Reset",
                 "Hello " + safeName + ",\n\n"
                         + "Your password reset code is: " + code + "\n\n"
-                        + "This code expires in 10 minutes.\n\n"
+                        + "This code expires in 1 minute.\n\n"
                         + "If you did not request a password reset, ignore this email."
         );
     }
