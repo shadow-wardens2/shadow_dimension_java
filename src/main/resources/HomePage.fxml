@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -28,7 +29,12 @@
             <VBox prefWidth="256.0" style="-fx-background-color: #050507; -fx-border-width: 0 1 0 0; -fx-border-color: #1a1a24;">
                 <VBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 24 24 40 24;">
                     <HBox alignment="CENTER_LEFT" spacing="12">
-                        <Pane prefHeight="40" prefWidth="40" style="-fx-background-color: #19191d; -fx-background-radius: 20; -fx-border-color: rgba(139, 92, 246, 0.3); -fx-border-radius: 20;" />
+                        <StackPane prefHeight="40" prefWidth="40">
+                            <children>
+                                <Label fx:id="lbUserAvatar" alignment="CENTER" prefHeight="40" prefWidth="40" style="-fx-background-color: #19191d; -fx-background-radius: 20; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="SD" />
+                                <ImageView fx:id="imgUserAvatar" fitHeight="40" fitWidth="40" preserveRatio="false" />
+                            </children>
+                        </StackPane>
                         <VBox alignment="CENTER_LEFT">
                             <Label fx:id="lbUserName" style="-fx-text-fill: #ffffff; -fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-font-size: 14px;" text="Shadow Dweller" />
                             <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 10px; -fx-font-weight: bold;" text="TIER: ETHEREAL" />

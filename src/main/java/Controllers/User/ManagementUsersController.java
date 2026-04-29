@@ -24,11 +24,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import Utils.AvatarUtil;
 
 import java.sql.SQLException;
 import java.io.FileOutputStream;
@@ -117,6 +120,9 @@ public class ManagementUsersController {
         try {
             selected.setIsLocked(selected.getIsLocked() == 1 ? 0 : 1);
             serviceUser.updateUserByAdmin(selected);
+            if (selected.getIsLocked() == 0) {
+                serviceUser.resetFailedLoginAttempts(selected.getId());
+            }
             applyFiltersAndSort();
 
             User current = SessionManager.getCurrentUser();
@@ -199,6 +205,16 @@ public class ManagementUsersController {
 
     // Builds one interactive card per user with rank/status/actions.
     private HBox createUserCard(User user) {
+        Label avatarLabel = new Label(user.getAvatarInitials());
+        avatarLabel.setMinSize(38, 38);
+        avatarLabel.setPrefSize(38, 38);
+        avatarLabel.setMaxSize(38, 38);
+        ImageView avatarImage = new ImageView();
+        AvatarUtil.applyDiceBearAvatar(avatarImage, avatarLabel, user, 38);
+        StackPane avatarPane = new StackPane(avatarLabel, avatarImage);
+        avatarPane.setMinSize(38, 38);
+        avatarPane.setPrefSize(38, 38);
+        avatarPane.setMaxSize(38, 38);
         Label usernameLabel = new Label(safe(user.getUsername()));
         usernameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
         Label emailLabel = new Label(safe(user.getEmail()));
@@ -253,7 +269,7 @@ public class ManagementUsersController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox row = new HBox(14, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
+        HBox row = new HBox(14, avatarPane, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-card");
         return row;

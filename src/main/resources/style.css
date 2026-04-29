@@ -608,6 +608,36 @@
     font-weight: bold;
     -fx-wrap-text: true;
 }
+
+.password-strength-bar {
+    -fx-accent: #5a5070;
+    -fx-background-color: transparent;
+}
+
+.password-strength-bar > .bar {
+    -fx-background-insets: 0;
+    -fx-background-radius: 999;
+}
+
+.password-strength-bar > .track {
+    -fx-background-color: #1c1922;
+    -fx-background-insets: 0;
+    -fx-background-radius: 999;
+    -fx-pref-height: 8;
+}
+
+.password-strength-bar.strength-weak {
+    -fx-accent: #ff5d7d;
+}
+
+.password-strength-bar.strength-medium {
+    -fx-accent: #ffbe55;
+}
+
+.password-strength-bar.strength-strong {
+    -fx-accent: #4ee28a;
+}
+
 /* === CHARTS === */
 .chart {
     -fx-padding: 10;
