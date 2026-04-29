@@ -6,6 +6,10 @@ import Controllers.Marketplace.Back.ManagementProduitController;
 import Controllers.Marketplace.Back.ManagementTypeController;
 import Controllers.Marketplace.Back.PageHost;
 import Controllers.event.EventSelectorController;
+import Controllers.Tutorials.*;
+import Controllers.User.VaultController;
+import Controllers.User.EditProfileContentController;
+import Controllers.User.ManagementUsersController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -224,6 +228,11 @@ public class HomePageController implements PageHost {
     }
 
     @Override
+<<<<<<< HEAD
+=======
+
+    // PageHost hook (currently no-op).
+>>>>>>> 73fe0a5ccaa4f1602eae93ef8d62a25d03c4a37b
     public void refreshStatistics() {
         // Implementation for refreshing statistics if needed
     }
