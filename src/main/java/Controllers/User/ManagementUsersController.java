@@ -24,11 +24,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import Utils.AvatarUtil;
 
 import java.sql.SQLException;
 import java.io.FileOutputStream;
@@ -78,7 +81,7 @@ public class ManagementUsersController {
     @FXML
     private void handleToggleSortById() {
         idAscending = !idAscending;
-        btnSortId.setText(idAscending ? "ID ASC" : "ID DESC");
+        btnSortId.setText(idAscending ? "Oldest First" : "Newest First");
         applyFiltersAndSort();
     }
 
@@ -117,6 +120,9 @@ public class ManagementUsersController {
         try {
             selected.setIsLocked(selected.getIsLocked() == 1 ? 0 : 1);
             serviceUser.updateUserByAdmin(selected);
+            if (selected.getIsLocked() == 0) {
+                serviceUser.resetFailedLoginAttempts(selected.getId());
+            }
             applyFiltersAndSort();
 
             User current = SessionManager.getCurrentUser();
@@ -167,9 +173,9 @@ public class ManagementUsersController {
             String name = safe(user.getUsername()).toLowerCase();
             String email = safe(user.getEmail()).toLowerCase();
             String rank = safe(user.getRank()).toLowerCase();
-            String id = String.valueOf(user.getId());
+            String status = safe(user.getStatus()).toLowerCase();
 
-            if (search.isBlank() || name.contains(search) || email.contains(search) || rank.contains(search) || id.contains(search)) {
+            if (search.isBlank() || name.contains(search) || email.contains(search) || rank.contains(search) || status.contains(search)) {
                 displayedUsers.add(user);
             }
         }
@@ -199,8 +205,16 @@ public class ManagementUsersController {
 
     // Builds one interactive card per user with rank/status/actions.
     private HBox createUserCard(User user) {
-        Label idLabel = new Label("#" + user.getId());
-        idLabel.setStyle("-fx-text-fill: #d6b2fc; -fx-font-weight: 700; -fx-min-width: 56;");
+        Label avatarLabel = new Label(user.getAvatarInitials());
+        avatarLabel.setMinSize(38, 38);
+        avatarLabel.setPrefSize(38, 38);
+        avatarLabel.setMaxSize(38, 38);
+        ImageView avatarImage = new ImageView();
+        AvatarUtil.applyDiceBearAvatar(avatarImage, avatarLabel, user, 38);
+        StackPane avatarPane = new StackPane(avatarLabel, avatarImage);
+        avatarPane.setMinSize(38, 38);
+        avatarPane.setPrefSize(38, 38);
+        avatarPane.setMaxSize(38, 38);
 
         Label usernameLabel = new Label(safe(user.getUsername()));
         usernameLabel.setStyle("-fx-text-fill: #f3eefc; -fx-font-size: 14px; -fx-font-weight: 700;");
@@ -256,7 +270,7 @@ public class ManagementUsersController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox row = new HBox(14, idLabel, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
+        HBox row = new HBox(14, avatarPane, identityBox, rankBox, statusLabel, presenceLabel, spacer, actionsBox);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("user-row-card");
         return row;

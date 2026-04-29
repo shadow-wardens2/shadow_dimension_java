@@ -1,5 +1,8 @@
 package Entities.User;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class User {
 
     // Persistent user fields mapped from database.
@@ -151,6 +154,35 @@ public class User {
         String u = (username == null || username.isBlank()) ? "-" : username;
         String e = (email == null || email.isBlank()) ? "-" : email;
         return u + "\n" + e;
+    }
+
+    public String getAvatarInitials() {
+        String source = (username == null || username.isBlank()) ? "Shadow Dweller" : username.trim();
+        String[] parts = source.split("\\s+");
+        if (parts.length >= 2) {
+            return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+        }
+        if (source.length() >= 2) {
+            return source.substring(0, 2).toUpperCase();
+        }
+        return source.substring(0, 1).toUpperCase();
+    }
+
+    public String getAvatarStyle() {
+        String source = (username == null || username.isBlank()) ? "shadow-dweller" : username;
+        int hue = Math.floorMod(source.toLowerCase().hashCode(), 360);
+        return "-fx-background-color: hsb(" + hue + ", 0.55, 0.82);"
+                + "-fx-background-radius: 999;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-weight: bold;"
+                + "-fx-alignment: center;";
+    }
+
+    public String getDiceBearAvatarUrl(int size) {
+        String seed = (username == null || username.isBlank()) ? "shadow-dweller" : username.trim();
+        return "https://api.dicebear.com/9.x/adventurer/png?seed="
+                + URLEncoder.encode(seed, StandardCharsets.UTF_8)
+                + "&size=" + size;
     }
 
     public String getRank() {

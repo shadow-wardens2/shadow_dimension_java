@@ -5,6 +5,7 @@
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -133,6 +134,8 @@
                                                 <Button fx:id="btnToggleSignupPassword" onAction="#toggleSignupPasswordVisibility" styleClass="icon-button" text="&#128065;" />
                                             </children>
                                         </HBox>
+                                        <ProgressBar fx:id="pbSignupPasswordStrength" prefWidth="1.7976931348623157E308" progress="0.0" styleClass="password-strength-bar" />
+                                        <Label fx:id="lblSignupPasswordStrength" style="-fx-text-fill: #7f7b87; -fx-font-size: 12px;" text="Password strength: empty" />
                                         <Label fx:id="lblSignupPasswordError" managed="false" styleClass="validation-error" visible="false" />
                                     </VBox>
 

@@ -5,6 +5,7 @@ import Entities.User.User;
 import Services.User.ServiceUser;
 import Utils.SessionManager;
 import Utils.FaceCaptureUtil;
+import Utils.AvatarUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import java.awt.image.BufferedImage;
@@ -28,6 +30,12 @@ public class VaultController {
 
     @FXML
     private Label lbAuthState;
+
+    @FXML
+    private Label lbAvatar;
+
+    @FXML
+    private ImageView imgAvatar;
 
     @FXML
     private Label lbUsername;
@@ -81,6 +89,7 @@ public class VaultController {
         if (user == null) {
             lbVaultTitle.setText("Guest Vault");
             lbAuthState.setText("Connect Soul to unlock your personal vault.");
+            AvatarUtil.applyDiceBearAvatar(imgAvatar, lbAvatar, null, 44);
             lbUsername.setText("-");
             lbEmail.setText("-");
             lbFullName.setText("-");
@@ -96,6 +105,7 @@ public class VaultController {
         String username = safe(user.getUsername(), "Shadow Dweller");
         lbVaultTitle.setText(username + " Vault");
         lbAuthState.setText("Soul synchronized.");
+        AvatarUtil.applyDiceBearAvatar(imgAvatar, lbAvatar, user, 44);
         lbUsername.setText(username);
         lbEmail.setText(safe(user.getEmail(), "-"));
         lbFullName.setText(safe(user.getFullName(), "-"));

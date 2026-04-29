@@ -1,10 +1,13 @@
 package Controllers;
 
 import Utils.SessionManager;
+import Utils.AvatarUtil;
 import Entities.User.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import java.io.IOException;
 
 public class HomeController {
@@ -13,6 +16,8 @@ public class HomeController {
     @FXML private Button btnDashboard;
     @FXML private Button btnAuth;
     @FXML private Button btnLogout;
+    @FXML private ImageView imgUserAvatar;
+    @FXML private Label lbUserAvatar;
 
     @FXML
     public void initialize() {
@@ -25,10 +30,22 @@ public class HomeController {
             if (btnAuth != null) {
                 btnAuth.setText("My Soul");
             }
+            if (imgUserAvatar != null && lbUserAvatar != null) {
+                AvatarUtil.applyDiceBearAvatar(imgUserAvatar, lbUserAvatar, user, 42);
+                imgUserAvatar.setVisible(true);
+                imgUserAvatar.setManaged(true);
+                lbUserAvatar.setVisible(true);
+                lbUserAvatar.setManaged(true);
+            }
             if (btnLogout != null) {
                 btnLogout.setVisible(true);
                 btnLogout.setManaged(true);
             }
+        } else if (lbUserAvatar != null && imgUserAvatar != null) {
+            lbUserAvatar.setVisible(false);
+            lbUserAvatar.setManaged(false);
+            imgUserAvatar.setVisible(false);
+            imgUserAvatar.setManaged(false);
         }
     }
 

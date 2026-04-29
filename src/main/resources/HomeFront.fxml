@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
@@ -35,6 +36,12 @@
         <Region HBox.hgrow="ALWAYS" />
         <HBox spacing="20.0" alignment="CENTER">
             <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <StackPane prefHeight="42.0" prefWidth="42.0" HBox.hgrow="NEVER">
+                <children>
+                    <Label fx:id="lbUserAvatar" alignment="CENTER" managed="false" prefHeight="42.0" prefWidth="42.0" style="-fx-background-color: #19191d; -fx-background-radius: 21; -fx-text-fill: #ffffff; -fx-font-weight: bold;" text="SD" visible="false" />
+                    <ImageView fx:id="imgUserAvatar" fitHeight="42.0" fitWidth="42.0" managed="false" preserveRatio="false" visible="false" />
+                </children>
+            </StackPane>
             <Button fx:id="btnAuth" onAction="#handleAuthAction" styleClass="ethereal-button" text="Connect Soul" />
             <Button fx:id="btnLogout" onAction="#handleLogout" styleClass="secondary-button" text="Logout" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
         </HBox>
