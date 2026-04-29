@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Rectangle?>
+
+<AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.HomeController">
+    
+    <!-- Atmospheric Background Layers -->
+    <StackPane AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <Pane opacity="0.4">
+            <style>
+                -fx-background-color: radial-gradient(center 50% 50%, radius 80%, rgba(211, 187, 255, 0.05), transparent);
+            </style>
+        </Pane>
+    </StackPane>
+
+    <!-- Navigation Header -->
+    <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets left="60.0" right="60.0" />
+        </padding>
+        <Label styleClass="label-sigil" text="SHADOW DIMENSIONS" />
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="30.0" alignment="CENTER">
+            <Label styleClass="body-md" text="Home" />
+            <Label onMouseClicked="#navigateToMarketplace" styleClass="body-md" text="Marketplace" style="-fx-cursor: hand;" />
+            <Label onMouseClicked="#navigateToVault" styleClass="body-md" text="My Vault" style="-fx-cursor: hand;" />
+            <Label onMouseClicked="#navigateToTutorials" styleClass="body-md" text="Tutorials" style="-fx-cursor: hand;" />
+            <Label styleClass="body-md" text="Forum" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="20.0" alignment="CENTER">
+            <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <Button fx:id="btnAuth" onAction="#handleAuthAction" styleClass="ethereal-button" text="Connect Soul" />
+        </HBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80">
+        <content>
+            <VBox spacing="100.0">
+                <padding>
+                    <Insets bottom="100.0" top="100.0" />
+                </padding>
+                
+                <!-- Hero Section -->
+                <VBox alignment="CENTER" spacing="20.0">
+                    <Label styleClass="label-sigil" text="THE VOID IS CALLING" />
+                    <Label alignment="CENTER" lineSpacing="-10.0" styleClass="display-lg" text="FORGE YOUR&#10;LEGEND IN ETERNAL&#10;NIGHT" textAlignment="CENTER" />
+                    <Label maxWidth="600.0" styleClass="body-md" text="Discover the premier dark fantasy marketplace and cultural hub where legends are born in shadow and rituals are tracked in real-time." textAlignment="CENTER" wrapText="true" opacity="0.7" />
+                    
+                    <HBox alignment="CENTER" spacing="20.0">
+                        <padding>
+                            <Insets top="20.0" />
+                        </padding>
+                        <Button onAction="#navigateToMarketplace" styleClass="ethereal-button" text="Marketplace" prefWidth="200" />
+                        <Button onAction="#navigateToVault" styleClass="secondary-button" text="My Vault" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
+                        <Button styleClass="secondary-button" text="View Chronicles" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
+                    </HBox>
+                </VBox>
+
+                <!-- AI Recommendations Section -->
+                <VBox fx:id="recommendationBox" spacing="30.0" managed="false" visible="false">
+                    <padding>
+                        <Insets left="100.0" right="100.0" />
+                    </padding>
+                    <Label styleClass="headline-md" text="✨ Recommended for You by ShadowAIn" style="-fx-text-fill: #d3bbff;" />
+                    <Label styleClass="body-md" text="Based on your past journeys through the Shadow Dimension." opacity="0.6" />
+                    <HBox fx:id="recommendationsContainer" spacing="30.0" alignment="CENTER_LEFT" />
+                </VBox>
+
+                <!-- Statistics Banner (Tonal Shift) -->
+                <VBox spacing="40.0" styleClass="artifact-card" style="-fx-background-color: -fx-surface-container-low; -fx-background-radius: 0;">
+                    <padding>
+                        <Insets bottom="60.0" left="100.0" right="100.0" top="60.0" />
+                    </padding>
+                    <HBox alignment="CENTER" spacing="100.0">
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="12.8k" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="ACTIVE GUARDIANS" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="84k+" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="RELICS EXCHANGED" />
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="10.0">
+                            <Label styleClass="display-lg" text="0.02s" style="-fx-font-size: 40;" />
+                            <Label styleClass="label-sigil" text="RITUAL LATENCY" />
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</AnchorPane>

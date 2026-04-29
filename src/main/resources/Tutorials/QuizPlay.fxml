@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<AnchorPane prefHeight="750.0" prefWidth="1000.0" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.QuizPlayController">
+    <children>
+        <VBox alignment="TOP_CENTER" spacing="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <!-- Header -->
+            <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="20.0" style="-fx-background-color: #0d0d12;">
+                <padding>
+                    <Insets left="40.0" right="40.0" />
+                </padding>
+                <Button onAction="#handleExit" styleClass="secondary-button" text="✕ Exit Quiz" />
+                <Region HBox.hgrow="ALWAYS" />
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="lbQuizTitle" styleClass="headline-md" text="Loading Quiz..." style="-fx-font-size: 20px;" />
+                    <ProgressBar fx:id="pbProgress" prefWidth="300.0" progress="0.0" styleClass="ethereal-progress" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lbQuestionCounter" styleClass="label-sigil" text="Q 1 / 10" />
+            </HBox>
+
+            <!-- Main Content Area -->
+            <StackPane VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                </padding>
+                <VBox alignment="CENTER" spacing="40" maxWidth="800" styleClass="panel-card" style="-fx-background-color: #16161e; -fx-background-radius: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 20, 0, 0, 10);">
+                    <padding>
+                        <Insets bottom="60.0" left="60.0" right="60.0" top="60.0" />
+                    </padding>
+
+                    <!-- Question Section -->
+                    <VBox alignment="CENTER" spacing="20">
+                        <Label fx:id="lbQuestionText" text="Wait for it... The trial begins shortly." wrapText="true" textAlignment="CENTER" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold; -fx-font-family: 'Inter', 'Segoe UI';" />
+                        <Region prefHeight="20" />
+                    </VBox>
+
+                    <!-- Options Grid -->
+                    <VBox fx:id="vbOptionsContainer" spacing="15" maxWidth="600" alignment="CENTER">
+                        <!-- Dynamic Buttons will be injected here -->
+                    </VBox>
+
+                    <Region VBox.vgrow="ALWAYS" />
+
+                    <!-- Footer Action -->
+                    <HBox alignment="CENTER">
+                        <Button fx:id="btnNext" onAction="#handleNext" styleClass="glow-button" text="NEXT QUESTION →" prefWidth="250" prefHeight="50" disable="true" />
+                    </HBox>
+                </VBox>
+            </StackPane>
+        </VBox>
+    </children>
+</AnchorPane>
