@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
 
@@ -25,9 +26,16 @@
                     </VBox>
                 </StackPane>
 
-                <VBox alignment="CENTER" spacing="10">
-                    <Label fx:id="lbMessage" text="You have shown great potential, apprentice." wrapText="true" textAlignment="CENTER" style="-fx-text-fill: #cccccc; -fx-font-size: 18px;" />
-                    <Label fx:id="lbPercent" text="70% Accuracy" style="-fx-text-fill: #6d28d9; -fx-font-weight: bold;" />
+                <VBox alignment="CENTER" spacing="20" maxWidth="600">
+                    <HBox alignment="CENTER" spacing="10">
+                        <Label text="✧" style="-fx-text-fill: #a78bfa; -fx-font-size: 18px;" />
+                        <Label text="THE ORACLE'S VERDICT" style="-fx-text-fill: #8b5cf6; -fx-font-size: 14px; -fx-font-weight: bold; -fx-letter-spacing: 1;" />
+                        <Label text="✧" style="-fx-text-fill: #a78bfa; -fx-font-size: 18px;" />
+                    </HBox>
+                    <VBox style="-fx-background-color: rgba(13, 13, 18, 0.8); -fx-background-radius: 20; -fx-border-color: rgba(109, 40, 217, 0.5); -fx-border-radius: 20; -fx-border-width: 1.5; -fx-padding: 30 40;" alignment="CENTER" minHeight="180">
+                        <Label fx:id="lbMessage" text="You have shown great potential, apprentice." wrapText="true" textAlignment="CENTER" style="-fx-text-fill: #e2e8f0; -fx-font-size: 15px; -fx-line-spacing: 6; -fx-font-style: italic;" prefWidth="500" minHeight="-Infinity" />
+                    </VBox>
+                    <Label fx:id="lbPercent" text="70% Accuracy" style="-fx-text-fill: #a78bfa; -fx-font-weight: bold; -fx-font-size: 16px;" />
                 </VBox>
 
                 <HBox alignment="CENTER" spacing="20">

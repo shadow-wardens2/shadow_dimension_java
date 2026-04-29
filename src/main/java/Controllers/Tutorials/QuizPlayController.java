@@ -39,6 +39,7 @@ public class QuizPlayController {
     private int score = 0;
     private Parent previousView;
     private FormationDetailsController detailsController;
+    private List<String> failedQuestions = new ArrayList<>();
 
     private ServiceQuestion serviceQuestion = new ServiceQuestion();
     private ServiceOption serviceOption = new ServiceOption();
@@ -52,6 +53,7 @@ public class QuizPlayController {
         this.detailsController = detailsController;
         lbQuizTitle.setText(quiz.getTitre());
 
+        failedQuestions.clear();
         loadQuestions();
         showQuestion();
     }
@@ -109,6 +111,8 @@ public class QuizPlayController {
     private void handleNext() {
         if (isCorrectSelected) {
             score++;
+        } else {
+            failedQuestions.add(questions.get(currentQuestionIndex).getTexte());
         }
 
         currentQuestionIndex++;
@@ -134,7 +138,7 @@ public class QuizPlayController {
             Parent root = loader.load();
 
             QuizResultController controller = loader.getController();
-            controller.setResults(score, questions.size(), currentQuiz, previousView, detailsController);
+            controller.setResults(score, questions.size(), currentQuiz, previousView, detailsController, failedQuestions);
 
             lbQuizTitle.getScene().setRoot(root);
         } catch (IOException e) {

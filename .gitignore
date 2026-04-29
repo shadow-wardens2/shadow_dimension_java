@@ -45,4 +45,7 @@ src/main/.env
 
 ### Mac OS ###
 .DS_Store
+
+### Environment Variables ###
 .env
+

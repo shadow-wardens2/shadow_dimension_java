@@ -54,14 +54,14 @@
 
                     <!-- Filter Chips -->
                     <FlowPane alignment="CENTER" hgap="15.0" vgap="10.0" prefWrapLength="800">
-                        <Button styleClass="glow-button" text="ALL" style="-fx-border-radius: 20; -fx-background-radius: 20; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="ACTION" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="ADVENTURE" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="FANTASY" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="ONLINE" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="RPG" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="SCI-FI" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
-                        <Button styleClass="secondary-button" text="SURVIVAL" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" />
+                        <Button styleClass="glow-button" text="ALL" style="-fx-border-radius: 20; -fx-background-radius: 20; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="ACTION" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="ADVENTURE" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="FANTASY" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="ONLINE" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="RPG" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="SCI-FI" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
+                        <Button styleClass="secondary-button" text="SURVIVAL" style="-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;" onAction="#handleCategoryFilter" />
                     </FlowPane>
 
                     <!-- AI Recommendation Section (void style) - now BELOW search/filter -->
@@ -98,7 +98,7 @@
                     <!-- Main Grid -->
                     <VBox spacing="40.0">
                         <padding>
-                            <Insets left="100.0" right="100.0" />
+                            <Insets left="60.0" right="60.0" />
                         </padding>
                         <HBox alignment="CENTER_LEFT">
                             <Label styleClass="headline-md" text="Available Formations" />
@@ -106,7 +106,7 @@
                             <Label fx:id="resultCountLabel" styleClass="label-sigil" text="0 FORMATIONS FOUND" opacity="0.5" />
                         </HBox>
                         
-                        <FlowPane fx:id="formationsContainer" hgap="40.0" vgap="40.0" prefWrapLength="1200.0">
+                        <FlowPane fx:id="formationsContainer" hgap="30.0" vgap="40.0" prefWrapLength="1200.0">
                             <!-- Cards will be injected here -->
                         </FlowPane>
                     </VBox>
