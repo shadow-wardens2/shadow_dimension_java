@@ -1,1 +1,0 @@
-# shadow_dimension_java
