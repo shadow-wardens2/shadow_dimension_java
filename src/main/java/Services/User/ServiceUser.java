@@ -123,11 +123,6 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Ce compte est verrouille.");
         }
 
-        int isVerified = rs.getInt("is_verified");
-        if (isVerified == 0) {
-            throw new IllegalArgumentException("Email non verifie. Entrez le code recu par mail.");
-        }
-
         String storedPassword = rs.getString("password");
         if (!isPasswordValid(plainPassword, storedPassword)) {
             int failedAttempts = rs.getInt("failed_login_attempts") + 1;
@@ -139,6 +134,10 @@ public class ServiceUser implements InterfaceServiceUser {
             updateFailedLoginAttempts(rs.getInt("id"), failedAttempts);
             int remainingAttempts = MAX_FAILED_LOGIN_ATTEMPTS - failedAttempts;
             throw new IllegalArgumentException("Mot de passe incorrect. Il reste " + remainingAttempts + " tentative(s) avant blocage.");
+        }
+
+        if (rs.getInt("is_verified") == 0) {
+            markUserAsVerified(rs.getInt("id"));
         }
 
         resetFailedLoginAttempts(rs.getInt("id"));
@@ -851,6 +850,12 @@ public class ServiceUser implements InterfaceServiceUser {
         PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = ?, is_locked = 1 WHERE id = ?");
         ps.setInt(1, failedAttempts);
         ps.setInt(2, userId);
+        ps.executeUpdate();
+    }
+
+    private void markUserAsVerified(int userId) throws SQLException {
+        PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET is_verified = 1 WHERE id = ?");
+        ps.setInt(1, userId);
         ps.executeUpdate();
     }
 }
