@@ -17,6 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 
@@ -41,6 +43,7 @@ public class ManagementProduitController implements Initializable {
     private FilteredList<Produit> filteredData;
     private SortedList<Produit> sortedData;
     private PageHost dashboardContext;
+    private Map<Produit, Parent> cardCache = new HashMap<>();
 
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
@@ -103,21 +106,25 @@ public class ManagementProduitController implements Initializable {
         };
 
         sortedData.setComparator(comparator);
-        refreshGrid(); // Explicitly refresh after sorting
     }
 
     private void refreshGrid() {
         productsTilePane.getChildren().clear();
         for (Produit product : sortedData) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/ProductCard.fxml"));
-                Parent card = loader.load();
-                ProductCardController controller = loader.getController();
-                controller.setProductData(product, this::editProduct, this::deleteProduct);
-                productsTilePane.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+            Parent card = cardCache.get(product);
+            if (card == null) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/ProductCard.fxml"));
+                    card = loader.load();
+                    ProductCardController controller = loader.getController();
+                    controller.setProductData(product, this::editProduct, this::deleteProduct);
+                    cardCache.put(product, card);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    continue;
+                }
             }
+            productsTilePane.getChildren().add(card);
         }
     }
 
@@ -158,6 +165,7 @@ public class ManagementProduitController implements Initializable {
 
     private void loadProducts() {
         try {
+            cardCache.clear();
             observableProducts.setAll(serviceProduit.getAll());
         } catch (SQLException e) {
             e.printStackTrace();

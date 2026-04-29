@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.Front.CheckoutFormController">
+    <VBox alignment="CENTER" spacing="25.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="100.0" AnchorPane.bottomAnchor="100.0" style="-fx-background-color: #1c1922; -fx-padding: 40; -fx-background-radius: 16;">
+        <Label styleClass="headline" text="Checkout" />
+        <Label styleClass="subheadline" text="Enter your ethereal coordinates to summon your artifacts." />
+        <Label fx:id="errorLabel" textFill="#ef4444" visible="false" />
+        
+        <GridPane hgap="20.0" vgap="20.0" alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50" />
+                <ColumnConstraints percentWidth="50" />
+            </columnConstraints>
+            
+            <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2">
+                <Label text="Full Name" styleClass="form-label" />
+                <TextField fx:id="tfFullName" styleClass="ritual-input" />
+            </VBox>
+            
+            <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                <Label text="Email Address" styleClass="form-label" />
+                <TextField fx:id="tfEmail" styleClass="ritual-input" />
+            </VBox>
+            
+            <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                <Label text="Address" styleClass="form-label" />
+                <TextField fx:id="tfAdresse" styleClass="ritual-input" />
+            </VBox>
+            <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <Label text="City" styleClass="form-label" />
+                <TextField fx:id="tfVille" styleClass="ritual-input" />
+            </VBox>
+            
+            <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                <Label text="Zip Code" styleClass="form-label" />
+                <TextField fx:id="tfCodePostal" styleClass="ritual-input" />
+            </VBox>
+            <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                <Label text="Country" styleClass="form-label" />
+                <TextField fx:id="tfPays" styleClass="ritual-input" />
+            </VBox>
+            
+            <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
+                <Label text="Phone Number" styleClass="form-label" />
+                <TextField fx:id="tfTelephone" styleClass="ritual-input" />
+            </VBox>
+        </GridPane>
+        
+        <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 20 0 0 0;">
+            <Button mnemonicParsing="false" onAction="#handleCancel" styleClass="secondary-button" text="Cancel" />
+            <Button mnemonicParsing="false" onAction="#handleConfirm" styleClass="glow-button" text="Confirm Order" />
+        </HBox>
+    </VBox>
+</AnchorPane>

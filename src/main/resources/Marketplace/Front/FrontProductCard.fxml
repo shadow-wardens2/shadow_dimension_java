@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
@@ -20,8 +21,9 @@
     </VBox>
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
-        <Label fx:id="lbPrice" styleClass="title-lg" text="Price SD" style="-fx-text-fill: #d3bbff;" />
+        <Label fx:id="lbPrice" styleClass="title-lg" text="0.00 TND" style="-fx-text-fill: #d3bbff;" />
         <Region HBox.hgrow="ALWAYS" />
+        <Button mnemonicParsing="false" onAction="#handleAddToCart" text="Cart +" style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-background-radius: 8; -fx-font-weight: bold; -fx-padding: 8 15;" />
         <VBox alignment="CENTER_RIGHT">
             <Label styleClass="label-sigil" text="STOCK" opacity="0.4" style="-fx-font-size: 10px;" />
             <Label fx:id="lbStock" styleClass="label-sigil" text="12" />

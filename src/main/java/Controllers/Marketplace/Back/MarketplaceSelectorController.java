@@ -40,6 +40,11 @@ public class MarketplaceSelectorController {
     }
 
     @FXML
+    void handleOrders(ActionEvent event) {
+        dashboardContext.loadPage("/Marketplace/Back/ManagementCommande.fxml");
+    }
+
+    @FXML
     void handleDownloadReport(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Marketplace Report");

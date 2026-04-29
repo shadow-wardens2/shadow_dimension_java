@@ -13,6 +13,7 @@
         <Button mnemonicParsing="false" onAction="#handleProducts" prefHeight="70.0" prefWidth="180.0" styleClass="glow-button" text="Manage Products" />
         <Button mnemonicParsing="false" onAction="#handleCategories" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Categories" />
         <Button mnemonicParsing="false" onAction="#handleTypes" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Types" />
+        <Button mnemonicParsing="false" onAction="#handleOrders" prefHeight="70.0" prefWidth="180.0" styleClass="secondary-button" text="Manage Orders" />
     </HBox>
     <HBox alignment="CENTER" spacing="20.0" style="-fx-padding: 10 0 0 0;">
         <Button mnemonicParsing="false" onAction="#handleDownloadReport" styleClass="secondary-button" text="Download Marketplace Report (PDF)" />

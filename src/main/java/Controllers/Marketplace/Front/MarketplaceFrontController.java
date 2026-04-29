@@ -16,9 +16,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import Services.Marketplace.AiRecommendationService;
+import Services.Marketplace.ServiceCommande;
+import javafx.scene.layout.HBox;
+import javafx.application.Platform;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import Utils.SessionManager;
 import Entities.User.User;
 import javafx.scene.control.Button;
+import Services.Marketplace.CurrencyConverterService;
+import javafx.scene.control.ComboBox;
 
 public class MarketplaceFrontController {
 
@@ -28,6 +38,9 @@ public class MarketplaceFrontController {
     @FXML private javafx.scene.control.Label lbProductCount;
     @FXML private javafx.scene.control.TextField searchField;
     @FXML private javafx.scene.control.ComboBox<String> categoryFilter;
+    @FXML private javafx.scene.control.ComboBox<String> currencySelector;
+    @FXML private VBox recommendationBox;
+    @FXML private HBox recommendationsContainer;
 
     private ServiceProduit sp = new ServiceProduit();
     private ServiceCategorie sc = new ServiceCategorie();
@@ -37,13 +50,13 @@ public class MarketplaceFrontController {
 
     @FXML
     public void initialize() {
+        boolean isAdmin = false;
         if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
-            if (user.isAdmin()) {
-                btnDashboard.setVisible(true);
-                btnDashboard.setManaged(true);
-            }
+            isAdmin = user.isAdmin();
         }
+        btnDashboard.setVisible(isAdmin);
+        btnDashboard.setManaged(isAdmin);
         
         try {
             allProducts = sp.getAll();
@@ -54,6 +67,10 @@ public class MarketplaceFrontController {
                 categoryFilter.getItems().add(c.getNom());
             }
             categoryFilter.getSelectionModel().selectFirst();
+
+            // Initialize Currency Selector
+            currencySelector.getItems().addAll("TND", "EUR", "USD");
+            currencySelector.setValue(CurrencyConverterService.getCurrentCurrency());
             
         } catch (SQLException e) {
             e.printStackTrace();
@@ -85,6 +102,16 @@ public class MarketplaceFrontController {
         displayProducts(filtered);
     }
 
+    @FXML
+    void handleCurrencyChange() {
+        String selected = currencySelector.getValue();
+        if (selected != null) {
+            CurrencyConverterService.setCurrentCurrency(selected);
+            // Refresh the grid to update prices
+            handleSearch(); // This will trigger displayProducts with current filters
+        }
+    }
+
     private void displayProducts(List<Produit> products) {
         productsGrid.getChildren().clear();
         lbProductCount.setText(products.size() + " ARTIFACTS DISCOVERED");
@@ -103,7 +130,8 @@ public class MarketplaceFrontController {
 
                 controller.setData(p, catName);
                 productsGrid.getChildren().add(card);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                System.err.println("Error loading product card for: " + p.getNom());
                 e.printStackTrace();
             }
         }
@@ -140,5 +168,10 @@ public class MarketplaceFrontController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void handleOpenCart() {
+        loadPage("/Marketplace/Front/CartView.fxml");
     }
 }

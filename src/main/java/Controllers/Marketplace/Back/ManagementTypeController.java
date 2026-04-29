@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.collections.transformation.FilteredList;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 
@@ -34,6 +36,7 @@ public class ManagementTypeController implements Initializable {
     private ObservableList<Type> observableTypes = FXCollections.observableArrayList();
     private FilteredList<Type> filteredData;
     private PageHost dashboardContext;
+    private Map<Type, Parent> cardCache = new HashMap<>();
 
     public void setDashboardContext(PageHost dashboardContext) {
         this.dashboardContext = dashboardContext;
@@ -78,15 +81,20 @@ public class ManagementTypeController implements Initializable {
     private void refreshGrid() {
         typeTilePane.getChildren().clear();
         for (Type type : filteredData) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/TypeCard.fxml"));
-                Parent card = loader.load();
-                TypeCardController controller = loader.getController();
-                controller.setTypeData(type, this::editType, this::deleteType);
-                typeTilePane.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+            Parent card = cardCache.get(type);
+            if (card == null) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Back/TypeCard.fxml"));
+                    card = loader.load();
+                    TypeCardController controller = loader.getController();
+                    controller.setTypeData(type, this::editType, this::deleteType);
+                    cardCache.put(type, card);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    continue;
+                }
             }
+            typeTilePane.getChildren().add(card);
         }
     }
 
@@ -127,6 +135,7 @@ public class ManagementTypeController implements Initializable {
 
     private void loadTypes() {
         try {
+            cardCache.clear();
             observableTypes.setAll(serviceType.getAll());
         } catch (SQLException e) {
             e.printStackTrace();
