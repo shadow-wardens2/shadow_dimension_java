@@ -1,10 +1,6 @@
 package Controllers.User;
 
-import Controllers.Marketplace.Back.MarketplaceSelectorController;
-import Controllers.Marketplace.Back.ManagementCategorieController;
-import Controllers.Marketplace.Back.ManagementProduitController;
-import Controllers.Marketplace.Back.ManagementTypeController;
-import Controllers.Marketplace.Back.PageHost;
+import Controllers.Marketplace.Back.*;
 import Controllers.event.EventSelectorController;
 import Controllers.Tutorials.*;
 import Controllers.User.VaultController;
@@ -201,6 +197,10 @@ public class HomePageController implements PageHost {
                 ((ManagementProduitController) controller).setDashboardContext(this);
             } else if (controller instanceof ManagementTypeController) {
                 ((ManagementTypeController) controller).setDashboardContext(this);
+            } else if (controller instanceof ManagementCommandeController) {
+                ((ManagementCommandeController) controller).setDashboardContext(this);
+            } else if (controller instanceof MarketplaceStatisticsController) {
+                ((MarketplaceStatisticsController) controller).setDashboardContext(this);
             }
             if (controller instanceof EventSelectorController) {
                 ((EventSelectorController) controller).setDashboardContext(this);

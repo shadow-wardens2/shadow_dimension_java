@@ -12,6 +12,8 @@ public class MailService {
     public static void sendMail(String to, String subject, String body) {
         String username = EnvConfig.get("MAIL_USERNAME");
         String password = EnvConfig.get("MAIL_PASSWORD");
+        if (password != null) password = password.replaceAll("\\s+", "");
+        
         String host = EnvConfig.get("MAIL_SMTP_HOST", "smtp.gmail.com");
         String port = EnvConfig.get("MAIL_SMTP_PORT", "587");
         String from = EnvConfig.get("MAIL_FROM", username);
@@ -21,10 +23,16 @@ public class MailService {
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", port);
+        props.put("mail.smtp.ssl.trust", host);
+        props.put("mail.smtp.connectiontimeout", "10000");
+        props.put("mail.smtp.timeout", "10000");
+
+        final String finalUser = username;
+        final String finalPass = password;
 
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
+                return new PasswordAuthentication(finalUser, finalPass);
             }
         });
 

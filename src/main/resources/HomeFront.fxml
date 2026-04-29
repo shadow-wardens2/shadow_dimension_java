@@ -76,7 +76,7 @@
                         <Insets left="100.0" right="100.0" />
                     </padding>
                     <Label styleClass="headline-md" text="✨ Recommended for You by ShadowAIn" style="-fx-text-fill: #d3bbff;" />
-                    <Label styleClass="body-md" text="Based on your past journeys through the Shadow Dimension." opacity="0.6" />
+                    <Label fx:id="recommendationSubtitle" styleClass="body-md" text="Based on your past journeys through the Shadow Dimension." opacity="0.6" />
                     <HBox fx:id="recommendationsContainer" spacing="30.0" alignment="CENTER_LEFT" />
                 </VBox>
 

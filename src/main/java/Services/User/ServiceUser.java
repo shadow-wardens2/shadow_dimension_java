@@ -42,7 +42,7 @@ public class ServiceUser implements InterfaceServiceUser {
 
     public ServiceUser() {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
-        ensureFailedLoginAttemptsColumn();
+        ensureUserColumns();
         ensureVerificationTable();
         ensurePasswordResetTable();
         ensureFaceIdTable();
@@ -591,7 +591,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public User getFirstActiveAdmin() throws SQLException {
-        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE roles LIKE '%ROLE_ADMIN%' AND is_active = 1 LIMIT 1";
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE roles LIKE '%ROLE_ADMIN%' AND is_active = 1 LIMIT 1";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
         if (rs.next()) {
@@ -799,12 +799,18 @@ public class ServiceUser implements InterfaceServiceUser {
         }
     }
 
-    private void ensureFailedLoginAttemptsColumn() {
-        String sql = "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0";
-        try (Statement st = cnx.createStatement()) {
-            st.execute(sql);
-        } catch (SQLException ignored) {
-            // Keep startup resilient; login still works when the schema is already up to date.
+    private void ensureUserColumns() {
+        String[] columns = {
+            "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS failed_login_attempts INT NOT NULL DEFAULT 0",
+            "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS is_verified TINYINT(1) NOT NULL DEFAULT 0",
+            "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS is_locked TINYINT(1) NOT NULL DEFAULT 0",
+            "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) DEFAULT NULL"
+        };
+        for (String sql : columns) {
+            try (Statement st = cnx.createStatement()) {
+                st.execute(sql);
+            } catch (SQLException ignored) {
+            }
         }
     }
 

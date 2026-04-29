@@ -27,6 +27,12 @@ public class AiRecommendationService {
         "meta-llama/llama-3.1-8b-instruct:free"
     };
 
+    private boolean isFallback = false;
+    
+    public boolean isFallback() {
+        return isFallback;
+    }
+
     public List<Produit> getRecommendations(List<Produit> allProducts, List<Produit> pastOrders) {
         if (pastOrders == null) pastOrders = new ArrayList<>();
         
@@ -118,6 +124,7 @@ public class AiRecommendationService {
                         recommendations.addAll(getFallback(available, 4 - recommendations.size(), recommendations));
                     }
                     
+                    isFallback = false;
                     return recommendations.subList(0, Math.min(4, recommendations.size()));
                 } else {
                     System.err.println("OpenRouter Model " + model + " failed with HTTP " + responseCode);
@@ -129,6 +136,7 @@ public class AiRecommendationService {
         
         // If all models fail, return fallback
         System.err.println("All AI models failed, using fallback.");
+        isFallback = true;
         return getFallback(available, 4);
     }
     

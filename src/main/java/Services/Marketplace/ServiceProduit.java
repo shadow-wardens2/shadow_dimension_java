@@ -2,6 +2,8 @@ package Services.Marketplace;
 
 import Entities.Marketplace.Produit;
 import Interfaces.InterfaceServiceProduit;
+import Entities.User.User;
+import Services.User.ServiceUser;
 import Utils.ShadowDimensionsDB; // your DB connection class
 
 import java.sql.*;
@@ -45,6 +47,9 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
         ps.setString(7, p.getImage());
         ps.setInt(8, p.getId());
         ps.executeUpdate();
+        
+        // Trigger low stock alert if needed
+        checkStockAndNotify(p);
     }
 
     @Override
@@ -92,5 +97,29 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
                     rs.getString("image"));
         }
         return null;
+    }
+
+    private void checkStockAndNotify(Produit p) {
+        if (p.getStock() < 5) {
+            new Thread(() -> {
+                try {
+                    ServiceUser su = new ServiceUser();
+                    User admin = su.getFirstActiveAdmin();
+                    if (admin != null) {
+                        String subject = "Low Stock Alert: " + p.getNom();
+                        String body = "Hello " + admin.getUsername() + ",\n\n" +
+                                      "The product '" + p.getNom() + "' (ID: " + p.getId() + ") is running low on stock.\n" +
+                                      "Current stock: " + p.getStock() + "\n\n" +
+                                      "Please restock soon.\n\n" +
+                                      "Regards,\n" +
+                                      "Shadow Dimensions Inventory System";
+                        
+                        MailService.sendMail(admin.getEmail(), subject, body);
+                    }
+                } catch (SQLException e) {
+                    System.err.println("Failed to check admin for stock alert: " + e.getMessage());
+                }
+            }).start();
+        }
     }
 }

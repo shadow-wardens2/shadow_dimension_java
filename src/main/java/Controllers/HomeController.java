@@ -34,6 +34,7 @@ public class HomeController {
 
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
+    @FXML private Label recommendationSubtitle;
 
     @FXML
     public void initialize() {
@@ -81,7 +82,17 @@ public class HomeController {
                 List<Produit> recommendations = aiService.getRecommendations(allProducts, pastOrders);
                 
                 if (!recommendations.isEmpty() && recommendationBox != null && recommendationsContainer != null) {
+                    boolean fallbackUsed = aiService.isFallback();
                     Platform.runLater(() -> {
+                        if (recommendationSubtitle != null) {
+                            if (fallbackUsed) {
+                                recommendationSubtitle.setText("Here are some popular relics from the Void while we reconnect with the AI Oracle.");
+                                recommendationSubtitle.setStyle("-fx-text-fill: #a1a1aa;");
+                            } else {
+                                recommendationSubtitle.setText("Our ShadowAI has analyzed your soul's journey to find these perfect relics.");
+                                recommendationSubtitle.setStyle("-fx-text-fill: #d3bbff;");
+                            }
+                        }
                         recommendationBox.setVisible(true);
                         recommendationBox.setManaged(true);
                         recommendationsContainer.getChildren().clear();
