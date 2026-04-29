@@ -29,7 +29,10 @@
         <TextField fx:id="tfNom" prefWidth="400.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
         <Label styleClass="form-label" text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <TextField fx:id="tfDescription" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <TextField fx:id="tfDescription" prefWidth="320.0" />
+            <Button onAction="#handleGenerateAiDescription" styleClass="secondary-button" text="✨ IA" />
+        </HBox>
 
         <Label styleClass="form-label" text="Prix:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <TextField fx:id="tfPrix" GridPane.columnIndex="1" GridPane.rowIndex="2" />

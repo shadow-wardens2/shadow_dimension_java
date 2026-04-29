@@ -37,7 +37,7 @@ public class ProductCardController {
 
         productName.setText(produit.getNom());
         productDescription.setText(produit.getDescription());
-        productPrice.setText(String.format("$%.2f", produit.getPrix()));
+        productPrice.setText(String.format("%.2f TND", produit.getPrix()));
         productStock.setText(String.valueOf(produit.getStock()));
 
         // Handle image if available

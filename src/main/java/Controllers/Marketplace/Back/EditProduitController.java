@@ -12,6 +12,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import Services.Marketplace.AiDescriptionService;
+import javafx.application.Platform;
 import java.io.File;
 
 import java.sql.SQLException;
@@ -40,6 +42,7 @@ public class EditProduitController {
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ServiceCategorie serviceCategorie = new ServiceCategorie();
     private ServiceType serviceType = new ServiceType();
+    private AiDescriptionService ads = new AiDescriptionService();
     private Produit produit;
 
     @FXML
@@ -173,6 +176,37 @@ public class EditProduitController {
         if (selectedFile != null) {
             tfImage.setText(selectedFile.getAbsolutePath());
         }
+    }
+
+    @FXML
+    private void handleGenerateAiDescription() {
+        String nom = tfNom.getText().trim();
+        Categorie cat = cbCategorie.getValue();
+        String catName = (cat != null) ? cat.getNom() : "Inconnu";
+
+        if (nom.isEmpty()) {
+            showError("Veuillez d'abord saisir le nom du produit !");
+            return;
+        }
+
+        tfDescription.setText("L'ombre s'agite... l'oracle écrit...");
+        tfDescription.setDisable(true);
+
+        new Thread(() -> {
+            try {
+                String aiDesc = ads.generateDescription(nom, catName);
+                Platform.runLater(() -> {
+                    tfDescription.setText(aiDesc);
+                    tfDescription.setDisable(false);
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("L'oracle est silencieux : " + e.getMessage());
+                    tfDescription.setText("");
+                    tfDescription.setDisable(false);
+                });
+            }
+        }).start();
     }
 
     private void closeWindow() {

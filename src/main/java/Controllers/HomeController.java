@@ -5,6 +5,17 @@ import Entities.User.User;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
+import Entities.Marketplace.Categorie;
+import Entities.Marketplace.Produit;
+import Services.Marketplace.AiRecommendationService;
+import Services.Marketplace.ServiceCategorie;
+import Services.Marketplace.ServiceCommande;
+import Services.Marketplace.ServiceProduit;
+import Controllers.Marketplace.Front.FrontProductCardController;
+import javafx.application.Platform;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import java.util.List;
 import java.io.IOException;
 
 public class HomeController {
@@ -14,6 +25,9 @@ public class HomeController {
     @FXML
     private Button btnDashboard;
     @FXML private Button btnAuth;
+
+    @FXML private VBox recommendationBox;
+    @FXML private HBox recommendationsContainer;
 
     @FXML
     public void initialize() {
@@ -26,7 +40,51 @@ public class HomeController {
             if (btnAuth != null) {
                 btnAuth.setText("My Soul");
             }
+            loadAiRecommendations();
         }
+    }
+
+    private void loadAiRecommendations() {
+        new Thread(() -> {
+            try {
+                ServiceProduit sp = new ServiceProduit();
+                ServiceCategorie sc = new ServiceCategorie();
+                List<Produit> allProducts = sp.getAll();
+                List<Categorie> allCategories = sc.getAll();
+
+                ServiceCommande scmd = new ServiceCommande();
+                List<Produit> pastOrders = scmd.getOrderedProductsByUserId(SessionManager.getCurrentUser().getId());
+                
+                AiRecommendationService aiService = new AiRecommendationService();
+                List<Produit> recommendations = aiService.getRecommendations(allProducts, pastOrders);
+                
+                if (!recommendations.isEmpty() && recommendationBox != null && recommendationsContainer != null) {
+                    Platform.runLater(() -> {
+                        recommendationBox.setVisible(true);
+                        recommendationBox.setManaged(true);
+                        recommendationsContainer.getChildren().clear();
+                        for (Produit p : recommendations) {
+                            try {
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/Front/FrontProductCard.fxml"));
+                                VBox card = loader.load();
+                                FrontProductCardController controller = loader.getController();
+                                String catName = allCategories.stream()
+                                        .filter(c -> c.getId() == p.getCategorieId())
+                                        .findFirst()
+                                        .map(Categorie::getNom)
+                                        .orElse("Unknown Tier");
+                                controller.setData(p, catName);
+                                recommendationsContainer.getChildren().add(card);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @FXML

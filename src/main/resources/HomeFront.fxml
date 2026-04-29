@@ -62,38 +62,15 @@
                     </HBox>
                 </VBox>
 
-                <!-- Featured Section (Asymmetric) -->
-                <HBox spacing="60.0">
+                <!-- AI Recommendations Section -->
+                <VBox fx:id="recommendationBox" spacing="30.0" managed="false" visible="false">
                     <padding>
                         <Insets left="100.0" right="100.0" />
                     </padding>
-                    
-                    <VBox spacing="30.0" HBox.hgrow="ALWAYS">
-                        <Label styleClass="headline-md" text="Relics of the Void" />
-                        <Label styleClass="body-md" text="Curated acquisitions from the furthest reaches of the Shadow Dimension. Each artifact carries the weight of its previous owner's soul." maxWidth="400.0" wrapText="true" opacity="0.6" />
-                        <Button styleClass="secondary-button" text="Explore the Vault →" style="-fx-border-color: transparent; -fx-text-fill: -fx-primary;" />
-                    </VBox>
-                    
-                    <GridPane hgap="30.0" vgap="30.0">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="300" />
-                            <ColumnConstraints minWidth="300" />
-                        </columnConstraints>
-                        
-                        <!-- Mini Cards -->
-                        <VBox spacing="15.0" styleClass="artifact-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                            <Rectangle arcHeight="20" arcWidth="20" fill="#1c1922" height="180.0" width="260.0" />
-                            <Label styleClass="title-lg" text="Eclipse Sovereign Plate" />
-                            <Label styleClass="label-sigil" text="1,240 SD" />
-                        </VBox>
-                        
-                        <VBox spacing="15.0" styleClass="artifact-card" GridPane.columnIndex="1" GridPane.rowIndex="0" translateY="40.0">
-                            <Rectangle arcHeight="20" arcWidth="20" fill="#1c1922" height="180.0" width="260.0" />
-                            <Label styleClass="title-lg" text="Shadow-Bound Dirk" />
-                            <Label styleClass="label-sigil" text="850 SD" />
-                        </VBox>
-                    </GridPane>
-                </HBox>
+                    <Label styleClass="headline-md" text="✨ Recommended for You by ShadowAIn" style="-fx-text-fill: #d3bbff;" />
+                    <Label styleClass="body-md" text="Based on your past journeys through the Shadow Dimension." opacity="0.6" />
+                    <HBox fx:id="recommendationsContainer" spacing="30.0" alignment="CENTER_LEFT" />
+                </VBox>
 
                 <!-- Statistics Banner (Tonal Shift) -->
                 <VBox spacing="40.0" styleClass="artifact-card" style="-fx-background-color: -fx-surface-container-low; -fx-background-radius: 0;">
