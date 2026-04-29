@@ -22,7 +22,7 @@ public class QuizResultController {
     private FormationDetailsController detailsController;
 
     public void setResults(int score, int total, Quiz quiz, Parent previousView,
-            FormationDetailsController detailsController) {
+            FormationDetailsController detailsController, java.util.List<String> failedQuestions) {
         this.quiz = quiz;
         this.previousView = previousView;
         this.detailsController = detailsController;
@@ -32,13 +32,15 @@ public class QuizResultController {
         double percent = total > 0 ? ((double) score / total) * 100 : 0;
         lbPercent.setText(String.format("%.1f%% Accuracy", percent));
 
-        if (percent >= 80) {
-            lbMessage.setText("Exceptional work! You are becoming a master of these arts.");
-        } else if (percent >= 50) {
-            lbMessage.setText("Good progress. A few more trials and you will achieve perfection.");
-        } else {
-            lbMessage.setText("The path is long and difficult. Do not be discouraged, try again.");
-        }
+        lbMessage.setText("The Oracle is analyzing your trial...");
+        
+        new Thread(() -> {
+            Services.Tutorials.AiQuizService aiService = new Services.Tutorials.AiQuizService();
+            String feedback = aiService.getQuizFeedback(quiz.getTitre(), score, total, failedQuestions);
+            javafx.application.Platform.runLater(() -> {
+                lbMessage.setText(feedback);
+            });
+        }).start();
     }
 
     @FXML

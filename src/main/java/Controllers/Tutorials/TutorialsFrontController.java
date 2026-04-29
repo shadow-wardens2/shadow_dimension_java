@@ -64,7 +64,7 @@ public class TutorialsFrontController implements Initializable {
         loadAiRecommendations();
 
         searchBar.textProperty().addListener((obs, oldVal, newVal) -> {
-            filterFormations(newVal);
+            applyFilters();
         });
     }
 
@@ -86,6 +86,7 @@ public class TutorialsFrontController implements Initializable {
 
         new Thread(() -> {
             String fullAiResponse = aiService.getPersonalizedRecommendation();
+            System.out.println("AI RESPONSE: " + fullAiResponse);
             Platform.runLater(() -> {
                 String[] recommendations = fullAiResponse.split("\\|\\|\\|");
 
@@ -195,9 +196,9 @@ public class TutorialsFrontController implements Initializable {
     private VBox createFormationCard(Formation f) {
         VBox card = new VBox(0);
         card.getStyleClass().add("artifact-card");
-        card.setPrefWidth(350);
-        card.setMinWidth(350);
-        card.setMaxWidth(350);
+        card.setPrefWidth(310);
+        card.setMinWidth(310);
+        card.setMaxWidth(310);
         card.setPadding(Insets.EMPTY);
         card.setStyle(
                 "-fx-background-color: #0d0d12; -fx-background-radius: 20; -fx-background-radius: 20; -fx-border-radius: 20;");
@@ -205,8 +206,8 @@ public class TutorialsFrontController implements Initializable {
         // Image Section with Badge
         StackPane imgStack = new StackPane();
         ImageView iv = new ImageView();
-        iv.setFitHeight(200);
-        iv.setFitWidth(350);
+        iv.setFitHeight(180);
+        iv.setFitWidth(310);
         iv.setPreserveRatio(false);
 
         try {
@@ -220,7 +221,7 @@ public class TutorialsFrontController implements Initializable {
         } catch (Exception e) {
         }
 
-        Rectangle clip = new Rectangle(350, 200);
+        Rectangle clip = new Rectangle(310, 180);
         clip.setArcWidth(40);
         clip.setArcHeight(40);
         iv.setClip(clip);
@@ -285,17 +286,51 @@ public class TutorialsFrontController implements Initializable {
         return card;
     }
 
-    private void filterFormations(String query) {
-        if (query == null || query.isEmpty()) {
-            displayFormations(allFormations);
-            return;
-        }
-        String lower = query.toLowerCase();
+    private String currentCategoryFilter = "ALL";
+
+    private void applyFilters() {
+        String query = searchBar.getText() != null ? searchBar.getText().toLowerCase() : "";
         List<Formation> filtered = allFormations.stream()
-                .filter(f -> f.getTitre().toLowerCase().contains(lower)
-                        || f.getDescription().toLowerCase().contains(lower))
+                .filter(f -> {
+                    boolean matchesSearch = query.isEmpty() || 
+                            f.getTitre().toLowerCase().contains(query) || 
+                            f.getDescription().toLowerCase().contains(query) ||
+                            (f.getJeu() != null && f.getJeu().getNom().toLowerCase().contains(query));
+                            
+                    boolean matchesCategory = "ALL".equalsIgnoreCase(currentCategoryFilter) ||
+                            (f.getJeu() != null && f.getJeu().getGenre() != null && f.getJeu().getGenre().equalsIgnoreCase(currentCategoryFilter));
+                            
+                    return matchesSearch && matchesCategory;
+                })
                 .collect(Collectors.toList());
         displayFormations(filtered);
+    }
+
+    @FXML
+    void handleCategoryFilter(javafx.event.ActionEvent event) {
+        Button btn = (Button) event.getSource();
+        currentCategoryFilter = btn.getText();
+        
+        FlowPane parent = (FlowPane) btn.getParent();
+        for (javafx.scene.Node node : parent.getChildren()) {
+            if (node instanceof Button) {
+                Button b = (Button) node;
+                if (b == btn) {
+                    b.getStyleClass().remove("secondary-button");
+                    if (!b.getStyleClass().contains("glow-button")) {
+                        b.getStyleClass().add("glow-button");
+                    }
+                    b.setStyle("-fx-border-radius: 20; -fx-background-radius: 20; -fx-font-size: 12px; -fx-padding: 6 20;");
+                } else {
+                    b.getStyleClass().remove("glow-button");
+                    if (!b.getStyleClass().contains("secondary-button")) {
+                        b.getStyleClass().add("secondary-button");
+                    }
+                    b.setStyle("-fx-background-color: #1c1922; -fx-border-color: transparent; -fx-font-size: 12px; -fx-padding: 6 20;");
+                }
+            }
+        }
+        applyFilters();
     }
 
     @FXML

@@ -118,6 +118,34 @@ public class AiQuizService {
         return questions;
     }
 
+    public String getQuizFeedback(String quizTitle, int score, int total, List<String> failedQuestions) {
+        String apiKey = resolveApiKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            return "The Oracle is silent. (API Key missing)";
+        }
+
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are the Shadow Oracle, a dark fantasy AI mentor in the Shadow Dimensions universe.\n");
+        prompt.append("The player has just completed the trial (quiz) titled '").append(quizTitle).append("'.\n");
+        prompt.append("They scored ").append(score).append(" out of ").append(total).append(".\n");
+                
+        if (failedQuestions.isEmpty()) {
+            prompt.append("They answered perfectly. Commend them in a mysterious, dark-fantasy tone. Keep it to 2 short sentences.");
+        } else {
+            prompt.append("They failed on the following topics/questions:\n");
+            for (String fq : failedQuestions) {
+                prompt.append("- ").append(fq).append("\n");
+            }
+            prompt.append("Provide mysterious, dark-fantasy themed feedback (max 3 short sentences). Tell them where they need to focus their training based on what they got wrong. Do not list the questions, just summarize the concepts they need to work on.");
+        }
+
+        String aiResponse = callAi(prompt.toString(), apiKey);
+        if (aiResponse == null || aiResponse.isBlank()) {
+            return "The shadows cloud my vision. Focus your mind and try again.";
+        }
+        return aiResponse;
+    }
+
     private String callAi(String userPrompt, String apiKey) {
         String escapedPrompt = userPrompt
                 .replace("\\", "\\\\")
@@ -154,40 +182,53 @@ public class AiQuizService {
 
     private String extractContent(String json) {
         try {
-            int start = json.indexOf("\"content\":") + 11;
-            int end = json.indexOf("\"", start);
-            while (json.charAt(end - 1) == '\\')
-                end = json.indexOf("\"", end + 1);
-            return json.substring(start, end)
-                    .replace("\\n", "\n")
-                    .replace("\\\"", "\"")
-                    .replace("\\\\", "\\");
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").matcher(json);
+            if (m.find()) {
+                return m.group(1).replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
+            }
         } catch (Exception e) {
-            return null;
+            e.printStackTrace();
         }
+        return "Could not parse Oracle's whisper.";
     }
 
     private String resolveApiKey() {
         String key = System.getenv("OPENROUTER_API_KEY");
-        if (key != null && !key.isBlank())
-            return key.trim();
+        if (key != null && !key.isBlank()) return key.trim();
 
         key = System.getProperty("openrouter.api.key");
-        if (key != null && !key.isBlank())
-            return key.trim();
+        if (key != null && !key.isBlank()) return key.trim();
 
-        java.io.File envFile = new java.io.File(".env");
-        if (envFile.exists()) {
-            try {
-                return java.nio.file.Files.readAllLines(envFile.toPath()).stream()
-                        .filter(l -> l.startsWith("OPENROUTER_API_KEY="))
-                        .map(l -> l.substring("OPENROUTER_API_KEY=".length()).trim())
-                        .findFirst()
-                        .orElse(null);
-            } catch (IOException e) {
-                System.err.println("AI Quiz Forge: Could not read .env");
+        String[] possiblePaths = { ".env", "api_key.txt", "../.env", "../../.env", "shadow_dimension_java/.env" };
+        for (String path : possiblePaths) {
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                try {
+                    key = java.nio.file.Files.readAllLines(file.toPath()).stream()
+                            .filter(l -> l.contains("OPENROUTER_API_KEY=") || (!path.equals(".env") && l.startsWith("sk-or")))
+                            .map(l -> {
+                                if (l.contains("OPENROUTER_API_KEY=")) {
+                                    String k = l.substring(l.indexOf("OPENROUTER_API_KEY=") + "OPENROUTER_API_KEY=".length()).trim();
+                                    if (k.startsWith("\"") && k.endsWith("\"")) k = k.substring(1, k.length() - 1);
+                                    if (k.startsWith("'") && k.endsWith("'")) k = k.substring(1, k.length() - 1);
+                                    return k;
+                                }
+                                return l.trim();
+                            })
+                            .filter(k -> k.startsWith("sk-or"))
+                            .findFirst()
+                            .orElse(null);
+                            
+                    if (key != null && !key.isBlank()) {
+                        System.out.println("AI Quiz Forge: Successfully loaded API key from " + file.getAbsolutePath());
+                        return key;
+                    }
+                } catch (java.io.IOException e) {
+                    System.err.println("AI Quiz Forge: Could not read " + path);
+                }
             }
         }
+        System.err.println("AI Quiz Forge: API Key not found.");
         return null;
     }
 }

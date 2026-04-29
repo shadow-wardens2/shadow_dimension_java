@@ -137,48 +137,62 @@ public class FormationAiService {
         return extractContent(response.body());
     }
 
+    private String extractContent(String json) {
+        try {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").matcher(json);
+            if (m.find()) {
+                return m.group(1).replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Could not parse Oracle's whisper.";
+    }
+
     private String resolveApiKey() {
-        // 1. Try Environment Variable
         String key = System.getenv("OPENROUTER_API_KEY");
-        if (key != null && !key.isBlank())
-            return key.trim();
+        if (key != null && !key.isBlank()) return key.trim();
 
-        // 2. Try JVM Property
         key = System.getProperty("openrouter.api.key");
-        if (key != null && !key.isBlank())
-            return key.trim();
+        if (key != null && !key.isBlank()) return key.trim();
 
-        // 3. Try local file (.env)
-        java.io.File envFile = new java.io.File(".env");
-        if (envFile.exists()) {
-            try {
-                return java.nio.file.Files.readAllLines(envFile.toPath()).stream()
-                        .filter(l -> l.startsWith("OPENROUTER_API_KEY="))
-                        .map(l -> l.substring("OPENROUTER_API_KEY=".length()).trim())
-                        .findFirst()
-                        .orElse(null);
-            } catch (java.io.IOException e) {
-                System.err.println("Shadow Oracle: Could not read .env");
+        String[] possiblePaths = { ".env", "api_key.txt", "../.env", "../../.env", "shadow_dimension_java/.env" };
+        for (String path : possiblePaths) {
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                try {
+                    key = java.nio.file.Files.readAllLines(file.toPath()).stream()
+                            .filter(l -> l.contains("OPENROUTER_API_KEY=") || (!path.equals(".env") && l.startsWith("sk-or")))
+                            .map(l -> {
+                                if (l.contains("OPENROUTER_API_KEY=")) {
+                                    String k = l.substring(l.indexOf("OPENROUTER_API_KEY=") + "OPENROUTER_API_KEY=".length()).trim();
+                                    if (k.startsWith("\"") && k.endsWith("\"")) k = k.substring(1, k.length() - 1);
+                                    if (k.startsWith("'") && k.endsWith("'")) k = k.substring(1, k.length() - 1);
+                                    return k;
+                                }
+                                return l.trim();
+                            })
+                            .filter(k -> k.startsWith("sk-or"))
+                            .findFirst()
+                            .orElse(null);
+                            
+                    if (key != null && !key.isBlank()) {
+                        System.out.println("Shadow Oracle: Successfully loaded API key from " + file.getAbsolutePath());
+                        return key;
+                    }
+                } catch (java.io.IOException e) {
+                    System.err.println("Shadow Oracle: Could not read " + path);
+                }
             }
         }
+        System.err.println("Shadow Oracle: API Key not found.");
         return null;
     }
-
     private String escapeJson(String value) {
-        return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
-    }
-
-    private String extractContent(String json) {
-        // Very basic JSON extraction for "content"
-        try {
-            int start = json.indexOf("\"content\":") + 11;
-            int end = json.indexOf("\"", start);
-            while (json.charAt(end - 1) == '\\') {
-                end = json.indexOf("\"", end + 1);
-            }
-            return json.substring(start, end).replace("\\n", "\n").replace("\\\"", "\"");
-        } catch (Exception e) {
-            return "Could not parse Oracle's whisper.";
-        }
+        return value.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t");
     }
 }
