@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class AiDescriptionService {
 
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
     private static final String[] MODELS = {
