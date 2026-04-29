@@ -573,6 +573,16 @@ public class ServiceUser implements InterfaceServiceUser {
         ps.executeUpdate();
     }
 
+    public User getFirstActiveAdmin() throws SQLException {
+        String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked FROM `user` WHERE roles LIKE '%ROLE_ADMIN%' AND is_active = 1 LIMIT 1";
+        Statement st = cnx.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        if (rs.next()) {
+            return mapUser(rs);
+        }
+        return null;
+    }
+
     // Internal lookup helpers.
     private User findByEmail(String email) throws SQLException {
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ?";

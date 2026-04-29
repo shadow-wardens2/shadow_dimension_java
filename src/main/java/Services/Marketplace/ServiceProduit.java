@@ -74,4 +74,23 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
         }
         return list;
     }
+
+    public Produit getById(int id) throws SQLException {
+        String req = "SELECT * FROM mkt_produit WHERE id = ?";
+        PreparedStatement ps = cnx.prepareStatement(req);
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return new Produit(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getString("description"),
+                    rs.getDouble("prix"),
+                    rs.getInt("stock"),
+                    rs.getInt("categorie_id"),
+                    rs.getInt("type_id"),
+                    rs.getString("image"));
+        }
+        return null;
+    }
 }

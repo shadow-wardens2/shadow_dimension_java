@@ -2,6 +2,8 @@ package Services.Marketplace;
 
 import Entities.Marketplace.Commande;
 import Entities.Marketplace.Produit;
+import Entities.User.User;
+import Services.User.ServiceUser;
 import Utils.ShadowDimensionsDB;
 
 import java.sql.*;
@@ -58,6 +60,28 @@ public class ServiceCommande {
             }
             pst2.executeBatch();
             pstStock.executeBatch();
+
+            // Stock Check and Mailing Service
+            ServiceProduit sp = new ServiceProduit();
+            ServiceUser su = new ServiceUser();
+            for (Produit p : c.getProduits()) {
+                Produit updatedProduct = sp.getById(p.getId());
+                if (updatedProduct != null && updatedProduct.getStock() < 5) {
+                    User admin = su.getFirstActiveAdmin();
+                    if (admin != null) {
+                        String subject = "Low Stock Alert: " + updatedProduct.getNom();
+                        String body = "Hello " + admin.getUsername() + ",\n\n" +
+                                      "The product '" + updatedProduct.getNom() + "' (ID: " + updatedProduct.getId() + ") is running low on stock.\n" +
+                                      "Current stock: " + updatedProduct.getStock() + "\n\n" +
+                                      "Please restock soon.\n\n" +
+                                      "Regards,\n" +
+                                      "Shadow Dimensions Inventory System";
+                        
+                        // Send mail in a separate thread to avoid blocking the main UI thread
+                        new Thread(() -> MailService.sendMail(admin.getEmail(), subject, body)).start();
+                    }
+                }
+            }
         }
     }
 
