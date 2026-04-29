@@ -75,4 +75,26 @@ public class ServiceQuestion implements InterfaceServiceTuto<Question> {
         }
         return list;
     }
+
+    public List<Question> getQuestionsByQuiz(int quizId) throws SQLException {
+        List<Question> list = new ArrayList<>();
+        String sql = "SELECT * FROM question WHERE quiz_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, quizId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Question q = new Question();
+                    q.setId(rs.getInt("id"));
+                    q.setTexte(rs.getString("texte"));
+
+                    Quiz quiz = new Quiz();
+                    quiz.setId(quizId);
+                    q.setQuiz(quiz);
+
+                    list.add(q);
+                }
+            }
+        }
+        return list;
+    }
 }

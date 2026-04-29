@@ -6,8 +6,8 @@ import Services.Tutorials.ServiceFormation;
 import Services.Tutorials.ServiceLecon;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -44,6 +44,9 @@ public class AjouterLeconController {
     @FXML
     private TextField tfVideoThumbnail;
 
+    @FXML
+    private Label lbError;
+
     private ServiceLecon serviceLecon;
     private ServiceFormation serviceFormation;
 
@@ -54,13 +57,41 @@ public class AjouterLeconController {
 
     @FXML
     public void initialize() {
+        lbError.setText("");
         try {
             List<Formation> formations = serviceFormation.getAll();
             cbFormation.setItems(FXCollections.observableArrayList(formations));
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la liste des formations.");
+            lbError.setText("Erreur: Impossible de charger les formations.");
         }
+    }
+
+    @FXML
+    private void fetchYoutubeData() {
+        String url = tfVideoUrl.getText().trim();
+        if (url.isEmpty()) {
+            lbError.setText("Erreur: Entrez une URL YouTube d'abord.");
+            return;
+        }
+
+        lbError.setText("Fetching metadata...");
+        new Thread(() -> {
+            java.util.Map<String, String> details = Utils.YoutubeApiManager.getVideoDetails(url);
+            javafx.application.Platform.runLater(() -> {
+                if (!details.isEmpty()) {
+                    if (tfTitre.getText().isEmpty())
+                        tfTitre.setText(details.get("title"));
+                    tfVideoDuration.setText(details.get("duration"));
+                    tfVideoThumbnail.setText(details.get("thumbnail"));
+                    lbError.setText("Metadata fetched successfully!");
+                    lbError.setStyle("-fx-text-fill: #22c55e;");
+                } else {
+                    lbError.setText("Erreur: Impossible de trouver la vidéo ou clé API invalide.");
+                    lbError.setStyle("-fx-text-fill: #ff5555;");
+                }
+            });
+        }).start();
     }
 
     @FXML
@@ -74,13 +105,12 @@ public class AjouterLeconController {
         try {
             ordre = Integer.parseInt(ordreStr);
         } catch (NumberFormatException ex) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "L'ordre doit être un nombre valide.");
+            lbError.setText("Erreur: L'ordre doit être un nombre valide.");
             return;
         }
 
         if (titre.isEmpty() || contenu.isEmpty() || formation == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur de validation",
-                    "Le titre, le contenu, l'ordre et la formation sont obligatoires !");
+            lbError.setText("Erreur: Titre, Contenu, Ordre et Formation requis !");
             return;
         }
 
@@ -88,7 +118,7 @@ public class AjouterLeconController {
             boolean exists = serviceLecon.getAll().stream()
                     .anyMatch(l -> l.getTitre().equalsIgnoreCase(titre));
             if (exists) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Une leçon avec ce titre existe déjà !");
+                lbError.setText("Erreur: Une leçon avec ce titre existe déjà !");
                 return;
             }
 
@@ -101,11 +131,10 @@ public class AjouterLeconController {
                     tfVideoThumbnail.getText().trim());
             serviceLecon.add(lecon);
 
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "La leçon a été ajoutée avec succès !");
             fermerFenetre();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ajouter la leçon.");
+            lbError.setText("Erreur: Impossible d'ajouter la leçon.");
         }
     }
 
@@ -117,13 +146,5 @@ public class AjouterLeconController {
     private void fermerFenetre() {
         Stage stage = (Stage) tfTitre.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

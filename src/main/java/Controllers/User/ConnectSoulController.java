@@ -116,6 +116,19 @@ public class ConnectSoulController {
     private VBox signupBox;
 
     @FXML
+    private Label lblLoginIdentityError;
+    @FXML
+    private Label lblLoginPasswordError;
+    @FXML
+    private Label lblSignupEmailError;
+    @FXML
+    private Label lblSignupUsernameError;
+    @FXML
+    private Label lblSignupPasswordError;
+    @FXML
+    private Label lblSignupConfirmPasswordError;
+
+    @FXML
     private VBox resetBox;
 
     @FXML
@@ -144,6 +157,25 @@ public class ConnectSoulController {
     private final SecureRandom secureRandom = new SecureRandom();
     private boolean loginPasswordVisible;
     private boolean signupPasswordVisible;
+
+    public void initialize() {
+        // Clear login validation messages as the user types.
+        tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
+        pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+        tfLoginPasswordVisible.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+
+        // Clear signup validation messages as the user corrects each field.
+        tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
+        tfSignupUsername.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
+        pfSignupPassword.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        tfSignupPasswordVisible.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        pfSignupConfirmPassword.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
+    }
     private boolean resetPasswordVisible;
     private String pendingResetEmail;
     private String signupCaptchaAnswer;
@@ -224,6 +256,8 @@ public class ConnectSoulController {
 
             String email = value(tfSignupEmail).trim();
             String username = value(tfSignupUsername).trim();
+            String email = tfSignupEmail.getText();
+            String username = tfSignupUsername.getText();
             String password = getSignupPassword();
             String confirmPassword = value(pfSignupConfirmPassword);
             boolean hasInputError = false;
@@ -418,6 +452,9 @@ public class ConnectSoulController {
             if (!validateCaptcha(resetCaptchaAnswer, tfResetCaptcha, lblResetCaptchaError, this::refreshResetCaptcha)) {
                 return;
             }
+
+            if (hasError)
+                return;
 
             serviceUser.sendPasswordResetCode(pendingResetEmail);
             showAlert(Alert.AlertType.INFORMATION, "Reset Password", "Un nouveau code a ete envoye.");
@@ -856,5 +893,14 @@ public class ConnectSoulController {
 
     private String fallbackMessage(Exception e) {
         return e.getMessage() == null ? "Erreur de validation." : e.getMessage();
+    }
+
+    private void setInlineError(Label label, String msg) {
+        if (label == null)
+            return;
+        label.setText(msg);
+        boolean hasError = msg != null && !msg.isEmpty();
+        label.setVisible(hasError);
+        label.setManaged(hasError);
     }
 }

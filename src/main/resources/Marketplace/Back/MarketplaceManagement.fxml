@@ -47,7 +47,6 @@
                     <Button alignment="BASELINE_LEFT" onAction="#openHome" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Home" />
                     <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceSelector" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Management" />
                     <Button alignment="BASELINE_LEFT" onAction="#handleDownloadReport" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Download Report" />
-                    <Button alignment="BASELINE_LEFT" onAction="#openStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Statistics" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">

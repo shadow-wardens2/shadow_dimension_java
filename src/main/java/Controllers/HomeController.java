@@ -20,8 +20,10 @@ import java.io.IOException;
 
 public class HomeController {
 
-    @FXML private javafx.scene.layout.AnchorPane rootNode;
-    @FXML private Button btnDashboard;
+    @FXML
+    private javafx.scene.layout.AnchorPane rootNode;
+    @FXML
+    private Button btnDashboard;
     @FXML private Button btnAuth;
 
     @FXML private VBox recommendationBox;
@@ -93,6 +95,24 @@ public class HomeController {
     @FXML
     void navigateToVault() {
         loadPage("/User/VaultFront.fxml");
+    }
+
+    @FXML
+    void navigateToTutorials() {
+        if (SessionManager.isLoggedIn()) {
+            loadPage("/Tutorials/TutorialsFront.fxml");
+        } else {
+            loadPage("/User/ConnectSoul.fxml");
+        }
+    }
+
+    @FXML
+    void navigateToTutorials() {
+        if (SessionManager.isLoggedIn()) {
+            loadPage("/Tutorials/TutorialsFront.fxml");
+        } else {
+            loadPage("/User/ConnectSoul.fxml");
+        }
     }
 
     @FXML

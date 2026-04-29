@@ -607,7 +607,6 @@
     font-weight: bold;
     -fx-wrap-text: true;
 }
-
 /* === CHARTS === */
 .chart {
     -fx-padding: 10;

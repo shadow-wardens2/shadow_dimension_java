@@ -6,6 +6,10 @@ import Controllers.Marketplace.Back.ManagementProduitController;
 import Controllers.Marketplace.Back.ManagementTypeController;
 import Controllers.Marketplace.Back.PageHost;
 import Controllers.event.EventSelectorController;
+import Controllers.Tutorials.*;
+import Controllers.User.VaultController;
+import Controllers.User.EditProfileContentController;
+import Controllers.User.ManagementUsersController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -21,7 +25,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class HomePageController implements PageHost {
-
     // Main content host where center pages are swapped dynamically.
 
     @FXML
@@ -191,17 +194,11 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EventSelectorController) {
                 ((EventSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
+            } else if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
-                ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof VaultController) {
+            } else if (controller instanceof VaultController) {
                 ((VaultController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof EditProfileContentController) {
+            } else if (controller instanceof EditProfileContentController) {
                 ((EditProfileContentController) controller).setDashboardContext(this);
             }
             if (controller instanceof ManagementUsersController) {

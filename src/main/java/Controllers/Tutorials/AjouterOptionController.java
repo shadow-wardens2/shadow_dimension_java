@@ -6,8 +6,8 @@ import Services.Tutorials.ServiceOption;
 import Services.Tutorials.ServiceQuestion;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -25,6 +25,9 @@ public class AjouterOptionController {
     @FXML
     private ComboBox<Question> cbQuestion;
 
+    @FXML
+    private Label lbError;
+
     private ServiceOption serviceOption;
     private ServiceQuestion serviceQuestion;
 
@@ -35,6 +38,7 @@ public class AjouterOptionController {
 
     @FXML
     public void initialize() {
+        lbError.setText("");
         cbEstCorrecte.setItems(FXCollections.observableArrayList("Vrai", "Faux"));
 
         try {
@@ -42,19 +46,12 @@ public class AjouterOptionController {
             cbQuestion.setItems(FXCollections.observableArrayList(questions));
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les questions.");
+            lbError.setText("Erreur: Impossible de charger les questions.");
         }
     }
 
     public void setPreselectedQuestion(Question question) {
-        if (question != null && cbQuestion.getItems() != null) {
-            for (Question q : cbQuestion.getItems()) {
-                if (q.getId() == question.getId()) {
-                    cbQuestion.getSelectionModel().select(q);
-                    break;
-                }
-            }
-        }
+        cbQuestion.setValue(question);
     }
 
     @FXML
@@ -64,21 +61,19 @@ public class AjouterOptionController {
         Question question = cbQuestion.getSelectionModel().getSelectedItem();
 
         if (texte.isEmpty() || estCorrecteStr == null || question == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Tous les champs sont obligatoires !");
+            lbError.setText("Erreur: Tous les champs sont obligatoires !");
             return;
         }
 
-        boolean estCorrecte = estCorrecteStr.equals("Vrai");
-
         try {
+            boolean estCorrecte = estCorrecteStr.equals("Vrai");
             Option option = new Option(0, texte, estCorrecte, question);
             serviceOption.add(option);
 
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "L'option a été ajoutée avec succès !");
             fermerFenetre();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ajouter l'option.");
+            lbError.setText("Erreur: Impossible d'ajouter l'option.");
         }
     }
 
@@ -90,13 +85,5 @@ public class AjouterOptionController {
     private void fermerFenetre() {
         Stage stage = (Stage) tfTexte.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

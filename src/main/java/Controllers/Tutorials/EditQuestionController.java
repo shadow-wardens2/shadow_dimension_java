@@ -3,23 +3,30 @@ package Controllers.Tutorials;
 import Entities.Tutorials.Question;
 import Services.Tutorials.ServiceQuestion;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-
-import java.sql.SQLException;
 
 public class EditQuestionController {
 
     @FXML
     private TextArea taTexte;
 
-    private ServiceQuestion serviceQuestion = new ServiceQuestion();
+    @FXML
+    private Label lbError;
+
+    private ServiceQuestion serviceQuestion;
     private Question question;
 
-    public void setQuestion(Question question) {
-        this.question = question;
-        taTexte.setText(question.getTexte());
+    public EditQuestionController() {
+        serviceQuestion = new ServiceQuestion();
+    }
+
+    public void setQuestion(Question q) {
+        this.question = q;
+        if (q != null) {
+            taTexte.setText(q.getTexte());
+        }
     }
 
     @FXML
@@ -27,37 +34,27 @@ public class EditQuestionController {
         String texte = taTexte.getText().trim();
 
         if (texte.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Le texte ne peut pas être vide.");
+            lbError.setText("Erreur: Le texte de la question est obligatoire !");
             return;
         }
 
-        question.setTexte(texte);
-
         try {
+            question.setTexte(texte);
             serviceQuestion.update(question);
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Question mise à jour avec succès !");
-            closeWindow();
-        } catch (SQLException e) {
+            fermerFenetre();
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de mettre à jour la question.");
+            lbError.setText("Erreur: Impossible de mettre à jour la question.");
         }
     }
 
     @FXML
     private void annuler() {
-        closeWindow();
+        fermerFenetre();
     }
 
-    private void closeWindow() {
+    private void fermerFenetre() {
         Stage stage = (Stage) taTexte.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

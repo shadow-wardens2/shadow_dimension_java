@@ -115,6 +115,21 @@ public class Formation {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Formation formation = (Formation) o;
+        return id == formation.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(id);
+    }
+
+    @Override
     public String toString() {
         return this.titre != null ? this.titre : "New Formation";
     }

@@ -4,12 +4,10 @@ import Entities.Tutorials.Option;
 import Services.Tutorials.ServiceOption;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
-import java.sql.SQLException;
 
 public class EditOptionController {
 
@@ -17,12 +15,15 @@ public class EditOptionController {
     private TextField tfTexte;
     @FXML
     private ComboBox<String> cbEstCorrecte;
+    @FXML
+    private Label lbError;
 
     private ServiceOption serviceOption = new ServiceOption();
     private Option option;
 
     @FXML
     public void initialize() {
+        lbError.setText("");
         cbEstCorrecte.setItems(FXCollections.observableArrayList("Vrai", "Faux"));
     }
 
@@ -38,7 +39,7 @@ public class EditOptionController {
         String estCorrecteStr = cbEstCorrecte.getValue();
 
         if (texte.isEmpty() || estCorrecteStr == null) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Tous les champs sont obligatoires.");
+            lbError.setText("Erreur: Tous les champs sont obligatoires.");
             return;
         }
 
@@ -47,11 +48,10 @@ public class EditOptionController {
 
         try {
             serviceOption.update(option);
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Option mise à jour avec succès !");
             closeWindow();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de mettre à jour l'option.");
+            lbError.setText("Erreur: Impossible de mettre à jour l'option.");
         }
     }
 
@@ -63,13 +63,5 @@ public class EditOptionController {
     private void closeWindow() {
         Stage stage = (Stage) tfTexte.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

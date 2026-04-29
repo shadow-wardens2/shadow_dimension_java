@@ -29,7 +29,7 @@
             <Label styleClass="body-md" text="Home" />
             <Label onMouseClicked="#navigateToMarketplace" styleClass="body-md" text="Marketplace" style="-fx-cursor: hand;" />
             <Label onMouseClicked="#navigateToVault" styleClass="body-md" text="My Vault" style="-fx-cursor: hand;" />
-            <Label onMouseClicked="#navigateToManagement" styleClass="body-md" text="Tutorials" style="-fx-cursor: hand;" />
+            <Label onMouseClicked="#navigateToTutorials" styleClass="body-md" text="Tutorials" style="-fx-cursor: hand;" />
             <Label styleClass="body-md" text="Forum" />
         </HBox>
         <Region HBox.hgrow="ALWAYS" />
