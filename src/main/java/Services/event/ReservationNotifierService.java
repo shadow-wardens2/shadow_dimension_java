@@ -43,9 +43,15 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
         }
 
         String mailDsn = AppConfig.get("MAILER_DSN");
-        String smtpHost = "smtp.gmail.com";
-        String smtpPort = "587";
+        String smtpHost = AppConfig.getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
+        String smtpPort = AppConfig.getOrDefault("MAIL_SMTP_PORT", "587");
         String username = AppConfig.get("MAIL_USERNAME");
+        if (username == null || username.isBlank()) {
+            username = AppConfig.get("MAIL_FROM");
+        }
+        if (username == null || username.isBlank()) {
+            username = AppConfig.get("ofME");
+        }
         String password = AppConfig.get("MAIL_PASSWORD");
 
         if ((username == null || password == null) && mailDsn != null && mailDsn.contains("://")) {
@@ -68,6 +74,7 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
 
         String finalUsername = username;
         String finalPassword = password.replaceAll("\\s+", "");
+        String finalFrom = AppConfig.getOrDefault("MAIL_FROM", finalUsername);
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -103,7 +110,7 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
 
         try {
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(finalUsername));
+            message.setFrom(new InternetAddress(finalFrom));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(reservation.getUserEmail()));
             message.setSubject(subject);
             message.setText(body);
