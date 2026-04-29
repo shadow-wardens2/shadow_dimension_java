@@ -88,10 +88,6 @@ public class ManagementQuizController implements Initializable {
     private void loadQuizzes() {
         try {
             obsQuizzes.setAll(serviceQuiz.getAll());
-            if (filteredList != null)
-                quizTable.setItems(filteredList);
-            else
-                quizTable.setItems(obsQuizzes);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -119,7 +115,8 @@ public class ManagementQuizController implements Initializable {
     }
 
     private void editQuiz(Quiz item) {
-        openPopup("/Tutorials/EditQuiz.fxml", "Edit Quiz", c -> ((EditQuizController) c).setQuiz(item));
+        openPopup("/Tutorials/EditQuiz.fxml", "Edit Quiz",
+                c -> ((Controllers.Tutorials.EditQuizController) c).setQuiz(item));
         loadQuizzes();
     }
 

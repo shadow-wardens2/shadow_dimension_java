@@ -78,4 +78,27 @@ public class ServiceOption implements InterfaceServiceTuto<Option> {
         }
         return list;
     }
+
+    public List<Option> getOptionsByQuestion(int questionId) throws SQLException {
+        List<Option> list = new ArrayList<>();
+        String sql = "SELECT * FROM `option` WHERE question_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, questionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Option o = new Option();
+                    o.setId(rs.getInt("id"));
+                    o.setTexte(rs.getString("texte"));
+                    o.setEstCorrecte(rs.getBoolean("est_correcte"));
+
+                    Question q = new Question();
+                    q.setId(questionId);
+                    o.setQuestion(q);
+
+                    list.add(o);
+                }
+            }
+        }
+        return list;
+    }
 }

@@ -7,10 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -55,34 +52,63 @@ public class ConnectSoulController {
     @FXML
     private VBox signupBox;
 
+    @FXML
+    private Label lblLoginIdentityError;
+    @FXML
+    private Label lblLoginPasswordError;
+    @FXML
+    private Label lblSignupEmailError;
+    @FXML
+    private Label lblSignupUsernameError;
+    @FXML
+    private Label lblSignupPasswordError;
+    @FXML
+    private Label lblSignupConfirmPasswordError;
+
     private final ServiceUser serviceUser = new ServiceUser();
     private boolean loginPasswordVisible;
     private boolean signupPasswordVisible;
 
-    @FXML
-    private void handleLogin() {
-        try {
-            User user = serviceUser.login(tfLoginIdentity.getText(), getLoginPassword());
     public void initialize() {
         // Clear login validation messages as the user types.
         tfLoginIdentity.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginIdentityError, ""));
         pfLoginPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
-        tfLoginPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
+        tfLoginPasswordVisible.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblLoginPasswordError, ""));
 
         // Clear signup validation messages as the user corrects each field.
         tfSignupEmail.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupEmailError, ""));
-        tfSignupUsername.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
-        pfSignupPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
-        tfSignupPasswordVisible.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
-        pfSignupConfirmPassword.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
+        tfSignupUsername.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupUsernameError, ""));
+        pfSignupPassword.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        tfSignupPasswordVisible.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupPasswordError, ""));
+        pfSignupConfirmPassword.textProperty()
+                .addListener((obs, oldVal, newVal) -> setInlineError(lblSignupConfirmPasswordError, ""));
     }
 
     @FXML
     private void handleLogin() {
         try {
-            User user = serviceUser.login(tfLoginIdentity.getText(), getLoginPassword());
+            String identity = tfLoginIdentity.getText();
+            String password = getLoginPassword();
+
+            boolean hasError = false;
+            if (identity == null || identity.isBlank()) {
+                setInlineError(lblLoginIdentityError, "L'email ou le username est obligatoire.");
+                hasError = true;
+            }
+            if (password == null || password.isBlank()) {
+                setInlineError(lblLoginPasswordError, "Le mot de passe est obligatoire.");
+                hasError = true;
+            }
+            if (hasError)
+                return;
+
+            User user = serviceUser.login(identity, password);
             if (user == null) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Identifiants invalides.");
+                setInlineError(lblLoginPasswordError, "Identifiants invalides.");
                 return;
             }
 
@@ -98,21 +124,42 @@ public class ConnectSoulController {
     @FXML
     private void handleSignup() {
         try {
+            String email = tfSignupEmail.getText();
+            String username = tfSignupUsername.getText();
             String password = getSignupPassword();
             String confirmPassword = pfSignupConfirmPassword.getText();
 
-            if (!password.equals(confirmPassword)) {
-                showAlert(Alert.AlertType.WARNING, "Attention", "Le mot de passe et sa confirmation ne correspondent pas.");
-                return;
+            boolean hasError = false;
+            if (email == null || email.isBlank()) {
+                setInlineError(lblSignupEmailError, "L'email est obligatoire.");
+                hasError = true;
+            }
+            if (username == null || username.isBlank()) {
+                setInlineError(lblSignupUsernameError, "Le username est obligatoire.");
+                hasError = true;
+            }
+            if (password == null || password.isBlank()) {
+                setInlineError(lblSignupPasswordError, "Le mot de passe est obligatoire.");
+                hasError = true;
+            } else {
+                String policyError = passwordPolicyMessage(password);
+                if (!policyError.isEmpty()) {
+                    setInlineError(lblSignupPasswordError, policyError);
+                    hasError = true;
+                }
+            }
+            if (confirmPassword == null || confirmPassword.isBlank()) {
+                setInlineError(lblSignupConfirmPasswordError, "La confirmation est obligatoire.");
+                hasError = true;
+            } else if (!password.equals(confirmPassword)) {
+                setInlineError(lblSignupConfirmPasswordError, "Les mots de passe ne correspondent pas.");
+                hasError = true;
             }
 
-            String policyError = passwordPolicyMessage(password);
-            if (!policyError.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Mot de passe invalide", policyError);
+            if (hasError)
                 return;
-            }
 
-            User user = serviceUser.signup(tfSignupEmail.getText(), tfSignupUsername.getText(), password);
+            User user = serviceUser.signup(email, username, password);
             SessionManager.setCurrentUser(user);
             showAlert(Alert.AlertType.INFORMATION, "Succes", "Compte cree avec succes.");
             openHomePage();
@@ -238,5 +285,14 @@ public class ConnectSoulController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private void setInlineError(Label label, String msg) {
+        if (label == null)
+            return;
+        label.setText(msg);
+        boolean hasError = msg != null && !msg.isEmpty();
+        label.setVisible(hasError);
+        label.setManaged(hasError);
     }
 }

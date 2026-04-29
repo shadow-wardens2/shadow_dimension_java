@@ -68,6 +68,33 @@ public class AjouterLeconController {
     }
 
     @FXML
+    private void fetchYoutubeData() {
+        String url = tfVideoUrl.getText().trim();
+        if (url.isEmpty()) {
+            lbError.setText("Erreur: Entrez une URL YouTube d'abord.");
+            return;
+        }
+
+        lbError.setText("Fetching metadata...");
+        new Thread(() -> {
+            java.util.Map<String, String> details = Utils.YoutubeApiManager.getVideoDetails(url);
+            javafx.application.Platform.runLater(() -> {
+                if (!details.isEmpty()) {
+                    if (tfTitre.getText().isEmpty())
+                        tfTitre.setText(details.get("title"));
+                    tfVideoDuration.setText(details.get("duration"));
+                    tfVideoThumbnail.setText(details.get("thumbnail"));
+                    lbError.setText("Metadata fetched successfully!");
+                    lbError.setStyle("-fx-text-fill: #22c55e;");
+                } else {
+                    lbError.setText("Erreur: Impossible de trouver la vidéo ou clé API invalide.");
+                    lbError.setStyle("-fx-text-fill: #ff5555;");
+                }
+            });
+        }).start();
+    }
+
+    @FXML
     private void ajouterLecon() {
         String titre = tfTitre.getText().trim();
         String contenu = taContenu.getText().trim();

@@ -55,7 +55,8 @@ public class MarketplaceManagementController implements PageHost {
     private void refreshAuthUi() {
         if (SessionManager.isLoggedIn()) {
             User user = SessionManager.getCurrentUser();
-            String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller" : user.getUsername();
+            String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
+                    : user.getUsername();
             lbUserName.setText(username);
             lbUserTier.setText(user.isAdmin() ? "ADMIN" : "MEMBER");
             btnTopAuth.setText("Logout");
@@ -80,14 +81,17 @@ public class MarketplaceManagementController implements PageHost {
     }
 
     private void redirectToLogin() {
-        showAlert(Alert.AlertType.WARNING, "Accès Restreint", "Veuillez vous connecter pour accéder à la gestion du marketplace.");
+        showAlert(Alert.AlertType.WARNING, "Accès Restreint",
+                "Veuillez vous connecter pour accéder à la gestion du marketplace.");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/ConnectSoul.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) contentArea.getScene().getWindow();
-            stage.setTitle("Connect Soul");
-            stage.setScene(new Scene(root));
-            stage.show();
+            if (contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                stage.setTitle("Connect Soul");
+                stage.setScene(new Scene(root));
+                stage.show();
+            }
         } catch (IOException | NullPointerException e) {
             // If we can't get the stage yet, it might be because the FXML hasn't been shown
             e.printStackTrace();
@@ -99,7 +103,7 @@ public class MarketplaceManagementController implements PageHost {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(msg);
-        alert.show();
+        alert.showAndWait();
     }
 
     @FXML
@@ -144,7 +148,8 @@ public class MarketplaceManagementController implements PageHost {
     void handleDownloadReport(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Marketplace Report");
-        fileChooser.setInitialFileName("Marketplace_Report_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")) + ".pdf");
+        fileChooser.setInitialFileName("Marketplace_Report_"
+                + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")) + ".pdf");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
 
         java.io.File file = fileChooser.showSaveDialog(contentArea.getScene().getWindow());
@@ -160,7 +165,6 @@ public class MarketplaceManagementController implements PageHost {
         }
     }
 
-    @Override
     public void refreshStatistics() {
         // Implementation for refreshing statistics if needed
     }
@@ -170,5 +174,3 @@ public class MarketplaceManagementController implements PageHost {
         loadPage("/Marketplace/Back/MarketplaceStatisticsContent.fxml");
     }
 }
-
-

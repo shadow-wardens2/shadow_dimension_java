@@ -32,6 +32,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label styleClass="form-label" text="URL Video:" prefWidth="120" />
                     <TextField fx:id="tfVideoUrl" promptText="URL video" HBox.hgrow="ALWAYS" />
+                    <Button onAction="#fetchYoutubeData" styleClass="secondary-button" text="Fetch" style="-fx-font-size: 10px; -fx-padding: 5 10;" />
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label styleClass="form-label" text="Durée vidéo:" prefWidth="120" />

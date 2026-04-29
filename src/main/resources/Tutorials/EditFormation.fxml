@@ -26,6 +26,10 @@
                     <ComboBox fx:id="cbNiveau" promptText="Sélectionnez le niveau" HBox.hgrow="ALWAYS" />
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label styleClass="form-label" text="Jeu:" prefWidth="120" />
+                    <ComboBox fx:id="cbJeu" promptText="Sélectionnez le jeu" HBox.hgrow="ALWAYS" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label styleClass="form-label" text="URL Image:" prefWidth="120" />
                     <TextField fx:id="tfImage" promptText="Entrer URL" HBox.hgrow="ALWAYS" />
                 </HBox>

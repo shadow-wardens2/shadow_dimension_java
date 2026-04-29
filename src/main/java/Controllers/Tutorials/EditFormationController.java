@@ -73,32 +73,29 @@ public class EditFormationController {
         String titre = tfTitre.getText().trim();
         String description = tfDescription.getText().trim();
         String niveau = cbNiveau.getValue();
+        Jeu selectedJeu = cbJeu.getValue();
 
-        if (titre.isEmpty() || niveau == null || jeu == null) {
+        if (titre.isEmpty() || niveau == null || selectedJeu == null) {
             lbError.setText("Erreur: Titre, Niveau et Jeu sont obligatoires !");
             return;
         }
 
         try {
             boolean exists = serviceFormation.getAll().stream()
-                    .anyMatch(f -> f.getTitre().equalsIgnoreCase(titre) && f.getId() != formation.getId());
+                    .anyMatch(f -> f.getTitre().equalsIgnoreCase(titre) && f.getId() != targetFormation.getId());
             if (exists) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Une formation avec ce titre existe déjà !");
+                lbError.setText("Erreur: Une formation avec ce titre existe déjà !");
                 return;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        formation.setTitre(titre);
-        formation.setDescription(description);
-        formation.setNiveau(niveau);
-        formation.setImage(tfImage.getText().trim());
+            targetFormation.setTitre(titre);
+            targetFormation.setDescription(description);
+            targetFormation.setNiveau(niveau);
+            targetFormation.setJeu(selectedJeu);
+            targetFormation.setImage(tfImage.getText().trim());
 
-        try {
-            serviceFormation.update(formation);
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Formation mise à jour avec succès !");
-            closeWindow();
+            serviceFormation.update(targetFormation);
+            fermerFenetre();
         } catch (SQLException e) {
             e.printStackTrace();
             lbError.setText("Erreur: Impossible de mettre à jour la formation.");

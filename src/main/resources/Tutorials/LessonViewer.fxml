@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+
+<AnchorPane prefHeight="700.0" prefWidth="900.0" styleClass="root" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Tutorials.LessonViewerController">
+    <VBox spacing="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: #0d0d12;">
+            <padding>
+                <Insets left="30.0" right="30.0" />
+            </padding>
+            <Button onAction="#handleBack" styleClass="secondary-button" text="← Back" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lbTitle" styleClass="headline-md" text="Lesson Title" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="btnDownload" onAction="#handleOpenDocument" styleClass="ethereal-button" text="📄 Open PDF" visible="false" />
+        </HBox>
+
+        <!-- Content Area -->
+        <StackPane VBox.vgrow="ALWAYS" style="-fx-background-color: #0d0d12;">
+            <padding>
+                <Insets bottom="40.0" left="60.0" right="60.0" top="40.0" />
+            </padding>
+            <VBox spacing="30" styleClass="panel-card" style="-fx-background-color: #1a1a24; -fx-background-radius: 20;">
+                <padding>
+                    <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+                </padding>
+                <Label fx:id="lbContent" wrapText="true" style="-fx-text-fill: #cccccc; -fx-font-size: 16px; -fx-line-spacing: 1.5;" VBox.vgrow="ALWAYS" alignment="TOP_LEFT" maxWidth="Infinity" />
+            </VBox>
+        </StackPane>
+    </VBox>
+</AnchorPane>

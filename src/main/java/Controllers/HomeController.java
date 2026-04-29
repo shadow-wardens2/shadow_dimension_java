@@ -9,8 +9,10 @@ import java.io.IOException;
 
 public class HomeController {
 
-    @FXML private javafx.scene.layout.AnchorPane rootNode;
-    @FXML private Button btnDashboard;
+    @FXML
+    private javafx.scene.layout.AnchorPane rootNode;
+    @FXML
+    private Button btnDashboard;
 
     @FXML
     public void initialize() {
@@ -27,6 +29,15 @@ public class HomeController {
     void navigateToMarketplace() {
         if (SessionManager.isLoggedIn()) {
             loadPage("/Marketplace/Front/MarketplaceFront.fxml");
+        } else {
+            loadPage("/User/ConnectSoul.fxml");
+        }
+    }
+
+    @FXML
+    void navigateToTutorials() {
+        if (SessionManager.isLoggedIn()) {
+            loadPage("/Tutorials/TutorialsFront.fxml");
         } else {
             loadPage("/User/ConnectSoul.fxml");
         }
