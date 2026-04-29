@@ -3,7 +3,7 @@ package Controllers.Tutorials;
 import Entities.Tutorials.Jeu;
 import Services.Tutorials.ServiceJeu;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -14,6 +14,9 @@ public class AjouterJeuController {
 
     @FXML
     private TextField tfGenre;
+
+    @FXML
+    private Label lbError;
 
     private ServiceJeu serviceJeu;
 
@@ -27,7 +30,7 @@ public class AjouterJeuController {
         String genre = tfGenre.getText() != null ? tfGenre.getText().trim() : "";
 
         if (nom.isEmpty() || genre.isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Tous les champs sont obligatoires !");
+            lbError.setText("Erreur: Tous les champs sont obligatoires !");
             return;
         }
 
@@ -35,18 +38,17 @@ public class AjouterJeuController {
             boolean exists = serviceJeu.getAll().stream()
                     .anyMatch(j -> j.getNom().equalsIgnoreCase(nom));
             if (exists) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Un jeu avec ce nom existe déjà !");
+                lbError.setText("Erreur: Un jeu avec ce nom existe déjà !");
                 return;
             }
 
             Jeu jeu = new Jeu(0, nom, genre);
             serviceJeu.add(jeu);
 
-            showAlert(Alert.AlertType.INFORMATION, "Succès", "Le jeu a été ajouté avec succès !");
             fermerFenetre();
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ajouter le jeu.\n" + e.getMessage());
+            lbError.setText("Erreur: Impossible d'ajouter le jeu.");
         }
     }
 
@@ -58,13 +60,5 @@ public class AjouterJeuController {
     private void fermerFenetre() {
         Stage stage = (Stage) tfNom.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

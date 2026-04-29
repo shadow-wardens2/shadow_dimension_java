@@ -1,11 +1,15 @@
 package Controllers.User;
 
-import Controllers.Marketplace.MarketplaceSelectorController;
-import Controllers.Marketplace.ManagementCategorieController;
-import Controllers.Marketplace.ManagementProduitController;
-import Controllers.Marketplace.ManagementTypeController;
-import Controllers.Marketplace.PageHost;
+import Controllers.Marketplace.Back.MarketplaceSelectorController;
+import Controllers.Marketplace.Back.ManagementCategorieController;
+import Controllers.Marketplace.Back.ManagementProduitController;
+import Controllers.Marketplace.Back.ManagementTypeController;
+import Controllers.Marketplace.Back.PageHost;
 import Controllers.event.EventSelectorController;
+import Controllers.Tutorials.*;
+import Controllers.User.VaultController;
+import Controllers.User.EditProfileContentController;
+import Controllers.User.ManagementUsersController;
 import Entities.User.User;
 import Utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -21,7 +25,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class HomePageController implements PageHost {
-
+    // Main content host where center pages are swapped dynamically.
 
     @FXML
     private StackPane contentArea;
@@ -42,9 +46,40 @@ public class HomePageController implements PageHost {
     private Button btnUserStatistics;
 
     @FXML
+    private Button btnVault;
+
+    @FXML
+    private Button btnMarketplaceManagement;
+
+    @FXML
+    private Button btnMarketplaceStatistics;
+
+    @FXML
+    private Button btnTutorialsManagement;
+
+    @FXML
+    private Button btnEventManagement;
+
+    // Initial landing content + auth UI state.
+    @FXML
     public void initialize() {
         loadPage("/HomeContent.fxml");
         refreshAuthUi();
+    }
+
+    // Sidebar navigation actions.
+    @FXML
+    void openFrontOffice(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomeFront.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) contentArea.getScene().getWindow();
+            stage.setTitle("Shadow Dimensions - The Void");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -59,16 +94,12 @@ public class HomePageController implements PageHost {
 
     @FXML
     void openMarketplaceManagement(ActionEvent event) {
-        if (!SessionManager.isLoggedIn()) {
-            handleAuthAction(null);
-            return;
-        }
-        loadPage("/Marketplace/MarketplaceSelector.fxml");
+        loadPage("/Marketplace/Back/MarketplaceSelector.fxml");
     }
 
     @FXML
     void openMarketplaceStatistics(ActionEvent event) {
-        loadPage("/Marketplace/MarketplaceStatisticsContent.fxml");
+        loadPage("/Marketplace/Back/MarketplaceStatisticsContent.fxml");
     }
 
     @FXML
@@ -97,6 +128,7 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Connect Soul / Logout action shared by top and bottom buttons.
     @FXML
     void handleAuthAction(ActionEvent event) {
         if (SessionManager.isLoggedIn()) {
@@ -118,8 +150,11 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Refreshes labels/buttons and section availability based on session state.
     private void refreshAuthUi() {
-        if (SessionManager.isLoggedIn()) {
+        boolean loggedIn = SessionManager.isLoggedIn();
+
+        if (loggedIn) {
             User user = SessionManager.getCurrentUser();
             String username = user.getUsername() == null || user.getUsername().isBlank() ? "Shadow Dweller"
                     : user.getUsername();
@@ -141,6 +176,7 @@ public class HomePageController implements PageHost {
         }
     }
 
+    // Loads a center page and injects dashboard context when needed.
     public void loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -158,17 +194,11 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof EventSelectorController) {
                 ((EventSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
+            } else if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
                 ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof Controllers.Tutorials.TutorialsSelectorController) {
-                ((Controllers.Tutorials.TutorialsSelectorController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof VaultController) {
+            } else if (controller instanceof VaultController) {
                 ((VaultController) controller).setDashboardContext(this);
-            }
-            if (controller instanceof EditProfileContentController) {
+            } else if (controller instanceof EditProfileContentController) {
                 ((EditProfileContentController) controller).setDashboardContext(this);
             }
             if (controller instanceof ManagementUsersController) {
@@ -199,6 +229,7 @@ public class HomePageController implements PageHost {
 
     @Override
 
+    // PageHost hook (currently no-op).
     public void refreshStatistics() {
         // Implementation for refreshing statistics if needed
     }

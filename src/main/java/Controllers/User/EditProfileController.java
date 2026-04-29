@@ -34,6 +34,9 @@ public class EditProfileController {
     private TextField tfPhone;
 
     @FXML
+    private Label lblPhoneError;
+
+    @FXML
     private TextField tfCountry;
 
     @FXML
@@ -59,6 +62,8 @@ public class EditProfileController {
         tfCountry.setText(emptyIfNull(user.getCountry()));
         tfCity.setText(emptyIfNull(user.getCity()));
         taBio.setText(emptyIfNull(user.getBio()));
+
+        tfPhone.textProperty().addListener((obs, oldVal, newVal) -> setInlineError(lblPhoneError, ""));
     }
 
     @FXML
@@ -70,47 +75,48 @@ public class EditProfileController {
         }
 
         try {
+            setInlineError(lblPhoneError, "");
+
+            String phone = tfPhone.getText() == null ? "" : tfPhone.getText().trim();
+            if (!phone.isBlank() && !isValidTunisiaPhone(phone)) {
+                setInlineError(lblPhoneError, "Format: +216 suivi de 8 chiffres");
+                return;
+            }
+
             user.setEmail(tfEmail.getText().trim());
             user.setUsername(tfUsername.getText().trim());
             user.setFullName(tfFullName.getText().trim());
-            user.setPhone(tfPhone.getText().trim());
+            user.setPhone(phone);
             user.setCountry(tfCountry.getText().trim());
             user.setCity(tfCity.getText().trim());
             user.setBio(taBio.getText().trim());
 
             serviceUser.updateProfile(user);
-            showAlert(Alert.AlertType.INFORMATION, "Succes", "Profil mis a jour.");
+            SessionManager.setCurrentUser(user);
+            openVaultPage();
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage() == null ? "Erreur de validation." : e.getMessage();
+            if (msg.toLowerCase().contains("telephone")) {
+                setInlineError(lblPhoneError, "Format: +216 suivi de 8 chiffres");
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Attention", msg);
+            }
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur SQL", e.getMessage());
         }
     }
 
     @FXML
-    private void handleLogout() {
-        SessionManager.clear();
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/ConnectSoul.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) tfEmail.getScene().getWindow();
-            stage.setTitle("Connect Soul");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Erreur", e.getMessage());
-        }
+    private void handleCancel() {
+        openVaultPage();
     }
 
-    @FXML
-    private void handleOpenMarketplace() {
-        if (!SessionManager.isLoggedIn()) {
-            showAlert(Alert.AlertType.ERROR, "Accès Refusé", "Vous devez être connecté pour accéder au Marketplace.");
-            return;
-        }
+    private void openVaultPage() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Marketplace/MarketplaceManagement.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/User/VaultFront.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) tfEmail.getScene().getWindow();
-            stage.setTitle("Gestion Produits");
+            stage.setTitle("Shadow Dimensions - The Void");
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -128,5 +134,19 @@ public class EditProfileController {
 
     private String emptyIfNull(String value) {
         return value == null ? "" : value;
+    }
+
+    private boolean isValidTunisiaPhone(String phone) {
+        return phone.matches("^\\+216\\d{8}$");
+    }
+
+    private void setInlineError(Label label, String message) {
+        if (label == null) {
+            return;
+        }
+        boolean show = message != null && !message.isBlank();
+        label.setText(show ? message : "");
+        label.setVisible(show);
+        label.setManaged(show);
     }
 }

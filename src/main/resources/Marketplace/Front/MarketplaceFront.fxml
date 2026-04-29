@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.Front.MarketplaceFrontController">
+    
+    <!-- Navigation Header -->
+    <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" style="-fx-background-color: -fx-surface;">
+        <padding>
+            <Insets left="60.0" right="60.0" />
+        </padding>
+        <Label onMouseClicked="#navigateToHome" styleClass="label-sigil" text="SHADOW DIMENSIONS" style="-fx-cursor: hand;" />
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="30.0" alignment="CENTER">
+            <Label onMouseClicked="#navigateToHome" styleClass="body-md" text="Home" style="-fx-cursor: hand;" />
+            <Label styleClass="body-md" text="Marketplace" style="-fx-text-fill: -fx-primary;" />
+            <Label onMouseClicked="#navigateToManagement" styleClass="body-md" text="Management" style="-fx-cursor: hand;" />
+            <Label styleClass="body-md" text="Chronicles" />
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <HBox spacing="20.0" alignment="CENTER">
+            <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <Button onAction="#handleOpenCart" styleClass="secondary-button" text="View Cart" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <Button styleClass="ethereal-button" text="Enter the Night" />
+        </HBox>
+    </HBox>
+
+    <VBox spacing="40.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80">
+        <padding>
+            <Insets left="60.0" right="60.0" top="40.0" bottom="40.0" />
+        </padding>
+        
+        <!-- Marketplace Title & Search -->
+        <HBox alignment="BOTTOM_LEFT" spacing="40.0">
+             <VBox spacing="10.0">
+                 <Label styleClass="label-sigil" text="CURATED ARTIFACTS" />
+                 <Label styleClass="headline-md" text="The Arcane Bazaar" />
+                 <Label fx:id="lbProductCount" styleClass="label-sigil" text="Initializing Ritual..." />
+             </VBox>
+             <Region HBox.hgrow="ALWAYS" />
+             <HBox alignment="CENTER" spacing="15.0">
+                 <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="Search relics..." styleClass="ritual-input" prefWidth="300.0" />
+                 <ComboBox fx:id="categoryFilter" onAction="#handleSearch" promptText="All Categories" styleClass="ritual-input" prefWidth="200.0" />
+                 <ComboBox fx:id="currencySelector" onAction="#handleCurrencyChange" promptText="Currency" styleClass="ritual-input" prefWidth="120.0" />
+             </HBox>
+         </HBox>
+
+        <!-- Artifacts Grid -->
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane" VBox.vgrow="ALWAYS">
+            <content>
+                <TilePane fx:id="productsGrid" hgap="30.0" vgap="30.0" prefColumns="4" alignment="TOP_LEFT" minHeight="600.0">
+                    <padding>
+                        <Insets bottom="40.0" right="20.0" />
+                    </padding>
+                    <!-- Product Cards will be injected here -->
+                </TilePane>
+            </content>
+        </ScrollPane>
+    </VBox>
+
+</AnchorPane>
