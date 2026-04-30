@@ -266,6 +266,27 @@ public class GoogleOAuthService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(random);
     }
 
-    public record GoogleProfile(String googleId, String email, String fullName) {
+    public static class GoogleProfile {
+        private final String googleId;
+        private final String email;
+        private final String fullName;
+
+        public GoogleProfile(String googleId, String email, String fullName) {
+            this.googleId = googleId;
+            this.email = email;
+            this.fullName = fullName;
+        }
+
+        public String googleId() {
+            return googleId;
+        }
+
+        public String email() {
+            return email;
+        }
+
+        public String fullName() {
+            return fullName;
+        }
     }
 }
