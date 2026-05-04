@@ -686,7 +686,7 @@ public class ServiceUser implements InterfaceServiceUser {
     // Verification-code persistence + outbound email send.
     private void sendVerificationCode(User user) throws SQLException {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
-        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(1));
+        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(3));
 
         PreparedStatement invalidatePs = cnx.prepareStatement("UPDATE user_verification_codes SET consumed = 1 WHERE user_id = ? AND consumed = 0");
         invalidatePs.setInt(1, user.getId());
@@ -703,7 +703,7 @@ public class ServiceUser implements InterfaceServiceUser {
 
     private void persistAndSendPasswordResetCode(User user) throws SQLException {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
-        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(1));
+        Timestamp expiresAt = Timestamp.valueOf(LocalDateTime.now().plusMinutes(3));
 
         PreparedStatement invalidatePs = cnx.prepareStatement("UPDATE user_password_reset_codes SET consumed = 1 WHERE user_id = ? AND consumed = 0");
         invalidatePs.setInt(1, user.getId());
