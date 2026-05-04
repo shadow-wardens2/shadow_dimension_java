@@ -1,5 +1,6 @@
 package Services.event;
 
+import Entities.event.Event;
 import Entities.event.Reservation;
 import Entities.event.ReservationStatus;
 import Utils.AppConfig;
@@ -19,7 +20,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Properties;
 
@@ -37,50 +41,23 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
         sendSms(reservation, newStatus);
     }
 
+    @Override
+    public void notifyEventReschedule(Reservation reservation, Event event, Timestamp oldStart, Timestamp oldEnd) {
+        sendRescheduleEmail(reservation, event, oldStart, oldEnd);
+        sendRescheduleSms(reservation, event, oldStart, oldEnd);
+    }
+
     private void sendEmail(Reservation reservation, ReservationStatus status) {
         if (reservation.getUserEmail() == null || reservation.getUserEmail().isBlank()) {
             return;
         }
 
-        String mailDsn = AppConfig.get("MAILER_DSN");
-        String smtpHost = AppConfig.getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
-        String smtpPort = AppConfig.getOrDefault("MAIL_SMTP_PORT", "587");
-        String username = AppConfig.get("MAIL_USERNAME");
-        if (username == null || username.isBlank()) {
-            username = AppConfig.get("MAIL_FROM");
-        }
-        if (username == null || username.isBlank()) {
-            username = AppConfig.get("ofME");
-        }
-        String password = AppConfig.get("MAIL_PASSWORD");
-
-        if ((username == null || password == null) && mailDsn != null && mailDsn.contains("://")) {
-            ParsedMailer parsed = parseMailerDsn(mailDsn);
-            username = parsed.username();
-            password = parsed.password();
-        }
-
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+        MailSettings settings = resolveMailSettings();
+        if (settings == null) {
             return;
         }
 
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", smtpHost);
-        props.put("mail.smtp.port", smtpPort);
-        props.put("mail.smtp.ssl.trust", smtpHost);
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-
-        String finalUsername = username;
-        String finalPassword = password.replaceAll("\\s+", "");
-        String finalFrom = AppConfig.getOrDefault("MAIL_FROM", finalUsername);
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(finalUsername, finalPassword);
-            }
-        });
+        Session session = createMailSession(settings);
 
         String safeName = reservation.getUsername() == null || reservation.getUsername().isBlank()
             ? "Shadow Dweller"
@@ -110,13 +87,107 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
 
         try {
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(finalFrom));
+            message.setFrom(new InternetAddress(settings.from()));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(reservation.getUserEmail()));
             message.setSubject(subject);
             message.setText(body);
             Transport.send(message);
         } catch (Exception e) {
             System.err.println("Reservation email failed: " + e.getMessage());
+        }
+    }
+
+    private void sendRescheduleEmail(Reservation reservation, Event event, Timestamp oldStart, Timestamp oldEnd) {
+        if (reservation == null || event == null) {
+            return;
+        }
+        if (reservation.getUserEmail() == null || reservation.getUserEmail().isBlank()) {
+            return;
+        }
+
+        MailSettings settings = resolveMailSettings();
+        if (settings == null) {
+            return;
+        }
+
+        Session session = createMailSession(settings);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String zone = ZoneId.systemDefault().getId();
+
+        String safeName = reservation.getUsername() == null || reservation.getUsername().isBlank()
+                ? "Shadow Dweller"
+                : reservation.getUsername();
+        String safeTitle = event.getTitle() == null || event.getTitle().isBlank()
+                ? reservation.getEventTitle()
+                : event.getTitle();
+        String safeLocation = event.getLocation() == null || event.getLocation().isBlank()
+                ? "TBA"
+                : event.getLocation();
+
+        String oldStartText = oldStart == null ? "TBA" : formatter.format(oldStart.toInstant().atZone(ZoneId.systemDefault()));
+        String oldEndText = oldEnd == null ? "TBA" : formatter.format(oldEnd.toInstant().atZone(ZoneId.systemDefault()));
+        String newStartText = event.getStartDate() == null ? "TBA" : formatter.format(event.getStartDate().toInstant().atZone(ZoneId.systemDefault()));
+        String newEndText = event.getEndDate() == null ? "TBA" : formatter.format(event.getEndDate().toInstant().atZone(ZoneId.systemDefault()));
+
+        String subject = "Event Rescheduled: " + safeTitle;
+        String body = "Hello " + safeName + ",\n\n"
+                + "The event '" + safeTitle + "' has a new date.\n"
+                + "Old schedule: " + oldStartText + " to " + oldEndText + " (" + zone + ")\n"
+                + "New schedule: " + newStartText + " to " + newEndText + " (" + zone + ")\n"
+                + "Location: " + safeLocation + "\n\n"
+                + "If you can no longer attend, please contact the organizers.\n\n"
+                + "Thank you for using Shadow Dimensions.";
+
+        try {
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(settings.from()));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(reservation.getUserEmail()));
+            message.setSubject(subject);
+            message.setText(body);
+            Transport.send(message);
+        } catch (Exception e) {
+            System.err.println("Reschedule email failed: " + e.getMessage());
+        }
+    }
+
+    private void sendRescheduleSms(Reservation reservation, Event event, Timestamp oldStart, Timestamp oldEnd) {
+        String to = reservation.getUserPhone();
+        if (to == null || to.isBlank()) {
+            return;
+        }
+
+        String sid = AppConfig.get("TWILIO_ACCOUNT_SID");
+        String auth = AppConfig.get("TWILIO_AUTH_TOKEN");
+        String from = AppConfig.get("TWILIO_FROM_NUMBER");
+
+        if (sid == null || auth == null || from == null || sid.isBlank() || auth.isBlank() || from.isBlank()) {
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String newStartText = event.getStartDate() == null ? "TBA" : formatter.format(event.getStartDate().toInstant().atZone(ZoneId.systemDefault()));
+        
+        String body = "Shadow Dimensions: Event '" + event.getTitle() + "' has been rescheduled to " + newStartText + ". Check your email for details.";
+
+        String payload = "To=" + urlEncode(to)
+                + "&From=" + urlEncode(from)
+                + "&Body=" + urlEncode(body);
+
+        String authHeader = Base64.getEncoder()
+                .encodeToString((sid + ":" + auth).getBytes(StandardCharsets.UTF_8));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.twilio.com/2010-04-01/Accounts/" + sid + "/Messages.json"))
+                .timeout(Duration.ofSeconds(10))
+                .header("Authorization", "Basic " + authHeader)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        try {
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException ignored) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -173,29 +244,44 @@ public class ReservationNotifierService implements ReservationNotificationGatewa
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    private ParsedMailer parseMailerDsn(String dsn) {
-        String normalized = dsn;
-        int protocolIndex = normalized.indexOf("://");
-        if (protocolIndex >= 0) {
-            normalized = normalized.substring(protocolIndex + 3);
-        }
-
-        int atIndex = normalized.indexOf('@');
-        String credentials = atIndex > 0 ? normalized.substring(0, atIndex) : normalized;
-        int sep = credentials.indexOf(':');
-        if (sep <= 0) {
-            return new ParsedMailer("", "");
-        }
-
-        String user = credentials.substring(0, sep);
-        String pass = credentials.substring(sep + 1);
-        return new ParsedMailer(urlDecode(user), urlDecode(pass));
-    }
-
     private String urlDecode(String value) {
         return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 
-    private record ParsedMailer(String username, String password) {
+    private record MailSettings(String username, String password, String from, String smtpHost, String smtpPort) {
+    }
+
+    private MailSettings resolveMailSettings() {
+        String smtpHost = AppConfig.getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
+        String smtpPort = AppConfig.getOrDefault("MAIL_SMTP_PORT", "587");
+        String username = AppConfig.get("MAIL_USERNAME");
+        if (username == null || username.isBlank()) {
+            username = AppConfig.get("MAIL_FROM");
+        }
+        String password = AppConfig.get("MAIL_PASSWORD");
+
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            return null;
+        }
+
+        String from = AppConfig.getOrDefault("MAIL_FROM", username);
+        return new MailSettings(username, password.replaceAll("\\s+", ""), from, smtpHost, smtpPort);
+    }
+
+    private Session createMailSession(MailSettings settings) {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", settings.smtpHost());
+        props.put("mail.smtp.port", settings.smtpPort());
+        props.put("mail.smtp.ssl.trust", settings.smtpHost());
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+        return Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(settings.username(), settings.password());
+            }
+        });
     }
 }

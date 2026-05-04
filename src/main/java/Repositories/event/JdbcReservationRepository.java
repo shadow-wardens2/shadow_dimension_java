@@ -127,6 +127,27 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByEvent(int eventId) throws SQLException {
+        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+                + "FROM evt_reservation r "
+                + "JOIN `user` u ON u.id = r.user_id "
+                + "JOIN evt_event e ON e.id = r.event_id "
+                + "WHERE r.event_id = ? "
+                + "ORDER BY r.reserved_at DESC";
+
+        List<Reservation> rows = new ArrayList<>();
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    rows.add(mapReservation(rs));
+                }
+            }
+        }
+        return rows;
+    }
+
+    @Override
     public List<Reservation> findForBackOffice(String search, String sortBy, boolean ascending, int offset, int limit) throws SQLException {
         String normalizedSort = normalizeSortBy(sortBy);
         String direction = ascending ? "ASC" : "DESC";

@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -83,6 +84,27 @@ public class ReservationService {
             return reservationRepository.findAcceptedByUser(userId);
         } catch (SQLException e) {
             throw new EventModuleException("Unable to load accepted reservations: " + e.getMessage(), e);
+        }
+    }
+
+    public int notifyEventReschedule(Event event, Timestamp oldStart, Timestamp oldEnd) {
+        if (event == null || event.getId() <= 0) {
+            return 0;
+        }
+
+        try {
+            List<Reservation> reservations = reservationRepository.findByEvent(event.getId());
+            int notified = 0;
+            for (Reservation reservation : reservations) {
+                if (reservation.getStatus() == ReservationStatus.DENIED) {
+                    continue;
+                }
+                notificationGateway.notifyEventReschedule(reservation, event, oldStart, oldEnd);
+                notified++;
+            }
+            return notified;
+        } catch (SQLException e) {
+            throw new EventModuleException("Unable to notify reservations: " + e.getMessage(), e);
         }
     }
 

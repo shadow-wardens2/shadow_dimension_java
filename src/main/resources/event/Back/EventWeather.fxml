@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="720.0" prefWidth="920.0" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.Back.EventWeatherController">
+    <children>
+        <VBox spacing="16.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <children>
+                        <Label styleClass="headline" text="Event Weather Forecast" />
+                        <Pane HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnRefresh" mnemonicParsing="false" onAction="#handleRefresh" styleClass="secondary-button" text="Refresh" />
+                    </children>
+                </HBox>
+                <VBox spacing="4.0">
+                    <children>
+                        <Label fx:id="lbEventTitle" styleClass="title-lg" text="Event" />
+                        <Label fx:id="lbLocation" styleClass="subheadline" text="Location" />
+                        <Label fx:id="lbDates" styleClass="subheadline" text="Schedule" />
+                    </children>
+                </VBox>
+                <Label fx:id="lbWarning" style="-fx-text-fill: #f4c430;" styleClass="body-md" text="" />
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="forecastContainer" spacing="8.0" style="-fx-padding: 6 2 8 2;" />
+                    </content>
+                </ScrollPane>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <children>
+                        <Label styleClass="body-md" text="New start date" />
+                        <DatePicker fx:id="dpNewDate" />
+                        <Button fx:id="btnReschedule" mnemonicParsing="false" onAction="#handleReschedule" styleClass="glow-button" text="Reschedule" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

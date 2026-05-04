@@ -20,6 +20,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAcceptedByUser(int userId) throws SQLException;
 
+    List<Reservation> findByEvent(int eventId) throws SQLException;
+
     List<Reservation> findForBackOffice(String search, String sortBy, boolean ascending, int offset, int limit) throws SQLException;
 
     int countForBackOffice(String search) throws SQLException;
