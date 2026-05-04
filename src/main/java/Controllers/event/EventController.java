@@ -1,5 +1,6 @@
 package Controllers.event;
 
+import Controllers.event.Back.EventWeatherController;
 import Entities.event.Event;
 import Services.event.EventService;
 import Utils.PdfExportUtil;
@@ -94,11 +95,13 @@ public class EventController implements Initializable {
         colActions.setCellFactory(param -> new TableCell<Event, Integer>() {
             private final Button btnUpdate = new Button("Edit");
             private final Button btnDelete = new Button("Delete");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete);
+            private final Button btnWeather = new Button("Weather");
+            private final HBox pane = new HBox(10, btnUpdate, btnDelete, btnWeather);
 
             {
                 btnUpdate.getStyleClass().add("edit-button");
                 btnDelete.getStyleClass().add("delete-button");
+                btnWeather.getStyleClass().add("secondary-button");
 
                 btnDelete.setOnAction(event -> {
                     Event e = getTableView().getItems().get(getIndex());
@@ -127,6 +130,11 @@ public class EventController implements Initializable {
                         showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
                     }
                 });
+
+                btnWeather.setOnAction(event -> {
+                    Event e = getTableView().getItems().get(getIndex());
+                    openWeather(e);
+                });
             }
 
             @Override
@@ -135,6 +143,10 @@ public class EventController implements Initializable {
                 if (empty) {
                     setGraphic(null);
                 } else {
+                    Event row = getTableView().getItems().get(getIndex());
+                    boolean outdoor = row != null && "outdoor".equalsIgnoreCase(row.getLocationType());
+                    btnWeather.setVisible(outdoor);
+                    btnWeather.setManaged(outdoor);
                     setGraphic(pane);
                 }
             }
@@ -240,6 +252,26 @@ public class EventController implements Initializable {
             stage.show();
         } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ouvrir le chatbot: " + e.getMessage());
+        }
+    }
+
+    private void openWeather(Event event) {
+        if (event == null) {
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/Back/EventWeather.fxml"));
+            Parent root = loader.load();
+            EventWeatherController controller = loader.getController();
+            controller.setEvent(event);
+
+            Stage stage = new Stage();
+            stage.setTitle("Event Weather");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'ouvrir la meteo: " + e.getMessage());
         }
     }
 

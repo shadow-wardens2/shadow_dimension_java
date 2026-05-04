@@ -29,6 +29,7 @@
         <HBox spacing="30.0" alignment="CENTER">
             <Label styleClass="body-md" text="Home" />
             <Label onMouseClicked="#navigateToMarketplace" styleClass="body-md" text="Marketplace" style="-fx-cursor: hand;" />
+            <Label onMouseClicked="#navigateToEvents" styleClass="body-md" text="Events" style="-fx-cursor: hand;" />
             <Label onMouseClicked="#navigateToVault" styleClass="body-md" text="My Vault" style="-fx-cursor: hand;" />
             <Label onMouseClicked="#navigateToTutorials" styleClass="body-md" text="Tutorials" style="-fx-cursor: hand;" />
             <Label styleClass="body-md" text="Forum" />
@@ -65,8 +66,9 @@
                             <Insets top="20.0" />
                         </padding>
                         <Button onAction="#navigateToMarketplace" styleClass="ethereal-button" text="Marketplace" prefWidth="200" />
+                        <Button onAction="#navigateToEvents" styleClass="secondary-button" text="Events" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
                         <Button onAction="#navigateToVault" styleClass="secondary-button" text="My Vault" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
-                        <Button styleClass="secondary-button" text="View Chronicles" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
+                        <Button onAction="#navigateToEvents" styleClass="secondary-button" text="View Chronicles" prefWidth="200" style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 12 32;" />
                     </HBox>
                 </VBox>
 

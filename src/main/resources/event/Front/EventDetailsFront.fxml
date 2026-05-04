@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="12.0" style="-fx-padding: 14; -fx-background-color: linear-gradient(to bottom, #05060a, #0c0d14);" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.event.Front.EventDetailsFrontController">
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <children>
+                <Button mnemonicParsing="false" onAction="#handleBackHome" styleClass="secondary-button" text="Home" />
+                <Button mnemonicParsing="false" onAction="#handleBackToEvents" styleClass="secondary-button" text="Events" />
+                <Button mnemonicParsing="false" onAction="#handleOpenMyEvents" styleClass="secondary-button" text="My Events" />
+                <Region HBox.hgrow="ALWAYS" />
+            </children>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="12.0" style="-fx-padding: 2 0 8 0;">
+                    <children>
+                        <VBox spacing="8.0" styleClass="artifact-card">
+                            <children>
+                                <Label fx:id="lbTitle" styleClass="headline" text="Event title" />
+                                <Label fx:id="lbMeta" styleClass="subheadline" style="-fx-text-fill: #e4d9ff;" text="Meta" />
+                                <ImageView fx:id="eventImageView" fitHeight="280.0" fitWidth="780.0" pickOnBounds="true" preserveRatio="true" />
+                                <Label fx:id="lbImageStatus" styleClass="subheadline" style="-fx-text-fill: #c8bde0;" text="" />
+                                <Label fx:id="lbDescription" styleClass="body-md" style="-fx-text-fill: #d8d2e6;" text="Description" wrapText="true" />
+
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Label styleClass="body-md" style="-fx-text-fill: #e8e0eb;" text="Reservation:" />
+                                        <Label fx:id="lbReservationStatus" styleClass="subheadline" style="-fx-text-fill: #ba9eff; -fx-font-size: 15px;" text="No reservation" />
+                                        <Pane HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="btnReserve" onAction="#handleReserve" styleClass="glow-button" text="Reserve" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8.0" styleClass="artifact-card">
+                            <children>
+                                <Label fx:id="lbRatingSummary" styleClass="subheadline" style="-fx-text-fill: #d9cdf4;" text="No reviews yet" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="8.0" styleClass="artifact-card">
+                            <children>
+                                <Label styleClass="subheadline" style="-fx-text-fill: #d9cdf4;" text="Your review" />
+                                <HBox spacing="6.0">
+                                    <children>
+                                        <Button fx:id="btnStar1" onAction="#pickStar1" styleClass="secondary-button" text="1" />
+                                        <Button fx:id="btnStar2" onAction="#pickStar2" styleClass="secondary-button" text="2" />
+                                        <Button fx:id="btnStar3" onAction="#pickStar3" styleClass="secondary-button" text="3" />
+                                        <Button fx:id="btnStar4" onAction="#pickStar4" styleClass="secondary-button" text="4" />
+                                        <Button fx:id="btnStar5" onAction="#pickStar5" styleClass="secondary-button" text="5" />
+                                    </children>
+                                </HBox>
+                                <TextArea fx:id="taComment" prefHeight="120.0" promptText="Share your experience..." wrapText="true" />
+                                <Button fx:id="btnSaveReview" onAction="#handleSaveReview" styleClass="secondary-button" text="Save Review" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>
