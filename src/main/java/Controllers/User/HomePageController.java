@@ -20,7 +20,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.layout.Region;
+import javafx.util.Duration;
 import java.io.IOException;
+import java.util.Random;
 
 public class HomePageController implements PageHost {
     // Main content host where center pages are swapped dynamically.
@@ -117,6 +124,21 @@ public class HomePageController implements PageHost {
     }
 
     @FXML
+    void openArtworksManagement(ActionEvent event) {
+        loadPage("/Artworks/ListerArtworks.fxml");
+    }
+
+    @FXML
+    void openArtworksStatistics(ActionEvent event) {
+        loadPage("/Artworks/ArtworksStatistics.fxml");
+    }
+
+    @FXML
+    void openEvaluationsManagement(ActionEvent event) {
+        loadPage("/Artworks/EvaluationsManagement.fxml");
+    }
+
+    @FXML
     void openUserManagement(ActionEvent event) {
         User user = SessionManager.getCurrentUser();
         if (user != null && user.isAdmin()) {
@@ -183,7 +205,7 @@ public class HomePageController implements PageHost {
     }
 
     // Loads a center page and injects dashboard context when needed.
-    public void loadPage(String fxmlPath) {
+    public Object loadPage(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
@@ -229,11 +251,34 @@ public class HomePageController implements PageHost {
             if (controller instanceof Controllers.Tutorials.ManagementLeconController) {
                 ((Controllers.Tutorials.ManagementLeconController) controller).setDashboardContext(this);
             }
+            if (controller instanceof Controllers.Artworks.ListerArtworksController) {
+                ((Controllers.Artworks.ListerArtworksController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterArtworkController) {
+                ((Controllers.Artworks.AjouterArtworkController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.DetailArtworkController) {
+                ((Controllers.Artworks.DetailArtworkController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.ListerCategoriesController) {
+                ((Controllers.Artworks.ListerCategoriesController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.AjouterCategoryController) {
+                ((Controllers.Artworks.AjouterCategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.ArtworksStatisticsController) {
+                ((Controllers.Artworks.ArtworksStatisticsController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.EvaluationsManagementController) {
+                // Evaluations controller doesn't need context currently but could in future
+            }
 
             contentArea.getChildren().clear();
             contentArea.getChildren().add(root);
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

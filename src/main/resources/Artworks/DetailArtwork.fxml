@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Rectangle?>
+
+<ScrollPane fitToWidth="true" styleClass="scroll-pane" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.DetailArtworkController">
+    <VBox spacing="40" style="-fx-background-color: #050507; -fx-padding: 48;">
+        <!-- Back Button & Header -->
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Button fx:id="backButton" onAction="#handleBack" styleClass="secondary-button" text="← Back to Gallery" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox fx:id="adminActions" spacing="12">
+                <Button onAction="#handleEdit" styleClass="glow-button" text="Edit Artwork" />
+                <Button onAction="#handleDelete" styleClass="delete-button" text="Delete" />
+            </HBox>
+        </HBox>
+
+        <HBox spacing="48">
+            <!-- Image Section -->
+            <VBox spacing="16" alignment="TOP_CENTER">
+                 <StackPane styleClass="bento-card" style="-fx-padding: 4; -fx-background-radius: 24; -fx-border-radius: 24;">
+                    <ImageView fx:id="artworkImage" fitHeight="500.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true">
+                        <clip>
+                            <javafx.scene.shape.Rectangle arcHeight="40" arcWidth="40" height="500" width="500" />
+                        </clip>
+                    </ImageView>
+                </StackPane>
+                <Label fx:id="statusBadge" styleClass="artwork-status-badge" text="AVAILABLE" />
+            </VBox>
+
+            <!-- Info Section -->
+            <VBox spacing="32" HBox.hgrow="ALWAYS">
+                <VBox spacing="8">
+                    <Label fx:id="categoryLabel" style="-fx-text-fill: #8b5cf6; -fx-font-size: 16px; -fx-font-weight: bold;" text="DIGITAL ART" />
+                    <Text fx:id="titleText" style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 48px; -fx-font-weight: 900; -fx-fill: #ffffff;" text="Artwork Title" wrappingWidth="500" />
+                </VBox>
+
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Text fx:id="priceText" style="-fx-font-size: 36px; -fx-font-weight: 900; -fx-fill: #ffffff;" text="450.00 DT" />
+                    <Separator orientation="VERTICAL" prefHeight="40" />
+                    <VBox>
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="ARTWORK ID" />
+                        <Label fx:id="idLabel" style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="#12345" />
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="12">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 18px; -fx-font-weight: bold;" text="Description" />
+                        <Button fx:id="btnAnalyzePdfDetail"
+                                text="✨ Générer un résumé IA"
+                                onAction="#handleAnalyzePdf"
+                                style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+                                       -fx-text-fill: white;
+                                       -fx-font-size: 11px;
+                                       -fx-font-weight: bold;
+                                       -fx-padding: 4 10;
+                                       -fx-background-radius: 6;
+                                       -fx-cursor: hand;" />
+                    </HBox>
+                    <Label fx:id="descriptionLabel" style="-fx-text-fill: #adaaae; -fx-font-size: 16px; -fx-line-spacing: 1.5;" text="Full description text goes here..." wrapText="true" maxWidth="600" />
+                </VBox>
+
+                <!-- AI Summary Section -->
+                <VBox fx:id="aiSummarySection" spacing="12" style="-fx-background-color: rgba(59, 130, 246, 0.05); -fx-padding: 20; -fx-background-radius: 16; -fx-border-color: rgba(59, 130, 246, 0.2); -fx-border-radius: 16;" visible="false" managed="false">
+                    <Label style="-fx-text-fill: #3b82f6; -fx-font-size: 18px; -fx-font-weight: bold;" text="✨ Résumé IA du PDF" />
+                    <Label fx:id="aiSummaryLabel" style="-fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-line-spacing: 1.4;" text="..." wrapText="true" maxWidth="560" />
+                </VBox>
+
+                <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+                
+                <GridPane hgap="40" vgap="16">
+                    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="CREATION DATE" />
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="April 15, 2024" />
+                    </VBox>
+                    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px;" text="ARTIST" />
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 14px; -fx-font-weight: bold;" text="Verified Artist" />
+                    </VBox>
+                </GridPane>
+            </VBox>
+        </HBox>
+
+        <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+
+        <!-- Evaluation Section -->
+        <VBox spacing="24" styleClass="artifact-card" style="-fx-padding: 32;">
+            <Label text="MANIFEST YOUR EVALUATION" style="-fx-font-family: 'Cinzel', serif; -fx-text-fill: #ba9eff; -fx-font-size: 20px;" />
+            
+            <VBox spacing="16">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Rating:" style="-fx-text-fill: #ffffff; -fx-font-size: 16px;" />
+                    <HBox fx:id="starContainer" spacing="5">
+                        <Button onAction="#handleRate1" style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate2" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate3" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate4" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate5" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                    </HBox>
+                </HBox>
+                
+                <TextArea fx:id="commentArea" promptText="Share your thoughts on this relic..." prefHeight="100" styleClass="ritual-input" wrapText="true" />
+                
+                <Button onAction="#handleSubmitEvaluation" styleClass="glow-button" text="Submit Evaluation" prefWidth="200" />
+            </VBox>
+
+            <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+
+            <!-- Existing Evaluations List -->
+            <VBox fx:id="evaluationsContainer" spacing="20">
+                <Label text="ECHOES FROM OTHER DWELLERS" style="-fx-text-fill: #adaaae; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <!-- Evaluations will be loaded here dynamically -->
+            </VBox>
+        </VBox>
+    </VBox>
+</ScrollPane>
