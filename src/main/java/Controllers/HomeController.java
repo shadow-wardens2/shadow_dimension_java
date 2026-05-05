@@ -213,11 +213,6 @@ public class HomeController {
     }
 
     @FXML
-    void handleOpenDashboard() {
-        loadPage("/HomePage.fxml");
-    }
-
-    @FXML
     void navigateToLogin() {
         loadPage("/User/ConnectSoul.fxml");
     }
