@@ -21,6 +21,7 @@ public class ServiceCategories implements InterfaceServiceArtworks<Categories> {
 
     @Override
     public void add(Categories c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "INSERT INTO category(name, description) VALUES (?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, c.getTitle());
@@ -30,6 +31,7 @@ public class ServiceCategories implements InterfaceServiceArtworks<Categories> {
 
     @Override
     public void update(Categories c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "UPDATE category SET name=?, description=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, c.getTitle());
@@ -40,6 +42,7 @@ public class ServiceCategories implements InterfaceServiceArtworks<Categories> {
 
     @Override
     public void delete(Categories c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "DELETE FROM category WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, c.getID());
@@ -48,6 +51,7 @@ public class ServiceCategories implements InterfaceServiceArtworks<Categories> {
 
     @Override
     public List<Categories> getAll() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         List<Categories> list = new ArrayList<>();
         String req = "SELECT * FROM category";
         Statement st = cnx.createStatement();

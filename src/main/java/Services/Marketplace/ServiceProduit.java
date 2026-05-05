@@ -22,6 +22,7 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
     @Override
     public void add(Produit p) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "INSERT INTO mkt_produit(nom, description, prix, stock, categorie_id, type_id, image) VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, p.getNom());
@@ -36,6 +37,7 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
     @Override
     public void update(Produit p) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "UPDATE mkt_produit SET nom=?, description=?, prix=?, stock=?, categorie_id=?, type_id=?, image=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, p.getNom());
@@ -54,6 +56,7 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
     @Override
     public void delete(Produit p) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "DELETE FROM mkt_produit WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, p.getId());
@@ -62,6 +65,7 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
 
     @Override
     public List<Produit> getAll() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         List<Produit> list = new ArrayList<>();
         String req = "SELECT * FROM mkt_produit";
         Statement st = cnx.createStatement();
@@ -81,6 +85,7 @@ public class ServiceProduit implements InterfaceServiceProduit<Produit> {
     }
 
     public Produit getById(int id) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "SELECT * FROM mkt_produit WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, id);

@@ -26,6 +26,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
 
     @Override
     public void add(Event e) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "INSERT INTO evt_event(title, description, location, start_date, end_date, image, capacity, qr_code_path, created_at, status, category_id, created_by_id, visual_vibe, location_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, e.getTitle());
@@ -51,6 +52,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
 
     @Override
     public void update(Event e) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "UPDATE evt_event SET title=?, description=?, location=?, start_date=?, end_date=?, image=?, capacity=?, qr_code_path=?, status=?, category_id=?, created_by_id=?, visual_vibe=?, location_type=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, e.getTitle());
@@ -76,6 +78,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
 
     @Override
     public void delete(Event e) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "DELETE FROM evt_event WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, e.getId());
@@ -84,6 +87,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
 
     @Override
     public List<Event> getAll() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         List<Event> list = new ArrayList<>();
         String req = "SELECT e.*, c.nom AS category_name, c.description AS category_description, c.type_tarification, c.prix AS category_price, c.creator_type, c.created_at AS category_created_at FROM evt_event e JOIN evt_category c ON e.category_id = c.id ORDER BY e.id DESC";
         Statement st = cnx.createStatement();
@@ -95,6 +99,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
     }
 
     public Event getById(int id) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "SELECT e.*, c.nom AS category_name, c.description AS category_description, c.type_tarification, c.prix AS category_price, c.creator_type, c.created_at AS category_created_at FROM evt_event e JOIN evt_category c ON e.category_id = c.id WHERE e.id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, id);
@@ -106,6 +111,7 @@ public class EventService implements InterfaceServiceProduit<Event> {
     }
 
     public Map<String, Integer> getEventCountByCategory() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         Map<String, Integer> counts = new LinkedHashMap<>();
         String req = "SELECT c.nom AS category_name, COUNT(e.id) AS total FROM evt_category c LEFT JOIN evt_event e ON e.category_id = c.id GROUP BY c.id, c.nom ORDER BY total DESC, c.nom ASC";
         Statement st = cnx.createStatement();

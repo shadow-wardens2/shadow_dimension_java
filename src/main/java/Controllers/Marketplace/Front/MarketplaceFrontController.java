@@ -73,6 +73,8 @@ public class MarketplaceFrontController {
             currencySelector.setValue(CurrencyConverterService.getCurrentCurrency());
             
         } catch (SQLException e) {
+            lbProductCount.setText("THE VOID IS SILENT: Connection to the Arcane database failed.");
+            lbProductCount.setStyle("-fx-text-fill: #ef4444;"); // Red color for error
             e.printStackTrace();
         }
         

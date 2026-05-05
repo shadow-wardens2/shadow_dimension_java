@@ -42,10 +42,14 @@ public class ServiceUser implements InterfaceServiceUser {
 
     public ServiceUser() {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
-        ensureUserColumns();
-        ensureVerificationTable();
-        ensurePasswordResetTable();
-        ensureFaceIdTable();
+        if (cnx != null) {
+            ensureUserColumns();
+            ensureVerificationTable();
+            ensurePasswordResetTable();
+            ensureFaceIdTable();
+        } else {
+            System.err.println("[ServiceUser] Warning: Database connection is null. Startup checks skipped.");
+        }
     }
 
     // Local signup (email/password) with password policy + verification email.
@@ -64,6 +68,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Ce username existe deja.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "INSERT INTO `user` (email, username, roles, password, is_active, is_verified, created_at, accessibility_mode, onboarding_completed, bad_comment_count, is_locked) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, email.trim());
@@ -108,6 +113,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Email/Username et mot de passe sont obligatoires.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified, failed_login_attempts FROM `user` WHERE email = ? OR username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, emailOrUsername.trim());
@@ -164,6 +170,7 @@ public class ServiceUser implements InterfaceServiceUser {
                 throw new IllegalArgumentException("Ce compte est verrouille.");
             }
 
+            if (cnx == null) throw new SQLException("Database connection is null");
             String updateSql = "UPDATE `user` SET google_id = ?, full_name = COALESCE(NULLIF(full_name, ''), ?) WHERE id = ?";
             PreparedStatement updatePs = cnx.prepareStatement(updateSql);
             updatePs.setString(1, googleId.trim());
@@ -175,6 +182,7 @@ public class ServiceUser implements InterfaceServiceUser {
         }
 
         String username = generateUniqueUsernameFromEmail(email);
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "INSERT INTO `user` (email, username, roles, password, google_id, full_name, is_active, is_verified, created_at, accessibility_mode, onboarding_completed, bad_comment_count, is_locked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, email.trim());
@@ -227,6 +235,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Aucun utilisateur trouve pour cet email.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, expires_at, consumed FROM user_verification_codes WHERE user_id = ? AND code = ? ORDER BY id DESC LIMIT 1";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, user.getId());
@@ -288,6 +297,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Aucun utilisateur trouve pour cet email.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, expires_at, consumed FROM user_password_reset_codes WHERE user_id = ? AND code = ? ORDER BY id DESC LIMIT 1";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, user.getId());
@@ -341,6 +351,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public boolean isFaceIdEnabled(int userId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT enabled FROM user_face_auth WHERE user_id = ? LIMIT 1";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, userId);
@@ -356,6 +367,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Signature faciale invalide.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement(
                 "INSERT INTO user_face_auth (user_id, face_signature, enabled, updated_at) VALUES (?, ?, 1, NOW()) " +
                         "ON DUPLICATE KEY UPDATE face_signature = VALUES(face_signature), enabled = 1, updated_at = NOW()"
@@ -366,6 +378,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public void disableFaceId(int userId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement("UPDATE user_face_auth SET enabled = 0, updated_at = NOW() WHERE user_id = ?");
         ps.setInt(1, userId);
         ps.executeUpdate();
@@ -380,6 +393,7 @@ public class ServiceUser implements InterfaceServiceUser {
                 "FROM user_face_auth ufa " +
                 "JOIN `user` u ON u.id = ufa.user_id " +
                 "WHERE ufa.enabled = 1";
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
@@ -422,6 +436,7 @@ public class ServiceUser implements InterfaceServiceUser {
                 "FROM user_face_auth ufa " +
                 "JOIN `user` u ON u.id = ufa.user_id " +
                 "WHERE ufa.enabled = 1";
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
@@ -515,6 +530,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public User getById(int id) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, id);
@@ -533,6 +549,7 @@ public class ServiceUser implements InterfaceServiceUser {
             throw new IllegalArgumentException("Le numero de telephone doit etre au format +216 suivi de 8 chiffres.");
         }
 
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "UPDATE `user` SET email = ?, username = ?, full_name = ?, phone = ?, country = ?, city = ?, bio = ? WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, user.getEmail());
@@ -547,6 +564,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public List<User> getAllUsers() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` ORDER BY id DESC";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -560,6 +578,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public void updateUserByAdmin(User user) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "UPDATE `user` SET email = ?, username = ?, roles = ?, full_name = ?, phone = ?, country = ?, city = ?, bio = ?, is_active = ?, is_locked = ? WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, user.getEmail());
@@ -577,12 +596,14 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public void resetFailedLoginAttempts(int userId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = 0 WHERE id = ?");
         ps.setInt(1, userId);
         ps.executeUpdate();
     }
 
     public void deleteUserById(int userId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "DELETE FROM `user` WHERE id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, userId);
@@ -590,6 +611,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     public User getFirstActiveAdmin() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE roles LIKE '%ROLE_ADMIN%' AND is_active = 1 LIMIT 1";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -601,6 +623,7 @@ public class ServiceUser implements InterfaceServiceUser {
 
     // Internal lookup helpers.
     private User findByEmail(String email) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE email = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, email);
@@ -620,6 +643,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByUsername(String username) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE username = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, username);
@@ -631,6 +655,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private User findByGoogleId(String googleId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String sql = "SELECT id, email, username, roles, password, full_name, phone, country, city, bio, created_at, is_active, is_locked, is_verified FROM `user` WHERE google_id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, googleId);
@@ -806,6 +831,7 @@ public class ServiceUser implements InterfaceServiceUser {
             "ALTER TABLE `user` ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) DEFAULT NULL"
         };
         for (String sql : columns) {
+            if (cnx == null) return; // Should not happen if called from constructor with null check
             try (Statement st = cnx.createStatement()) {
                 st.execute(sql);
             } catch (SQLException ignored) {
@@ -821,6 +847,7 @@ public class ServiceUser implements InterfaceServiceUser {
                 + "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
                 + "CONSTRAINT fk_user_face_auth_user FOREIGN KEY (user_id) REFERENCES `user`(id) ON DELETE CASCADE"
                 + ")";
+        if (cnx == null) return;
         try (Statement st = cnx.createStatement()) {
             st.execute(sql);
         } catch (SQLException ignored) {
@@ -846,6 +873,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private void updateFailedLoginAttempts(int userId, int failedAttempts) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = ? WHERE id = ?");
         ps.setInt(1, failedAttempts);
         ps.setInt(2, userId);
@@ -853,6 +881,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private void lockUserAfterFailedAttempts(int userId, int failedAttempts) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET failed_login_attempts = ?, is_locked = 1 WHERE id = ?");
         ps.setInt(1, failedAttempts);
         ps.setInt(2, userId);
@@ -860,6 +889,7 @@ public class ServiceUser implements InterfaceServiceUser {
     }
 
     private void markUserAsVerified(int userId) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         PreparedStatement ps = cnx.prepareStatement("UPDATE `user` SET is_verified = 1 WHERE id = ?");
         ps.setInt(1, userId);
         ps.executeUpdate();

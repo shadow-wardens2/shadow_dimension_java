@@ -58,6 +58,10 @@ public class HomeController {
                 lbUserAvatar.setVisible(true);
                 lbUserAvatar.setManaged(true);
             }
+            if (btnLogout != null) {
+                btnLogout.setVisible(true);
+                btnLogout.setManaged(true);
+            }
             loadAiRecommendations();
         }
         setupMascotAnimation();
@@ -229,5 +233,11 @@ public class HomeController {
     @FXML
     private void handleEnterNight() {
         navigateToMarketplace();
+    }
+
+    @FXML
+    void handleLogout() {
+        SessionManager.clear();
+        loadPage("/HomeFront.fxml");
     }
 }

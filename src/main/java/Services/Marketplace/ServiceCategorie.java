@@ -18,6 +18,7 @@ public class ServiceCategorie implements InterfaceServiceProduit<Categorie> {
 
     @Override
     public void add(Categorie c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "INSERT INTO mkt_categorie(nom, description) VALUES (?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, c.getNom());
@@ -27,6 +28,7 @@ public class ServiceCategorie implements InterfaceServiceProduit<Categorie> {
 
     @Override
     public void update(Categorie c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "UPDATE mkt_categorie SET nom=?, description=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, c.getNom());
@@ -37,6 +39,7 @@ public class ServiceCategorie implements InterfaceServiceProduit<Categorie> {
 
     @Override
     public void delete(Categorie c) throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         String req = "DELETE FROM mkt_categorie WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, c.getId());
@@ -45,6 +48,7 @@ public class ServiceCategorie implements InterfaceServiceProduit<Categorie> {
 
     @Override
     public List<Categorie> getAll() throws SQLException {
+        if (cnx == null) throw new SQLException("Database connection is null");
         List<Categorie> list = new ArrayList<>();
         String req = "SELECT * FROM mkt_categorie";
         Statement st = cnx.createStatement();
