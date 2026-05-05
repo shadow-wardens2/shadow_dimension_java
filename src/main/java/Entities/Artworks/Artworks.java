@@ -8,20 +8,23 @@ public class Artworks {
     private String description;
     private int price;
     private String imageurl;
+    private String pdfUrl;
+    private String aiSummary;
     private String status;
     private int categoryID;
 
     public Artworks(){}
 
-    public Artworks(int id, String title, String description, int price, String imageurl, String status, int categoryID) {
+    public Artworks(int id, String title, String description, int price, String imageurl, String pdfUrl, String aiSummary, String status, int categoryID) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
         this.imageurl = imageurl;
+        this.pdfUrl = pdfUrl;
+        this.aiSummary = aiSummary;
         this.status = status;
         this.categoryID = categoryID;
-
     }
 
     public int getId() {
@@ -32,7 +35,6 @@ public class Artworks {
     }
     public String getTitle() {
         return title;
-
     }
     public void setTitle(String title) {
         this.title = title;
@@ -55,6 +57,18 @@ public class Artworks {
     public void setImageurl(String imageurl) {
         this.imageurl = imageurl;
     }
+    public String getPdfUrl() {
+        return pdfUrl;
+    }
+    public void setPdfUrl(String pdfUrl) {
+        this.pdfUrl = pdfUrl;
+    }
+    public String getAiSummary() {
+        return aiSummary;
+    }
+    public void setAiSummary(String aiSummary) {
+        this.aiSummary = aiSummary;
+    }
     public String getStatus() {
         return status;
     }
@@ -76,6 +90,8 @@ public class Artworks {
                 ", description='" + description + '\'' +
                 ", price=" + price +
                 ", image='" + imageurl + '\'' +
+                ", pdfUrl='" + pdfUrl + '\'' +
+                ", aiSummary='" + aiSummary + '\'' +
                 ", status='" + status + '\'' +
                 ", categoryID=" + categoryID +
                 '}';
@@ -84,11 +100,11 @@ public class Artworks {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Artworks artworks)) return false;
-        return id == artworks.id && price == artworks.price && categoryID == artworks.categoryID && Objects.equals(title, artworks.title) && Objects.equals(description, artworks.description) && Objects.equals(imageurl, artworks.imageurl) && Objects.equals(status, artworks.status);
+        return id == artworks.id && price == artworks.price && categoryID == artworks.categoryID && Objects.equals(title, artworks.title) && Objects.equals(description, artworks.description) && Objects.equals(imageurl, artworks.imageurl) && Objects.equals(pdfUrl, artworks.pdfUrl) && Objects.equals(aiSummary, artworks.aiSummary) && Objects.equals(status, artworks.status);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, price, imageurl, status, categoryID);
+        return Objects.hash(id, title, description, price, imageurl, pdfUrl, aiSummary, status, categoryID);
     }
 }

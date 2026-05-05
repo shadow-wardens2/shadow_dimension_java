@@ -25,6 +25,10 @@ public class HomeController {
 
     @FXML private VBox recommendationBox;
     @FXML private HBox recommendationsContainer;
+    @FXML private javafx.scene.Group ghostGroup;
+    @FXML private javafx.scene.layout.Pane mascotGlow;
+    @FXML private javafx.scene.layout.Region leftPupil;
+    @FXML private javafx.scene.layout.Region rightPupil;
 
     @FXML
     public void initialize() {
@@ -35,6 +39,55 @@ public class HomeController {
                 btnDashboard.setManaged(true);
             }
             loadAiRecommendations();
+        }
+        setupMascotAnimation();
+        setupEyeTracking();
+    }
+
+    private void setupEyeTracking() {
+        if (rootNode != null && leftPupil != null && rightPupil != null) {
+            rootNode.setOnMouseMoved(event -> {
+                double mouseX = event.getSceneX();
+                double mouseY = event.getSceneY();
+
+                updatePupil(leftPupil, mouseX, mouseY);
+                updatePupil(rightPupil, mouseX, mouseY);
+            });
+        }
+    }
+
+    private void updatePupil(javafx.scene.layout.Region pupil, double mouseX, double mouseY) {
+        javafx.geometry.Point2D pupilScenePos = pupil.localToScene(pupil.getWidth() / 2, pupil.getHeight() / 2);
+        
+        double dx = mouseX - pupilScenePos.getX();
+        double dy = mouseY - pupilScenePos.getY();
+        
+        double angle = Math.atan2(dy, dx);
+        double distance = Math.min(6, Math.sqrt(dx * dx + dy * dy) / 20); // Max 6px move
+        
+        pupil.setTranslateX(Math.cos(angle) * distance);
+        pupil.setTranslateY(Math.sin(angle) * distance);
+    }
+
+    private void setupMascotAnimation() {
+        if (ghostGroup != null) {
+            // Floating effect
+            javafx.animation.TranslateTransition floatAnim = new javafx.animation.TranslateTransition(javafx.util.Duration.seconds(3), ghostGroup);
+            floatAnim.setByY(-20);
+            floatAnim.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            floatAnim.setAutoReverse(true);
+            floatAnim.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            floatAnim.play();
+
+            // Pulse effect for glow
+            if (mascotGlow != null) {
+                javafx.animation.FadeTransition pulse = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(2), mascotGlow);
+                pulse.setFromValue(0.2);
+                pulse.setToValue(0.6);
+                pulse.setCycleCount(javafx.animation.Animation.INDEFINITE);
+                pulse.setAutoReverse(true);
+                pulse.play();
+            }
         }
     }
 
@@ -107,6 +160,11 @@ public class HomeController {
     @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
+    }
+
+    @FXML
+    void navigateToLogin() {
+        loadPage("/User/ConnectSoul.fxml");
     }
 
     private void loadPage(String fxmlPath) {

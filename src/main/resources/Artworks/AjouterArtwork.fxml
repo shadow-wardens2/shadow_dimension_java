@@ -29,17 +29,30 @@
         <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <TextArea fx:id="txtDescription" promptText="Detailed description (min 15 chars)"
                       styleClass="text-area" prefRowCount="4" />
-            <Button fx:id="btnGenerateDesc"
-                    text="✨ Générer Description IA"
-                    onAction="#handleGenerateDescription"
-                    styleClass="ai-button"
-                    style="-fx-background-color: linear-gradient(to right, #7c3aed, #a855f7);
-                           -fx-text-fill: white;
-                           -fx-font-size: 12px;
-                           -fx-font-weight: bold;
-                           -fx-padding: 6 14;
-                           -fx-background-radius: 8;
-                           -fx-cursor: hand;" />
+            <HBox spacing="10">
+                <Button fx:id="btnGenerateDesc"
+                        text="✨ Générer Description IA"
+                        onAction="#handleGenerateDescription"
+                        styleClass="ai-button"
+                        style="-fx-background-color: linear-gradient(to right, #7c3aed, #a855f7);
+                               -fx-text-fill: white;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-padding: 6 14;
+                               -fx-background-radius: 8;
+                               -fx-cursor: hand;" />
+                <Button fx:id="btnAnalyzePdf"
+                        text="📂 Analyser PDF Livre"
+                        onAction="#handleAnalyzePdf"
+                        styleClass="ai-button"
+                        style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+                               -fx-text-fill: white;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-padding: 6 14;
+                               -fx-background-radius: 8;
+                               -fx-cursor: hand;" />
+            </HBox>
         </VBox>
 
         <!-- Price -->
@@ -67,17 +80,25 @@
         <TextField fx:id="txtImage" promptText="http://... image link" styleClass="text-field"
                    GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
+        <!-- PDF URL -->
+        <Label fx:id="labelPdf" styleClass="form-label" text="PDF File:"
+               GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <HBox fx:id="panePdf" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <TextField fx:id="txtPdfUrl" promptText="Path to book PDF" styleClass="text-field" HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleBrowsePdf" text="📁 Browse" styleClass="secondary-button" />
+        </HBox>
+
         <!-- Status -->
         <Label styleClass="form-label" text="Status:"
-               GridPane.columnIndex="0" GridPane.rowIndex="4" />
+               GridPane.columnIndex="0" GridPane.rowIndex="5" />
         <ComboBox fx:id="comboStatus" promptText="Select Status" styleClass="combo-box"
-                  GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="9999" />
+                  GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="9999" />
 
         <!-- Category -->
         <Label styleClass="form-label" text="Category:"
-               GridPane.columnIndex="0" GridPane.rowIndex="5" />
+               GridPane.columnIndex="0" GridPane.rowIndex="6" />
         <ComboBox fx:id="comboCategory" promptText="Select Category" styleClass="combo-box"
-                  GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="9999" />
+                  GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="9999" />
     </GridPane>
 
     <HBox spacing="16" alignment="CENTER_RIGHT">

@@ -47,8 +47,26 @@
                 </HBox>
 
                 <VBox spacing="12">
-                    <Label style="-fx-text-fill: #ffffff; -fx-font-size: 18px; -fx-font-weight: bold;" text="Description" />
-                    <Label fx:id="descriptionLabel" style="-fx-text-fill: #adaaae; -fx-font-size: 16px; -fx-line-spacing: 1.5;" text="Full description text goes here. This can be quite long and should be easy to read with proper spacing and font choices." wrapText="true" maxWidth="600" />
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-text-fill: #ffffff; -fx-font-size: 18px; -fx-font-weight: bold;" text="Description" />
+                        <Button fx:id="btnAnalyzePdfDetail"
+                                text="✨ Générer un résumé IA"
+                                onAction="#handleAnalyzePdf"
+                                style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+                                       -fx-text-fill: white;
+                                       -fx-font-size: 11px;
+                                       -fx-font-weight: bold;
+                                       -fx-padding: 4 10;
+                                       -fx-background-radius: 6;
+                                       -fx-cursor: hand;" />
+                    </HBox>
+                    <Label fx:id="descriptionLabel" style="-fx-text-fill: #adaaae; -fx-font-size: 16px; -fx-line-spacing: 1.5;" text="Full description text goes here..." wrapText="true" maxWidth="600" />
+                </VBox>
+
+                <!-- AI Summary Section -->
+                <VBox fx:id="aiSummarySection" spacing="12" style="-fx-background-color: rgba(59, 130, 246, 0.05); -fx-padding: 20; -fx-background-radius: 16; -fx-border-color: rgba(59, 130, 246, 0.2); -fx-border-radius: 16;" visible="false" managed="false">
+                    <Label style="-fx-text-fill: #3b82f6; -fx-font-size: 18px; -fx-font-weight: bold;" text="✨ Résumé IA du PDF" />
+                    <Label fx:id="aiSummaryLabel" style="-fx-text-fill: #ffffff; -fx-font-size: 15px; -fx-line-spacing: 1.4;" text="..." wrapText="true" maxWidth="560" />
                 </VBox>
 
                 <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
@@ -65,5 +83,37 @@
                 </GridPane>
             </VBox>
         </HBox>
+
+        <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+
+        <!-- Evaluation Section -->
+        <VBox spacing="24" styleClass="artifact-card" style="-fx-padding: 32;">
+            <Label text="MANIFEST YOUR EVALUATION" style="-fx-font-family: 'Cinzel', serif; -fx-text-fill: #ba9eff; -fx-font-size: 20px;" />
+            
+            <VBox spacing="16">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Rating:" style="-fx-text-fill: #ffffff; -fx-font-size: 16px;" />
+                    <HBox fx:id="starContainer" spacing="5">
+                        <Button onAction="#handleRate1" style="-fx-background-color: transparent; -fx-text-fill: #8b5cf6; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate2" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate3" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate4" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                        <Button onAction="#handleRate5" style="-fx-background-color: transparent; -fx-text-fill: #adaaae; -fx-font-size: 24px; -fx-cursor: hand;" text="★" />
+                    </HBox>
+                </HBox>
+                
+                <TextArea fx:id="commentArea" promptText="Share your thoughts on this relic..." prefHeight="100" styleClass="ritual-input" wrapText="true" />
+                
+                <Button onAction="#handleSubmitEvaluation" styleClass="glow-button" text="Submit Evaluation" prefWidth="200" />
+            </VBox>
+
+            <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
+
+            <!-- Existing Evaluations List -->
+            <VBox fx:id="evaluationsContainer" spacing="20">
+                <Label text="ECHOES FROM OTHER DWELLERS" style="-fx-text-fill: #adaaae; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <!-- Evaluations will be loaded here dynamically -->
+            </VBox>
+        </VBox>
     </VBox>
 </ScrollPane>

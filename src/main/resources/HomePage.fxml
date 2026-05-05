@@ -7,6 +7,12 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.Region?>
 
 <StackPane prefHeight="800.0" prefWidth="1280.0" style="-fx-background-color: #050507;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.User.HomePageController">
 
@@ -46,6 +52,8 @@
                     <Button alignment="BASELINE_LEFT" onAction="#openTutorialsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Tutorials Management" />
                     <Button alignment="BASELINE_LEFT" onAction="#openEventManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Event Management" />
                     <Button alignment="BASELINE_LEFT" onAction="#openArtworksManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Artworks Management" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openArtworksStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Artworks Statistics" />
+                    <Button alignment="BASELINE_LEFT" onAction="#openEvaluationsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Artworks Evaluation" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">
@@ -58,9 +66,5 @@
             <StackPane fx:id="contentArea" style="-fx-background-color: #050507;" />
         </center>
     </BorderPane>
-
-    <StackPane alignment="BOTTOM_RIGHT" mouseTransparent="true">
-        <Button mouseTransparent="false" prefHeight="56" prefWidth="56" style="-fx-translate-x: -32; -fx-translate-y: -32;" styleClass="chat-toggle" text="💬" />
-    </StackPane>
 
 </StackPane>

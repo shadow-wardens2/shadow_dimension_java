@@ -22,28 +22,32 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
 
     @Override
     public void add(Artworks a) throws SQLException {
-        String req = "INSERT INTO artworks(title, description, price, imageurl, status, category_id) VALUES (?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO artworks(title, description, price, imageurl, pdf_url, ai_summary, status, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, a.getTitle());
         ps.setString(2, a.getDescription());
         ps.setInt(3, a.getPrice());
         ps.setString(4, a.getImageurl());
-        ps.setString(5, a.getStatus());
-        ps.setInt(6, a.getCategoryID());
+        ps.setString(5, a.getPdfUrl());
+        ps.setString(6, a.getAiSummary());
+        ps.setString(7, a.getStatus());
+        ps.setInt(8, a.getCategoryID());
         ps.executeUpdate();
     }
 
     @Override
     public void update(Artworks a) throws SQLException {
-        String req = "UPDATE artworks SET title=?, description=?, price=?, imageurl=?, status=?, category_id=? WHERE id=?";
+        String req = "UPDATE artworks SET title=?, description=?, price=?, imageurl=?, pdf_url=?, ai_summary=?, status=?, category_id=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, a.getTitle());
         ps.setString(2, a.getDescription());
         ps.setInt(3, a.getPrice());
         ps.setString(4, a.getImageurl());
-        ps.setString(5, a.getStatus());
-        ps.setInt(6, a.getCategoryID());
-        ps.setInt(7, a.getId());
+        ps.setString(5, a.getPdfUrl());
+        ps.setString(6, a.getAiSummary());
+        ps.setString(7, a.getStatus());
+        ps.setInt(8, a.getCategoryID());
+        ps.setInt(9, a.getId());
         ps.executeUpdate();
     }
 
@@ -61,6 +65,16 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
         String req = "SELECT * FROM artworks";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(req);
+        
+        // Debug: Print available columns
+        java.sql.ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+        System.out.print("Available columns: ");
+        for (int i = 1; i <= columnCount; i++) {
+            System.out.print(metaData.getColumnName(i) + (i < columnCount ? ", " : ""));
+        }
+        System.out.println();
+
         while (rs.next()) {
             Artworks a = new Artworks();
             a.setId(rs.getInt("id"));
@@ -68,6 +82,8 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
             a.setDescription(rs.getString("description"));
             a.setPrice(rs.getInt("price"));
             a.setImageurl(rs.getString("imageurl"));
+            a.setPdfUrl(rs.getString("pdf_url"));
+            a.setAiSummary(rs.getString("ai_summary"));
             a.setStatus(rs.getString("status"));
             a.setCategoryID(rs.getInt("category_id"));
             list.add(a);

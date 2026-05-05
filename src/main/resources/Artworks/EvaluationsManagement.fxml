@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="30" style="-fx-background-color: #050507; -fx-padding: 40;" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.EvaluationsManagementController">
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="5">
+            <Label styleClass="display-lg" text="ARTWORKS EVALUATION" style="-fx-font-size: 32px;" />
+            <Label styleClass="subheadline" text="Monitor the echoes and feedback from the dwellers" />
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <TextField fx:id="searchField" promptText="Search by Artwork Title..." styleClass="ritual-input" prefWidth="300" />
+    </HBox>
+
+    <!-- Evaluations Table -->
+    <TableView fx:id="evalTable" VBox.vgrow="ALWAYS" styleClass="modern-table">
+        <columns>
+            <TableColumn fx:id="colArtwork" prefWidth="250" text="ARTWORK" />
+            <TableColumn fx:id="colRating" prefWidth="120" text="RATING" />
+            <TableColumn fx:id="colComment" prefWidth="400" text="COMMENT" />
+            <TableColumn fx:id="colDate" prefWidth="180" text="DATE" />
+            <TableColumn fx:id="colActions" prefWidth="100" text="ACTIONS" />
+        </columns>
+    </TableView>
+
+    <!-- Summary Stats -->
+    <HBox spacing="40" alignment="CENTER_RIGHT">
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Total Echoes:" style="-fx-text-fill: #adaaae;" />
+            <Label fx:id="lbTotalEvaluations" text="0" style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" />
+        </HBox>
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Global Harmony:" style="-fx-text-fill: #adaaae;" />
+            <Label fx:id="lbAvgRating" text="0.0 ★" style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold;" />
+        </HBox>
+    </HBox>
+</VBox>

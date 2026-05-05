@@ -18,7 +18,14 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.layout.Region;
+import javafx.util.Duration;
 import java.io.IOException;
+import java.util.Random;
 
 public class HomePageController implements PageHost {
 
@@ -94,6 +101,16 @@ public class HomePageController implements PageHost {
     @FXML
     void openArtworksManagement(ActionEvent event) {
         loadPage("/Artworks/ListerArtworks.fxml");
+    }
+
+    @FXML
+    void openArtworksStatistics(ActionEvent event) {
+        loadPage("/Artworks/ArtworksStatistics.fxml");
+    }
+
+    @FXML
+    void openEvaluationsManagement(ActionEvent event) {
+        loadPage("/Artworks/EvaluationsManagement.fxml");
     }
 
     @FXML
@@ -218,6 +235,12 @@ public class HomePageController implements PageHost {
             }
             if (controller instanceof Controllers.Artworks.AjouterCategoryController) {
                 ((Controllers.Artworks.AjouterCategoryController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.ArtworksStatisticsController) {
+                ((Controllers.Artworks.ArtworksStatisticsController) controller).setDashboardContext(this);
+            }
+            if (controller instanceof Controllers.Artworks.EvaluationsManagementController) {
+                // Evaluations controller doesn't need context currently but could in future
             }
 
             contentArea.getChildren().clear();
