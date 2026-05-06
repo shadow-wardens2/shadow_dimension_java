@@ -76,11 +76,15 @@ public class EventReclamationFrontController implements Initializable {
         colAdminResponse.setCellValueFactory(cell -> new ReadOnlyStringWrapper(valueOrDash(cell.getValue().getAdminResponse())));
 
         colActions.setCellFactory(param -> new TableCell<>() {
+            private final Button btnDetails = new Button("Details");
             private final Button btnEscalate = new Button("Escalate");
-            private final HBox box = new HBox(8, btnEscalate);
+            private final HBox box = new HBox(8, btnDetails, btnEscalate);
 
             {
+                btnDetails.getStyleClass().add("secondary-button");
                 btnEscalate.getStyleClass().add("secondary-button");
+                
+                btnDetails.setOnAction(event -> openDetails(getTableView().getItems().get(getIndex())));
                 btnEscalate.setOnAction(event -> handleEscalate(getTableView().getItems().get(getIndex())));
             }
 
@@ -95,7 +99,13 @@ public class EventReclamationFrontController implements Initializable {
                 boolean canEscalate = row.canEscalate();
                 btnEscalate.setManaged(canEscalate);
                 btnEscalate.setVisible(canEscalate);
-                setGraphic(canEscalate ? box : null);
+                setGraphic(box);
+            }
+        });
+
+        reclamationTable.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && !reclamationTable.getSelectionModel().isEmpty()) {
+                openDetails(reclamationTable.getSelectionModel().getSelectedItem());
             }
         });
 
@@ -223,6 +233,19 @@ public class EventReclamationFrontController implements Initializable {
             showAlert(Alert.AlertType.INFORMATION, "Escalation", "Reclamation escalated.");
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Escalation", e.getMessage());
+        }
+    }
+
+    private void openDetails(EventReclamation reclamation) {
+        if (reclamation == null) return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/Front/EventReclamationDetailsFront.fxml"));
+            Parent root = loader.load();
+            EventReclamationDetailsFrontController controller = loader.getController();
+            controller.setReclamation(reclamation);
+            reclamationTable.getScene().setRoot(root);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Error", "Could not load details: " + e.getMessage());
         }
     }
 
