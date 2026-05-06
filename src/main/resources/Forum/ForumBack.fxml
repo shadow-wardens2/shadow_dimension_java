@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" style="-fx-background-color: #050507; -fx-padding: 32;"
+      stylesheets="@../style.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.Forum.ForumBackController">
+
+    <!-- Header Row -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="Forum Management"
+               style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #ba9eff;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button onAction="#handleAddPost" styleClass="glow-button" text="✦ New Scroll"/>
+    </HBox>
+
+    <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS"
+             style="-fx-background-color: transparent; -fx-tab-min-width: 160px;">
+
+        <!-- ── TAB 1: Posts ── -->
+        <Tab text="📜 All Scrolls" closable="false">
+            <VBox spacing="12" style="-fx-padding: 16 0 0 0;">
+
+                <!-- Search + Sort Bar -->
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <TextField fx:id="tfSearch" promptText="Search scrolls…"
+                               styleClass="search-field" prefWidth="320"/>
+                    <ComboBox fx:id="cbSort" prefWidth="200" styleClass="combo-box"/>
+                </HBox>
+
+                <!-- Table -->
+                <TableView fx:id="postsTable" styleClass="table-view" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId"       text="ID"       prefWidth="50"  />
+                        <TableColumn fx:id="colTitle"    text="Title"    prefWidth="240" />
+                        <TableColumn fx:id="colCategory" text="Category" prefWidth="110" />
+                        <TableColumn fx:id="colAuthor"   text="Author"   prefWidth="120" />
+                        <TableColumn fx:id="colVotes"    text="Votes"    prefWidth="70"  />
+                        <TableColumn fx:id="colComments" text="Replies"  prefWidth="75"  />
+                        <TableColumn fx:id="colHidden"   text="Hidden"   prefWidth="70"  />
+                        <TableColumn fx:id="colLocked"   text="Locked"   prefWidth="70"  />
+                        <TableColumn fx:id="colDate"     text="Created"  prefWidth="130" />
+                        <TableColumn fx:id="colActions"  text="Actions"  prefWidth="220" />
+                    </columns>
+                    <placeholder>
+                        <Label text="No scrolls found in the void." style="-fx-text-fill: #5a5070; -fx-font-size: 14px;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- ── TAB 2: Banned Users ── -->
+        <Tab text="🚫 Banned Commenters" closable="false">
+            <VBox spacing="12" style="-fx-padding: 16 0 0 0;">
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label text="Users banned from commenting due to repeated prohibited language."
+                           style="-fx-text-fill: #adaaae; -fx-font-size: 13px;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnRefreshBanned" onAction="#handleRefreshBanned" text="↻ Refresh"
+                            style="-fx-background-color: rgba(139,92,246,0.15); -fx-text-fill: #ba9eff; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 6 14; -fx-cursor: hand; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <TableView fx:id="bannedTable" styleClass="table-view" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colBanId"       text="ID"          prefWidth="60"  />
+                        <TableColumn fx:id="colBanUsername" text="Username"     prefWidth="180" />
+                        <TableColumn fx:id="colBanEmail"    text="Email"        prefWidth="240" />
+                        <TableColumn fx:id="colBanStrikes"  text="Strikes"      prefWidth="80"  />
+                        <TableColumn fx:id="colBanAction"   text="Action"       prefWidth="140" />
+                    </columns>
+                    <placeholder>
+                        <Label text="✓ No banned commenters — the dimension is peaceful."
+                               style="-fx-text-fill: #4ade80; -fx-font-size: 14px; -fx-font-style: italic;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+        </Tab>
+
+    </TabPane>
+
+</VBox>

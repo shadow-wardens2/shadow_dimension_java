@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" prefWidth="520"
+      style="-fx-background-color: #0f111a; -fx-padding: 36;"
+      stylesheets="@../style.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.Forum.AddPostController">
+
+    <!-- Header -->
+    <Label text="✦ New Scroll"
+           style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #ba9eff;"/>
+    <Label text="Share your arcane knowledge with the order"
+           style="-fx-text-fill: #5a5070; -fx-font-size: 13px;"/>
+
+    <!-- Separator Line -->
+    <Region prefHeight="1" style="-fx-background-color: rgba(139,92,246,0.15);"/>
+
+    <!-- Title -->
+    <VBox spacing="6">
+        <Label text="Title" styleClass="form-label"/>
+        <TextField fx:id="tfTitle" promptText="Name your scroll…" styleClass="text-field"/>
+    </VBox>
+
+    <!-- Category -->
+    <VBox spacing="6">
+        <Label text="Category" styleClass="form-label"/>
+        <ComboBox fx:id="cbCategory" maxWidth="Infinity" styleClass="combo-box"/>
+    </VBox>
+
+    <!-- Content -->
+    <VBox spacing="6" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT">
+            <Label text="Content" styleClass="form-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnAiCorrect" text="✨ Auto-Correct" onAction="#handleAiCorrect" style="-fx-background-color: rgba(245, 158, 11, 0.15); -fx-text-fill: #f59e0b; -fx-border-color: #f59e0b; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 4 12; -fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;"/>
+        </HBox>
+        <TextArea fx:id="taContent" promptText="Write your message…" prefRowCount="6" styleClass="text-area"/>
+    </VBox>
+
+    <!-- Image URL (optional) -->
+    <VBox spacing="6">
+        <Label text="Image URL (optional)" styleClass="form-label"/>
+        <TextField fx:id="tfImageUrl" promptText="https://…" styleClass="text-field"/>
+    </VBox>
+
+    <!-- Error label -->
+    <Label fx:id="lblError" styleClass="validation-error" text="" managed="false" visible="false" wrapText="true"/>
+
+    <!-- Buttons -->
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button onAction="#handleCancel" styleClass="secondary-button" text="Cancel"
+                style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 24;"/>
+        <Button onAction="#handleSave" styleClass="glow-button" text="Publish Scroll"/>
+    </HBox>
+</VBox>
