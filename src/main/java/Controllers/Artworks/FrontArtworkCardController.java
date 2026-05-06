@@ -106,8 +106,8 @@ public class FrontArtworkCardController {
 
         dialog.showAndWait().ifPresent(email -> {
             if (isValidEmail(email)) {
-                Services.Artworks.ServiceReservations reservationService = new Services.Artworks.ServiceReservations();
                 try {
+                    Services.Artworks.ServiceReservations reservationService = new Services.Artworks.ServiceReservations();
                     if (reservationService.exists(artwork.getId(), email)) {
                         showError("Already Manifested", "You have already reserved this relic with this mail address.");
                         return;
