@@ -28,6 +28,7 @@
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <Text fx:id="priceText" style="-fx-fill: #ffffff; -fx-font-size: 20px; -fx-font-weight: 900;" text="250 DT" />
         <Region HBox.hgrow="ALWAYS" />
-        <Button mnemonicParsing="false" onAction="#handleViewDetails" text="View Soul" styleClass="glow-button" />
+        <Button onAction="#handleReserve" styleClass="secondary-button" text="Reserve Soul" />
+        <Button mnemonicParsing="false" onAction="#handleViewDetails" styleClass="glow-button" text="View Soul" />
     </HBox>
 </VBox>
