@@ -72,48 +72,42 @@
             <effect>
                 <DropShadow color="#8b5cf633" radius="20" />
             </effect>
-            <StackPane prefHeight="100" prefWidth="100">
+            <StackPane prefHeight="100" prefWidth="100" style="-fx-background-color: transparent;">
                 <!-- Ethereal Glow Aura -->
-                <Circle radius="45" fill="rgba(139, 92, 246, 0.15)">
+                <Circle radius="40" fill="rgba(139, 92, 246, 0.1)">
                     <effect><GaussianBlur radius="15" /></effect>
                 </Circle>
                 
-                <!-- Curator Body (SVG) -->
-                <Group scaleX="0.6" scaleY="0.6">
-                    <StackPane>
-                        <!-- Main Body -->
-                        <SVGPath content="M50,10 C25,10 5,30 5,60 C5,90 25,110 50,110 C75,110 95,90 95,60 C95,30 75,10 50,10 Z" stroke="#8b5cf6" strokeWidth="2">
-                            <fill>
-                                <LinearGradient endX="1" endY="1" startX="0" startY="0">
-                                    <stops>
-                                        <Stop color="#1a1a24" offset="0.0" />
-                                        <Stop color="#2d1b4d" offset="1.0" />
-                                    </stops>
-                                </LinearGradient>
-                            </fill>
-                        </SVGPath>
-                        
-                        <!-- Face -->
-                        <VBox alignment="CENTER" spacing="8" translateY="-10">
-                            <HBox alignment="CENTER" spacing="12">
-                                <StackPane>
-                                    <Ellipse radiusX="8" radiusY="11" fill="#050507" />
-                                    <Circle radius="2" fill="WHITE" translateX="-2" translateY="-2" />
-                                </StackPane>
-                                <StackPane>
-                                    <Ellipse radiusX="8" radiusY="11" fill="#050507" />
-                                    <Circle radius="2" fill="WHITE" translateX="-2" translateY="-2" />
-                                </StackPane>
+                <!-- The Shadow Ghost -->
+                <Group scaleX="0.7" scaleY="0.7">
+                    <VBox alignment="CENTER" style="-fx-background-color: transparent;">
+                        <StackPane style="-fx-background-color: transparent;">
+                            <!-- Ghost Body - Hand-crafted SVG -->
+                            <SVGPath content="M50,5 C25,5 5,25 5,55 C5,85 5,105 5,105 L20,95 L35,105 L50,95 L65,105 L80,95 L95,105 L95,55 C95,25 75,5 50,5 Z" stroke="#8b5cf6" strokeWidth="2.5">
+                                <fill>
+                                    <LinearGradient endX="0" endY="1" startX="0" startY="0">
+                                        <stops>
+                                            <Stop color="#8b5cf6" offset="0.0" />
+                                            <Stop color="#2d1b4d" offset="1.0" />
+                                        </stops>
+                                    </LinearGradient>
+                                </fill>
+                            </SVGPath>
+                            
+                            <!-- Ethereal Eyes -->
+                            <HBox alignment="CENTER" spacing="15" translateY="-10">
+                                <Circle radius="6" fill="#050507" />
+                                <Circle radius="6" fill="#050507" />
                             </HBox>
-                            <SVGPath content="M-10,0 Q0,8 10,0" fill="TRANSPARENT" stroke="#8b5cf6" strokeWidth="2" strokeLineCap="ROUND" />
-                        </VBox>
-                    </StackPane>
+                            
+                            <!-- Pupil Glow -->
+                            <HBox alignment="CENTER" spacing="22" translateY="-12">
+                                <Circle radius="2" fill="#ba9eff" />
+                                <Circle radius="2" fill="#ba9eff" />
+                            </HBox>
+                        </StackPane>
+                    </VBox>
                 </Group>
-                
-                <!-- Floating Particle -->
-                <Region prefHeight="8" prefWidth="8" style="-fx-background-color: #ba9eff; -fx-background-radius: 4;" translateX="35" translateY="-30">
-                    <effect><Glow level="0.8"/></effect>
-                </Region>
             </StackPane>
             <VBox spacing="8" HBox.hgrow="ALWAYS">
                 <Label text="SHADOW CURATOR'S INSIGHT" style="-fx-text-fill: #8b5cf6; -fx-font-weight: bold; -fx-font-size: 14px; -fx-letter-spacing: 2;" />
