@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" prefWidth="480"
+      style="-fx-background-color: #0f111a; -fx-padding: 32;"
+      stylesheets="@../style.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.Forum.EditCommentController">
+
+    <Label text="✎ Edit Reply"
+           style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #ba9eff;"/>
+    <Label text="Adjust your words for the order"
+           style="-fx-text-fill: #5a5070; -fx-font-size: 13px;"/>
+
+    <Region prefHeight="1" style="-fx-background-color: rgba(139,92,246,0.15);"/>
+
+    <VBox spacing="6" VBox.vgrow="ALWAYS">
+        <Label text="Reply" styleClass="form-label"/>
+        <TextArea fx:id="taContent" prefRowCount="5" styleClass="text-area"/>
+    </VBox>
+
+    <Label fx:id="lblError" styleClass="validation-error" text="" managed="false" visible="false" wrapText="true"/>
+
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button onAction="#handleCancel" styleClass="secondary-button" text="Cancel"
+                style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 24;"/>
+        <Button onAction="#handleSave" styleClass="glow-button" text="Save Reply"/>
+    </HBox>
+</VBox>

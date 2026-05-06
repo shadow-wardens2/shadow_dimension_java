@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane prefHeight="800.0" prefWidth="1024.0"
+            style="-fx-background-color: #050507;"
+            stylesheets="@../style.css"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controllers.Forum.CategoryBackController">
+
+    <HBox spacing="20" AnchorPane.topAnchor="30" AnchorPane.bottomAnchor="30" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30">
+
+        <!-- Left Side: Table View -->
+        <VBox spacing="15" HBox.hgrow="ALWAYS" style="-fx-background-color: #0f111a; -fx-border-color: rgba(139,92,246,0.15); -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20;">
+            <Label text="Forum Categories" styleClass="headline" style="-fx-font-size: 24px; -fx-text-fill: #e8e0eb;"/>
+            
+            <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS" styleClass="forum-table">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+                    <TableColumn fx:id="colName" text="Name" prefWidth="150" />
+                    <TableColumn fx:id="colSlug" text="Slug" prefWidth="150" />
+                    <TableColumn fx:id="colDescription" text="Description" prefWidth="250" />
+                    <TableColumn fx:id="colColor" text="Color" prefWidth="100" />
+                </columns>
+            </TableView>
+        </VBox>
+
+        <!-- Right Side: Form -->
+        <VBox spacing="15" minWidth="350" maxWidth="350" style="-fx-background-color: #0f111a; -fx-border-color: rgba(139,92,246,0.15); -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 24;">
+            <Label text="Category Details" styleClass="headline" style="-fx-font-size: 20px; -fx-text-fill: #e8e0eb;"/>
+            
+            <Label fx:id="lblError" textFill="#ff4500" visible="false" managed="false"/>
+
+            <VBox spacing="5">
+                <Label text="Name" style="-fx-text-fill: #adaaae; -fx-font-weight: bold;"/>
+                <TextField fx:id="tfName" promptText="e.g. Announcements" styleClass="text-field"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Slug" style="-fx-text-fill: #adaaae; -fx-font-weight: bold;"/>
+                <TextField fx:id="tfSlug" promptText="e.g. announcements" styleClass="text-field"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Badge Color" style="-fx-text-fill: #adaaae; -fx-font-weight: bold;"/>
+                <ColorPicker fx:id="colorPicker" styleClass="button"/>
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Description" style="-fx-text-fill: #adaaae; -fx-font-weight: bold;"/>
+                <TextArea fx:id="taDescription" promptText="Category description..." prefRowCount="4" styleClass="text-area"/>
+            </VBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="btnAdd" text="Add" onAction="#handleAdd" styleClass="glow-button" prefWidth="100"/>
+                <Button fx:id="btnUpdate" text="Update" onAction="#handleUpdate" styleClass="secondary-button" prefWidth="100"/>
+                <Button fx:id="btnDelete" text="Delete" onAction="#handleDelete" styleClass="delete-button" prefWidth="100"/>
+            </HBox>
+            <Button text="Clear Selection" onAction="#handleClear" styleClass="ghost-button" maxWidth="Infinity"/>
+        </VBox>
+
+    </HBox>
+
+</AnchorPane>

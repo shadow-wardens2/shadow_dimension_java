@@ -150,6 +150,11 @@ public class HomeController {
     }
 
     @FXML
+    void navigateToForum() {
+        loadPage("/Forum/ForumFront.fxml");
+    }
+
+    @FXML
     void handleOpenDashboard() {
         loadPage("/HomePage.fxml");
     }

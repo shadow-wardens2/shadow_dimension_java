@@ -51,6 +51,9 @@
                     <Button alignment="BASELINE_LEFT" onAction="#openMarketplaceStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Marketplace Statistics" />
                     <Button alignment="BASELINE_LEFT" onAction="#openTutorialsManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Tutorials Management" />
                     <Button alignment="BASELINE_LEFT" onAction="#openEventManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Event Management" />
+                    <Button fx:id="btnForumManagement" alignment="BASELINE_LEFT" onAction="#openForumManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Forum Management" />
+                    <Button fx:id="btnForumCategoryManagement" alignment="BASELINE_LEFT" onAction="#openForumCategoryManagement" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Forum Categories" />
+                    <Button fx:id="btnForumStatistics" alignment="BASELINE_LEFT" onAction="#openForumStatistics" prefHeight="45" prefWidth="256" styleClass="sidebar-btn" text="    Forum Statistics" />
                 </VBox>
                 <Pane VBox.vgrow="ALWAYS" />
                 <VBox style="-fx-padding: 24;">

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane fx:id="rootPane" prefHeight="900.0" prefWidth="1200.0"
+            style="-fx-background-color: #050507;"
+            stylesheets="@../style.css"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controllers.Forum.ForumFrontController">
+
+    <!-- Top Navigation Bar -->
+    <HBox alignment="CENTER_LEFT" prefHeight="72.0" spacing="40.0"
+          style="-fx-background-color: rgba(5,5,7,0.95); -fx-border-width: 0 0 1 0; -fx-border-color: rgba(139,92,246,0.12);"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding><Insets left="60.0" right="60.0"/></padding>
+        <Label styleClass="headline" text="Shadow" style="-fx-font-size: 18px;"/>
+        <Label styleClass="headline" text="Dimensions" style="-fx-font-size: 18px; -fx-padding: 0 0 0 -32;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label style="-fx-text-fill: #5a5070; -fx-font-size: 13px; -fx-font-family: 'Cinzel', serif;" text="THE SCROLLS OF THE VOID"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnNewPost" onAction="#handleNewPost" styleClass="glow-button" text="✦ New Scroll"/>
+        <Button styleClass="secondary-button" text="← Back"
+                style="-fx-border-radius: 30; -fx-background-radius: 30; -fx-padding: 10 20;"
+                onAction="#handleBack"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-pane"
+                AnchorPane.topAnchor="72" AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <content>
+            <VBox spacing="0">
+                <padding><Insets top="32.0" bottom="60.0" left="0" right="0"/></padding>
+
+                <!-- Hero Banner -->
+                <VBox alignment="CENTER" spacing="8" style="-fx-padding: 0 60 32 60;">
+                    <Label style="-fx-font-family: 'Cinzel', serif; -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #e8e0eb;" text="The Scrolls"/>
+                    <Label style="-fx-text-fill: #5a5070; -fx-font-size: 14px;" text="Share your arcane knowledge with the order"/>
+                </VBox>
+
+                <!-- Category Filter Pills -->
+                <HBox fx:id="categoryBar" spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 60 24 60;"/>
+
+                <!-- Two-column layout: posts feed + sidebar -->
+                <HBox spacing="24" style="-fx-padding: 0 60 0 60;">
+                    <!-- Posts Feed -->
+                    <VBox fx:id="postsContainer" spacing="12" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-text-fill: #5a5070; -fx-font-size: 13px;" text="Loading scrolls…"/>
+                    </VBox>
+
+                    <!-- Sidebar -->
+                    <VBox spacing="16" minWidth="260" maxWidth="260">
+                        <VBox spacing="12" style="-fx-background-color: #0f111a; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 14; -fx-background-radius: 14; -fx-padding: 20;">
+                            <Label style="-fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-text-fill: #ba9eff; -fx-font-size: 14px;" text="About the Scrolls"/>
+                            <Label style="-fx-text-fill: #adaaae; -fx-font-size: 12px; -fx-wrap-text: true;" text="The Scrolls is a place for Shadow Dimension members to share knowledge, discuss strategies, and forge alliances." wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="10" style="-fx-background-color: #0f111a; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 14; -fx-background-radius: 14; -fx-padding: 20;">
+                            <Label style="-fx-font-family: 'Cinzel', serif; -fx-font-weight: bold; -fx-text-fill: #ba9eff; -fx-font-size: 14px;" text="Categories"/>
+                            <Label style="-fx-text-fill: #4ade80; -fx-font-size: 12px;" text="⬡  Gaming"/>
+                            <Label style="-fx-text-fill: #60a5fa; -fx-font-size: 12px;" text="⬡  Tutorials"/>
+                            <Label style="-fx-text-fill: #f472b6; -fx-font-size: 12px;" text="⬡  Events"/>
+                            <Label style="-fx-text-fill: #fb923c; -fx-font-size: 12px;" text="⬡  Marketplace"/>
+                            <Label style="-fx-text-fill: #8b5cf6; -fx-font-size: 12px;" text="⬡  General"/>
+                        </VBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>

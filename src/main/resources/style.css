@@ -713,3 +713,44 @@
     -fx-font-weight: bold;
 }
 
+/* === FORUM SPECIFIC STYLES === */
+.forum-post-card {
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+.vote-button-up, .vote-button-down {
+    -fx-background-color: transparent;
+    -fx-text-fill: #adaaae;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 2 6;
+}
+
+.vote-button-up:hover {
+    -fx-text-fill: #ff4500;
+    -fx-background-color: rgba(255, 69, 0, 0.1);
+    -fx-background-radius: 4;
+}
+
+.vote-button-down:hover {
+    -fx-text-fill: #7193ff;
+    -fx-background-color: rgba(113, 147, 255, 0.1);
+    -fx-background-radius: 4;
+}
+
+.vote-count {
+    -fx-text-fill: #e8e0eb;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 0;
+}
+
+.category-chip {
+    -fx-padding: 3 10;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
