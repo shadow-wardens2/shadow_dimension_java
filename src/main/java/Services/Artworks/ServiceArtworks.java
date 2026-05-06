@@ -23,7 +23,7 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
     @Override
     public void add(Artworks a) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
-        String req = "INSERT INTO artworks(title, description, price, imageurl, pdf_url, ai_summary, status, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO artwork(title, description, price, imageurl, pdf_url, ai_summary, status, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, a.getTitle());
         ps.setString(2, a.getDescription());
@@ -39,7 +39,7 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
     @Override
     public void update(Artworks a) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
-        String req = "UPDATE artworks SET title=?, description=?, price=?, imageurl=?, pdf_url=?, ai_summary=?, status=?, category_id=? WHERE id=?";
+        String req = "UPDATE artwork SET title=?, description=?, price=?, imageurl=?, pdf_url=?, ai_summary=?, status=?, category_id=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, a.getTitle());
         ps.setString(2, a.getDescription());
@@ -56,7 +56,7 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
     @Override
     public void delete(Artworks a) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
-        String req = "DELETE FROM artworks WHERE id=?";
+        String req = "DELETE FROM artwork WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setInt(1, a.getId());
         ps.executeUpdate();
@@ -66,7 +66,7 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
     public List<Artworks> getAll() throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
         List<Artworks> list = new ArrayList<>();
-        String req = "SELECT * FROM artworks";
+        String req = "SELECT * FROM artwork";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(req);
         

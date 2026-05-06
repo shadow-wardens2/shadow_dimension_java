@@ -46,6 +46,7 @@ public class DetailArtworkController {
     @FXML private HBox starContainer;
     @FXML private TextArea commentArea;
     @FXML private VBox evaluationsContainer;
+    @FXML private VBox evaluationSection;
 
     private int selectedRating = 1;
     private ServiceEvaluations serviceEvaluations = new ServiceEvaluations();
@@ -60,11 +61,19 @@ public class DetailArtworkController {
         this.dashboardContext = dashboardContext;
         this.isFrontOffice = false;
         if (adminActions != null) adminActions.setVisible(true);
+        if (evaluationSection != null) {
+            evaluationSection.setVisible(false);
+            evaluationSection.setManaged(false);
+        }
     }
 
     public void setIsFrontOffice(boolean isFrontOffice) {
         this.isFrontOffice = isFrontOffice;
         if (adminActions != null) adminActions.setVisible(!isFrontOffice);
+        if (evaluationSection != null) {
+            evaluationSection.setVisible(isFrontOffice);
+            evaluationSection.setManaged(isFrontOffice);
+        }
     }
 
     public void setArtworkData(Artworks artwork) {
@@ -103,11 +112,20 @@ public class DetailArtworkController {
         // Image loading
         if (artwork.getImageurl() != null && !artwork.getImageurl().isEmpty()) {
             try {
-                File file = new File(artwork.getImageurl());
+                String path = artwork.getImageurl();
+                File file;
+                if (path.startsWith("/uploads/") || path.startsWith("\\uploads\\")) {
+                    file = new File(System.getProperty("user.dir") + path);
+                } else if (!path.startsWith("http") && !path.contains(":") && !path.startsWith("data:")) {
+                    file = new File(System.getProperty("user.dir") + "/uploads/artworks/" + path);
+                } else {
+                    file = new File(path);
+                }
+
                 if (file.exists()) {
                     artworkImage.setImage(new Image(file.toURI().toString()));
                 } else {
-                    artworkImage.setImage(new Image(artwork.getImageurl(), true));
+                    artworkImage.setImage(new Image(path, true));
                 }
             } catch (Exception e) {
                 System.err.println("Could not load image: " + artwork.getImageurl());

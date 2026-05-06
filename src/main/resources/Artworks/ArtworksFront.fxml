@@ -10,6 +10,8 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.paint.RadialGradient?>
+<?import javafx.scene.paint.Stop?>
 
 <AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" style="-fx-background-color: #050507;" stylesheets="@../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Artworks.ArtworksFrontController">
     <children>
@@ -91,53 +93,68 @@
             </VBox>
             <Button fx:id="mascotTriggerBtn" onAction="#toggleMascot" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;">
                 <graphic>
-                    <StackPane fx:id="mascotContainer" prefHeight="100" prefWidth="100">
+                    <StackPane fx:id="mascotContainer" prefHeight="140" prefWidth="120">
                         <Group fx:id="ghostGroup">
                             <StackPane alignment="CENTER">
-                                <!-- Outer Glow -->
-                                <Region prefHeight="130" prefWidth="110" style="-fx-background-color: rgba(255, 255, 255, 0.15); -fx-background-radius: 60 60 30 30; -fx-scale-x: 1.1; -fx-scale-y: 1.1;">
-                                    <effect>
-                                        <GaussianBlur radius="20" />
-                                    </effect>
+                                <!-- Ghost Shadow Beneath -->
+                                <Ellipse radiusX="30" radiusY="8" fill="rgba(139, 92, 246, 0.15)" translateY="65">
+                                    <effect><GaussianBlur radius="10" /></effect>
+                                </Ellipse>
+
+                                <!-- Outer Glow Aura -->
+                                <Region prefHeight="110" prefWidth="90" style="-fx-background-color: linear-gradient(to bottom, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.05)); -fx-background-radius: 50 50 20 20; -fx-scale-x: 1.2; -fx-scale-y: 1.2;">
+                                    <effect><GaussianBlur radius="25" /></effect>
                                 </Region>
 
-                                <!-- Ghost Body (Wavy Bottom) -->
-                                <VBox alignment="TOP_CENTER" spacing="-20">
-                                    <StackPane>
-                                         <SVGPath content="M50,0 C22.4,0 0,22.4 0,50 L0,100 C10,95 20,105 30,100 C40,95 50,105 60,100 C70,95 80,105 90,100 C100,95 110,105 120,100 L120,50 C120,22.4 97.6,0 70,0 Z" 
-                                                  fill="WHITE" stroke="BLACK" strokeWidth="2" scaleX="0.8" scaleY="0.8" />
-                                         
-                                         <!-- Face Container -->
-                                         <VBox alignment="CENTER" spacing="5" translateY="-10">
-                                             <!-- Eyes -->
-                                             <HBox alignment="CENTER" spacing="12">
-                                                 <StackPane fx:id="leftEye">
-                                                     <Ellipse radiusX="8" radiusY="12" fill="BLACK" />
-                                                     <StackPane fx:id="leftPupil">
-                                                         <Circle radius="2" fill="WHITE" translateX="-2" translateY="-2" />
-                                                     </StackPane>
+                                <!-- Ghost Body -->
+                                <StackPane>
+                                     <SVGPath content="M50,0 C22.4,0 0,22.4 0,50 L0,110 C10,105 20,115 30,110 C40,105 50,115 60,110 C70,105 80,115 90,110 C100,105 110,115 120,110 L120,50 C120,22.4 97.6,0 70,0 Z" 
+                                              stroke="rgba(139, 92, 246, 0.4)" strokeWidth="1.5" scaleX="0.8" scaleY="0.8">
+                                         <fill>
+                                             <RadialGradient centerX="0.5" centerY="0.4" radius="0.7">
+                                                 <stops>
+                                                     <Stop offset="0" color="#ffffff" />
+                                                     <Stop offset="1" color="#e2e8f0" />
+                                                 </stops>
+                                             </RadialGradient>
+                                         </fill>
+                                         <effect>
+                                             <DropShadow color="rgba(139, 92, 246, 0.2)" radius="10" spread="0.1" />
+                                         </effect>
+                                     </SVGPath>
+                                     
+                                     <!-- Face Container -->
+                                     <VBox alignment="CENTER" spacing="8" translateY="-10">
+                                         <!-- Eyes -->
+                                         <HBox alignment="CENTER" spacing="15">
+                                             <StackPane fx:id="leftEye">
+                                                 <Ellipse radiusX="9" radiusY="13" fill="#1a1a24" />
+                                                 <StackPane fx:id="leftPupil">
+                                                     <Circle radius="2.5" fill="WHITE" translateX="-2" translateY="-2" />
                                                  </StackPane>
-                                                 <StackPane fx:id="rightEye">
-                                                     <Ellipse radiusX="8" radiusY="12" fill="BLACK" />
-                                                     <StackPane fx:id="rightPupil">
-                                                         <Circle radius="2" fill="WHITE" translateX="-2" translateY="-2" />
-                                                     </StackPane>
-                                                 </StackPane>
-                                             </HBox>
-                                             
-                                             <!-- Smiling Mouth with Tongue -->
-                                             <StackPane translateY="5">
-                                                 <SVGPath content="M-20,0 Q0,15 20,0" fill="TRANSPARENT" stroke="BLACK" strokeWidth="2" />
-                                                 <SVGPath content="M-8,5 Q0,15 8,5 Z" fill="#ff6b6b" stroke="BLACK" strokeWidth="1" translateY="2" />
                                              </StackPane>
-                                         </VBox>
-                                    </StackPane>
-                                </VBox>
+                                             <StackPane fx:id="rightEye">
+                                                 <Ellipse radiusX="9" radiusY="13" fill="#1a1a24" />
+                                                 <StackPane fx:id="rightPupil">
+                                                     <Circle radius="2.5" fill="WHITE" translateX="-2" translateY="-2" />
+                                                 </StackPane>
+                                             </StackPane>
+                                         </HBox>
+                                         
+                                         <!-- Expression -->
+                                         <StackPane translateY="2">
+                                             <!-- Mouth -->
+                                             <SVGPath content="M-15,0 Q0,12 15,0" fill="TRANSPARENT" stroke="#1a1a24" strokeWidth="2.5" strokeLineCap="ROUND" />
+                                             <!-- Tiny Tongue -->
+                                             <SVGPath content="M-6,4 Q0,10 6,4 L6,6 Q0,12 -6,6 Z" fill="#ff6b6b" stroke="#1a1a24" strokeWidth="0.5" translateY="1" />
+                                         </StackPane>
+                                     </VBox>
+                                </StackPane>
 
-                                <!-- Blush -->
-                                <HBox alignment="CENTER" spacing="35" translateY="4">
-                                    <Region fx:id="leftBlush" prefHeight="6" prefWidth="12" style="-fx-background-color: rgba(255, 182, 193, 0.6); -fx-background-radius: 3;" visible="false" />
-                                    <Region fx:id="rightBlush" prefHeight="6" prefWidth="12" style="-fx-background-color: rgba(255, 182, 193, 0.6); -fx-background-radius: 3;" visible="false" />
+                                <!-- Blush (Expressive indicator) -->
+                                <HBox alignment="CENTER" spacing="38" translateY="8">
+                                    <Region fx:id="leftBlush" prefHeight="7" prefWidth="14" style="-fx-background-color: rgba(255, 107, 107, 0.4); -fx-background-radius: 5;" visible="false" />
+                                    <Region fx:id="rightBlush" prefHeight="7" prefWidth="14" style="-fx-background-color: rgba(255, 107, 107, 0.4); -fx-background-radius: 5;" visible="false" />
                                 </HBox>
                             </StackPane>
                         </Group>

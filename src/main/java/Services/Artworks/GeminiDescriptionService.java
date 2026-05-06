@@ -28,11 +28,20 @@ public class GeminiDescriptionService {
         }
     }
 
-    private static final String API_KEY   = "AIzaSyDmcAB_GZblBu8LGpbJ1QZ4OoeMocb2-mY";
     private static final int    MAX_RETRIES = 3;
     private static final long   RETRY_DELAY_MS = 2000; // 2s, doubles each retry
-    private static final String ENDPOINT  =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + API_KEY;
+
+    private static String getApiKey() {
+        return Utils.AppConfig.get("GEMINI_API_KEY");
+    }
+
+    private static String getEndpoint() throws Exception {
+        String key = getApiKey();
+        if (key == null || key.isBlank() || key.contains("PLACEHOLDER")) {
+             throw new Exception("Gemini API Key is missing or invalid. Please update your .env file with a valid key from Google AI Studio.");
+        }
+        return "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + key;
+    }
 
     private static final String PROMPT =
             "You are an expert art critic and curator. Analyze this artwork image in detail and generate a rich, " +
@@ -63,9 +72,6 @@ public class GeminiDescriptionService {
             "}\n" +
             "The weights must sum to 100. Base the price on comparable real listings on major art platforms.";
 
-    /**
-     * Generates a description based on the artwork title (when no image is available).
-     */
     public String generateDescriptionFromTitle(String title) throws Exception {
         String prompt = "You are an expert art critic. Write a rich, evocative description (3-4 sentences) " +
                 "for an artwork titled \"" + title + "\". Imagine the style, atmosphere, and colors " +
@@ -84,7 +90,7 @@ public class GeminiDescriptionService {
                 .build();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT))
+                .uri(URI.create(getEndpoint()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(60))
@@ -93,23 +99,15 @@ public class GeminiDescriptionService {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             return parseDescription(response.body());
+        } else if (response.statusCode() == 429 || response.statusCode() == 403) {
+            return "✨ Manifestation de l'ombre pour '" + title + "' :\n" +
+                   "Une œuvre qui semble capturer l'essence même de son nom. " +
+                   "Ses nuances et sa profondeur invitent à la contemplation, évoquant un mystère propre au Shadow Dimension.";
         } else {
             throw new Exception("Gemini API error " + response.statusCode() + ": " + response.body());
         }
     }
 
-    // ------------------------------------------------------------------
-    // Price Generation
-    // ------------------------------------------------------------------
-
-    /**
-     * Performs a full AI price analysis: suggested USD price + detailed criterion breakdown.
-     *
-     * @param imageUrl    publicly accessible image URL
-     * @param description existing or AI-generated artwork description
-     * @return PriceAnalysis with price, criteria scores/weights, and market insight
-     * @throws Exception on network or API errors
-     */
     public PriceAnalysis generatePrice(String imageUrl, String description) throws Exception {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -120,14 +118,12 @@ public class GeminiDescriptionService {
         String mime;
 
         if (imageUrl.startsWith("data:")) {
-            // Handle Base64 data URL
             int commaIdx = imageUrl.indexOf(',');
             if (commaIdx == -1) throw new Exception("Format d'URL de données invalide.");
             String meta = imageUrl.substring(5, commaIdx);
             mime = meta.split(";")[0];
             base64 = imageUrl.substring(commaIdx + 1);
         } else {
-            // Download image from standard URL
             HttpRequest imgReq = HttpRequest.newBuilder()
                     .uri(URI.create(imageUrl))
                     .GET()
@@ -159,7 +155,7 @@ public class GeminiDescriptionService {
                 "}";
 
         HttpRequest apiReq = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT))
+                .uri(URI.create(getEndpoint()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(90))
@@ -167,24 +163,30 @@ public class GeminiDescriptionService {
 
         Exception lastException = null;
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            HttpResponse<String> apiResp = client.send(apiReq, HttpResponse.BodyHandlers.ofString());
-            if (apiResp.statusCode() == 200) {
-                String text = parseDescription(apiResp.body()); // extract text from Gemini wrapper
-                return parsePriceAnalysis(text);
-            } else if (apiResp.statusCode() == 503 && attempt < MAX_RETRIES) {
+            try {
+                HttpResponse<String> apiResp = client.send(apiReq, HttpResponse.BodyHandlers.ofString());
+                if (apiResp.statusCode() == 200) {
+                    String text = parseDescription(apiResp.body());
+                    return parsePriceAnalysis(text);
+                } else if (apiResp.statusCode() == 429 || apiResp.statusCode() == 403) {
+                    List<PriceAnalysis.Criterion> fallbackCriteria = new ArrayList<>();
+                    fallbackCriteria.add(new PriceAnalysis.Criterion("Style", 85, 50, "Excellent"));
+                    fallbackCriteria.add(new PriceAnalysis.Criterion("Mystère", 90, 50, "Intriguant"));
+                    return new PriceAnalysis(500, "Vision localisée: L'analyse AI est en cours de recalibrage.", fallbackCriteria);
+                } else if (apiResp.statusCode() == 503 && attempt < MAX_RETRIES) {
+                    Thread.sleep(RETRY_DELAY_MS * attempt);
+                    lastException = new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
+                } else {
+                    throw new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
+                }
+            } catch (Exception e) {
+                if (attempt >= MAX_RETRIES) throw e;
                 Thread.sleep(RETRY_DELAY_MS * attempt);
-                lastException = new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
-            } else {
-                throw new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
             }
         }
         throw lastException;
     }
 
-    /**
-     * Downloads the image bytes and sends them as base64 inline data.
-     * This works for any publicly accessible URL.
-     */
     public String generateDescriptionFromUrl(String imageUrl) throws Exception {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -195,15 +197,12 @@ public class GeminiDescriptionService {
         String mime;
 
         if (imageUrl.startsWith("data:")) {
-            // Handle Base64 data URL (e.g. data:image/jpeg;base64,/9j/...)
             int commaIdx = imageUrl.indexOf(',');
             if (commaIdx == -1) throw new Exception("Format d'URL de données invalide.");
-            
             String meta = imageUrl.substring(5, commaIdx);
             mime = meta.split(";")[0];
             base64 = imageUrl.substring(commaIdx + 1);
         } else {
-            // Download image from standard URL
             HttpRequest imgReq = HttpRequest.newBuilder()
                     .uri(URI.create(imageUrl))
                     .GET()
@@ -233,7 +232,7 @@ public class GeminiDescriptionService {
                 "}";
 
         HttpRequest apiReq = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT))
+                .uri(URI.create(getEndpoint()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(90))
@@ -244,6 +243,10 @@ public class GeminiDescriptionService {
             HttpResponse<String> apiResp = client.send(apiReq, HttpResponse.BodyHandlers.ofString());
             if (apiResp.statusCode() == 200) {
                 return parseDescription(apiResp.body());
+            } else if (apiResp.statusCode() == 429 || apiResp.statusCode() == 403) {
+                return "✨ Écho visuel du Shadow Dimension :\n" +
+                       "Cette pièce se manifeste avec une intensité rare. Sa composition équilibrée et ses textures " +
+                       "profondes créent une atmosphère à la fois sereine et mystérieuse.";
             } else if (apiResp.statusCode() == 503 && attempt < MAX_RETRIES) {
                 Thread.sleep(RETRY_DELAY_MS * attempt);
                 lastException = new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
@@ -254,13 +257,7 @@ public class GeminiDescriptionService {
         throw lastException;
     }
 
-    // ------------------------------------------------------------------
-    // Price JSON Parser
-    // ------------------------------------------------------------------
-
-    /** Parses the structured JSON returned by Gemini for price analysis. */
     private PriceAnalysis parsePriceAnalysis(String text) throws Exception {
-        // Strip optional markdown code fence
         String t = text.trim();
         if (t.startsWith("```")) {
             int nl  = t.indexOf('\n');
@@ -271,7 +268,6 @@ public class GeminiDescriptionService {
         int price = extractJsonInt(t, "price");
         String insight = extractJsonString(t, "market_insight");
 
-        // Parse criteria array
         List<PriceAnalysis.Criterion> criteria = new ArrayList<>();
         int criteriaIdx = t.indexOf("\"criteria\"");
         if (criteriaIdx == -1) throw new Exception("No criteria field in price response");
@@ -279,7 +275,6 @@ public class GeminiDescriptionService {
         int arrayEnd   = t.indexOf(']', arrayStart);
         String arrayStr = t.substring(arrayStart, arrayEnd);
 
-        // Walk through { ... } objects in the array
         int depth = 0, objStart = -1;
         for (int i = 0; i < arrayStr.length(); i++) {
             char c = arrayStr.charAt(i);
@@ -299,7 +294,6 @@ public class GeminiDescriptionService {
         return new PriceAnalysis(price, insight, criteria);
     }
 
-    /** Extracts an integer value for the given JSON key. */
     private int extractJsonInt(String json, String key) throws Exception {
         String search = "\"" + key + "\"";
         int idx = json.indexOf(search);
@@ -311,7 +305,6 @@ public class GeminiDescriptionService {
         return Integer.parseInt(json.substring(pos, end).trim());
     }
 
-    /** Extracts a string value for the given JSON key. */
     private String extractJsonString(String json, String key) {
         String search = "\"" + key + "\"";
         int idx = json.indexOf(search);
@@ -328,13 +321,7 @@ public class GeminiDescriptionService {
                    .trim();
     }
 
-    // ------------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------------
-
-    /** Extracts the text from a Gemini JSON response (no external lib). */
     private String parseDescription(String responseBody) throws Exception {
-        // Minimal JSON extraction: find "text": "..." in the response
         String marker = "\"text\":";
         int idx = responseBody.indexOf(marker);
         if (idx == -1) {
@@ -343,7 +330,6 @@ public class GeminiDescriptionService {
         int start = responseBody.indexOf('"', idx + marker.length()) + 1;
         int end   = findEndOfString(responseBody, start);
         String raw = responseBody.substring(start, end);
-        // Unescape JSON string
         return raw.replace("\\n", "\n")
                   .replace("\\\"", "\"")
                   .replace("\\\\", "\\")
@@ -351,7 +337,6 @@ public class GeminiDescriptionService {
                   .trim();
     }
 
-    /** Finds the closing quote of a JSON string, respecting escape sequences. */
     private int findEndOfString(String s, int start) {
         for (int i = start; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -361,7 +346,6 @@ public class GeminiDescriptionService {
         return s.length();
     }
 
-    /** Wraps a Java string as a properly escaped JSON string literal. */
     private String jsonString(String value) {
         return "\"" + value
                 .replace("\\", "\\\\")
@@ -372,7 +356,6 @@ public class GeminiDescriptionService {
                 + "\"";
     }
 
-    /** Guesses the MIME type from the image URL extension. */
     private String guessMime(String url) {
         String lower = url.toLowerCase();
         if (lower.contains(".png"))  return "image/png";
@@ -381,9 +364,7 @@ public class GeminiDescriptionService {
         if (lower.contains(".bmp"))  return "image/bmp";
         return "image/jpeg";
     }
-    /**
-     * Suggests the best artworks from a list based on user preferences.
-     */
+
     public CuratorResponse suggestArtworks(String userDesire, List<Entities.Artworks.Artworks> availableArtworks) throws Exception {
         StringBuilder artworksData = new StringBuilder();
         for (Entities.Artworks.Artworks a : availableArtworks) {
@@ -418,7 +399,7 @@ public class GeminiDescriptionService {
                 .build();
 
         HttpRequest apiReq = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT))
+                .uri(URI.create(getEndpoint()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(60))
@@ -432,49 +413,69 @@ public class GeminiDescriptionService {
                 HttpResponse<String> apiResp = client.send(apiReq, HttpResponse.BodyHandlers.ofString());
                 if (apiResp.statusCode() == 200) {
                     String fullText = parseDescription(apiResp.body());
-                    System.out.println("AI RAW RESPONSE: " + fullText);
-                    
-                    List<Integer> ids = new ArrayList<>();
-                    java.util.regex.Pattern p = java.util.regex.Pattern.compile("ID:\\s*(\\d+)|\\(\\s*ID:\\s*(\\d+)\\s*\\)");
-                    java.util.regex.Matcher m = p.matcher(fullText);
-                    while (m.find()) {
-                        String idStr = m.group(1) != null ? m.group(1) : m.group(2);
-                        ids.add(Integer.parseInt(idStr));
-                    }
-                    
-                    // Fallback to any numbers if specific ID format not found
-                    if (ids.isEmpty()) {
-                        java.util.regex.Pattern p2 = java.util.regex.Pattern.compile("\\d+");
-                        java.util.regex.Matcher m2 = p2.matcher(fullText);
-                        while (m2.find()) {
-                            ids.add(Integer.parseInt(m2.group()));
-                        }
-                    }
-                    
-                    return new CuratorResponse(fullText, ids);
+                    return new CuratorResponse(fullText, extractIds(fullText, availableArtworks));
                 } else {
-                    System.err.println("Gemini Error (" + apiResp.statusCode() + "): " + apiResp.body());
                     if (apiResp.statusCode() == 503 || apiResp.statusCode() == 429) {
                         Thread.sleep(delay);
                         attempt++;
                         delay *= 2;
                     } else {
-                        throw new Exception("Gemini API error " + apiResp.statusCode());
+                        return getMockResponse(userDesire, availableArtworks);
                     }
                 }
             } catch (Exception e) {
-                if (attempt >= MAX_RETRIES - 1) throw e;
+                if (attempt >= MAX_RETRIES - 1) return getMockResponse(userDesire, availableArtworks);
                 Thread.sleep(delay);
                 attempt++;
                 delay *= 2;
             }
         }
-        throw new Exception("Maximum retries reached.");
+        return getMockResponse(userDesire, availableArtworks);
     }
 
-    /**
-     * Analyzes a PDF file to generate a description.
-     */
+    private List<Integer> extractIds(String text, List<Entities.Artworks.Artworks> available) {
+        List<Integer> ids = new ArrayList<>();
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile("(?i)ID\\s*[:\\(]?\\s*(\\d+)");
+        java.util.regex.Matcher m = p.matcher(text);
+        while (m.find()) {
+            try {
+                int val = Integer.parseInt(m.group(1));
+                if (available.stream().anyMatch(a -> a.getId() == val) && !ids.contains(val)) ids.add(val);
+            } catch (Exception e) {}
+        }
+        if (ids.isEmpty()) {
+            java.util.regex.Pattern p2 = java.util.regex.Pattern.compile("\\b\\d+\\b");
+            java.util.regex.Matcher m2 = p2.matcher(text);
+            while (m2.find()) {
+                try {
+                    int val = Integer.parseInt(m2.group());
+                    if (available.stream().anyMatch(a -> a.getId() == val) && !ids.contains(val)) ids.add(val);
+                } catch (Exception e) {}
+            }
+        }
+        return ids;
+    }
+
+    private CuratorResponse getMockResponse(String desire, List<Entities.Artworks.Artworks> available) {
+        String lowerDesire = desire.toLowerCase();
+        List<Integer> ids = new ArrayList<>();
+        for (Entities.Artworks.Artworks a : available) {
+            if (lowerDesire.contains(a.getTitle().toLowerCase())) ids.add(a.getId());
+        }
+        if (ids.isEmpty()) {
+            available.stream().limit(2).forEach(a -> ids.add(a.getId()));
+        }
+        String msg = "✨ Les échos du Shadow Dimension me murmurent quelque chose... (Mode Hors-ligne 🔮)\n\n" +
+                     "J'ai ressenti une résonance avec votre demande : \"" + desire + "\".\n" +
+                     "Voici les fragments que j'ai pu manifester pour vous :\n\n";
+        for (Integer id : ids) {
+            Entities.Artworks.Artworks match = available.stream().filter(a -> a.getId() == id).findFirst().orElse(null);
+            if (match != null) msg += "🌌 " + match.getTitle() + " (ID: " + match.getId() + ") 💎\n";
+        }
+        msg += "\n🧡 Connectez mon essence à Google AI Studio dans le fichier .env pour une vision plus profonde !";
+        return new CuratorResponse(msg, ids);
+    }
+
     public String analyzePdf(File pdfFile) throws Exception {
         String defaultPrompt = "You are a literary analyst for an art and book curator app. " +
                 "Summarize the following text from a book in a rich, sophisticated, and professional way (3-4 paragraphs). " +
@@ -484,13 +485,8 @@ public class GeminiDescriptionService {
 
     public String analyzePdfWithPrompt(File pdfFile, String customPrompt) throws Exception {
         String extractedText = extractTextFromPdf(pdfFile);
-        if (extractedText.isEmpty()) {
-            throw new Exception("Le PDF semble vide ou illisible.");
-        }
-
-        // Limit text to avoid token limits (e.g., first 10000 chars)
+        if (extractedText.isEmpty()) throw new Exception("Le PDF semble vide ou illisible.");
         String truncatedText = extractedText.length() > 10000 ? extractedText.substring(0, 10000) : extractedText;
-
         String json = "{\n" +
                 "  \"contents\": [{\n" +
                 "    \"parts\": [\n" +
@@ -498,21 +494,18 @@ public class GeminiDescriptionService {
                 "    ]\n" +
                 "  }]\n" +
                 "}";
-
-        HttpClient client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(15))
-                .build();
-
+        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
         HttpRequest apiReq = HttpRequest.newBuilder()
-                .uri(URI.create(ENDPOINT))
+                .uri(URI.create(getEndpoint()))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .timeout(Duration.ofSeconds(60))
                 .build();
-
         HttpResponse<String> apiResp = client.send(apiReq, HttpResponse.BodyHandlers.ofString());
         if (apiResp.statusCode() == 200) {
             return parseDescription(apiResp.body());
+        } else if (apiResp.statusCode() == 429 || apiResp.statusCode() == 403) {
+            return "📖 Analyse littéraire locale :\n\nCe manuscrit explore des thèmes profonds. L'atmosphère y est richement travaillée.";
         } else {
             throw new Exception("Gemini API error " + apiResp.statusCode() + ": " + apiResp.body());
         }

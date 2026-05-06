@@ -22,7 +22,7 @@ public class ServiceEvaluations {
                      "rating INT," +
                      "comment TEXT," +
                      "date_manifested TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                     "FOREIGN KEY (artwork_id) REFERENCES artworks(id) ON DELETE CASCADE" +
+                     "FOREIGN KEY (artwork_id) REFERENCES artwork(id) ON DELETE CASCADE" +
                      ")";
         try (Statement st = cnx.createStatement()) {
             st.execute(sql);
@@ -72,12 +72,13 @@ public class ServiceEvaluations {
     }
     public List<Evaluation> getAllWithArtworks() throws SQLException {
         List<Evaluation> list = new ArrayList<>();
-        String req = "SELECT e.*, a.title as artwork_title FROM evaluations e JOIN artworks a ON e.artwork_id = a.id ORDER BY e.date_manifested DESC";
+        String req = "SELECT e.id AS evaluation_id, e.artwork_id, e.user_id, e.rating, e.comment, e.date_manifested, a.title as artwork_title " +
+                     "FROM evaluations e JOIN artwork a ON e.artwork_id = a.id ORDER BY e.date_manifested DESC";
         Statement st = cnx.createStatement();
         ResultSet rs = st.executeQuery(req);
         while (rs.next()) {
             Evaluation e = new Evaluation(
-                rs.getInt("id"),
+                rs.getInt("evaluation_id"),
                 rs.getInt("artwork_id"),
                 rs.getInt("user_id"),
                 rs.getInt("rating"),
