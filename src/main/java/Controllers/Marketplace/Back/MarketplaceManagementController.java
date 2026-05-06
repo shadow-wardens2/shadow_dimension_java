@@ -1,5 +1,9 @@
 package Controllers.Marketplace.Back;
 
+import Controllers.Artworks.ArtworksStatisticsController;
+import Controllers.Artworks.EvaluationsManagementController;
+import Controllers.Artworks.ListerArtworksController;
+import Controllers.Artworks.ListerCategoriesController;
 import Utils.SessionManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -135,6 +139,14 @@ public class MarketplaceManagementController implements PageHost {
                 ((ManagementProduitController) controller).setDashboardContext(this);
             } else if (controller instanceof ManagementTypeController) {
                 ((ManagementTypeController) controller).setDashboardContext(this);
+            } else if (controller instanceof ArtworksStatisticsController) {
+                ((ArtworksStatisticsController) controller).setDashboardContext(this);
+            } else if (controller instanceof ListerArtworksController) {
+                ((ListerArtworksController) controller).setDashboardContext(this);
+            } else if (controller instanceof ListerCategoriesController) {
+                ((ListerCategoriesController) controller).setDashboardContext(this);
+            } else if (controller instanceof EvaluationsManagementController) {
+                ((EvaluationsManagementController) controller).setDashboardContext(this);
             }
 
             contentArea.getChildren().clear();

@@ -11,21 +11,25 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import java.sql.SQLException;
 import java.util.List;
+import Controllers.Marketplace.Back.PageHost;
 
 public class EvaluationsManagementController {
 
     @FXML private TableView<Evaluation> evalTable;
     @FXML private TableColumn<Evaluation, String> colArtwork;
-    @FXML private TableColumn<Evaluation, String> colRating;
     @FXML private TableColumn<Evaluation, String> colComment;
     @FXML private TableColumn<Evaluation, String> colDate;
     @FXML private TableColumn<Evaluation, Void> colActions;
     @FXML private TextField searchField;
     @FXML private Label lbTotalEvaluations;
-    @FXML private Label lbAvgRating;
 
     private ServiceEvaluations serviceEvaluations = new ServiceEvaluations();
     private ObservableList<Evaluation> evaluationList = FXCollections.observableArrayList();
+    private PageHost dashboardContext;
+
+    public void setDashboardContext(PageHost context) {
+        this.dashboardContext = context;
+    }
 
     @FXML
     public void initialize() {
@@ -36,7 +40,6 @@ public class EvaluationsManagementController {
 
     private void setupColumns() {
         colArtwork.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getArtworkTitle()));
-        colRating.setCellValueFactory(data -> new SimpleStringProperty("★".repeat(data.getValue().getRating())));
         colComment.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getComment()));
         colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDate()));
 
@@ -73,8 +76,6 @@ public class EvaluationsManagementController {
 
     private void updateStats(List<Evaluation> data) {
         lbTotalEvaluations.setText(String.valueOf(data.size()));
-        double avg = data.stream().mapToInt(Evaluation::getRating).average().orElse(0.0);
-        lbAvgRating.setText(String.format("%.1f ★", avg));
     }
 
     private void setupSearch() {

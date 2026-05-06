@@ -688,11 +688,13 @@
 /* Bar Chart Colors */
 .chart-bar {
     -fx-bar-fill: #8b5cf6;
+    -fx-background-color: -fx-bar-fill;
     -fx-background-radius: 4 4 0 0;
 }
 
-.default-color0.chart-bar { -fx-bar-fill: linear-gradient(to top, #4c1d95, #8b5cf6); }
-.default-color1.chart-bar { -fx-bar-fill: linear-gradient(to top, #1e1b4b, #ba9eff); }
+.default-color0.chart-bar { -fx-bar-fill: linear-gradient(to top, #6d28d9, #a78bfa); }
+.default-color1.chart-bar { -fx-bar-fill: linear-gradient(to top, #4c1d95, #8b5cf6); }
+.chart-bar:hover { -fx-opacity: 0.8; }
 
 .chart-plot-background {
     -fx-background-color: transparent;

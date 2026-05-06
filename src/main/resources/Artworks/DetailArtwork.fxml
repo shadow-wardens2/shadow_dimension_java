@@ -87,7 +87,7 @@
         <Separator prefWidth="200" style="-fx-opacity: 0.1;" />
 
         <!-- Evaluation Section -->
-        <VBox spacing="24" styleClass="artifact-card" style="-fx-padding: 32;">
+        <VBox fx:id="evaluationSection" spacing="24" styleClass="artifact-card" style="-fx-padding: 32;" visible="false" managed="false">
             <Label text="MANIFEST YOUR EVALUATION" style="-fx-font-family: 'Cinzel', serif; -fx-text-fill: #ba9eff; -fx-font-size: 20px;" />
             
             <VBox spacing="16">

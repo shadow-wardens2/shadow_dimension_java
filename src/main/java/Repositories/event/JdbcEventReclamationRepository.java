@@ -197,7 +197,8 @@ public class JdbcEventReclamationRepository implements EventReclamationRepositor
     }
 
     private String baseSelect() {
-        return "SELECT r.*, u.username, u.email, e.title AS event_title FROM evt_reclamation r "
+        return "SELECT r.id AS reclamation_id, r.user_id, r.event_id, r.status, r.subject, r.message, r.ai_response, r.admin_response, r.created_at, r.updated_at, "
+                + "u.username, u.email, e.title AS event_title FROM evt_reclamation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id";
     }
@@ -217,7 +218,7 @@ public class JdbcEventReclamationRepository implements EventReclamationRepositor
 
     private EventReclamation mapReclamation(ResultSet rs) throws SQLException {
         EventReclamation row = new EventReclamation(
-                rs.getInt("id"),
+                rs.getInt("reclamation_id"),
                 rs.getInt("user_id"),
                 rs.getInt("event_id"),
                 EventReclamationStatus.fromDatabase(rs.getString("status")),

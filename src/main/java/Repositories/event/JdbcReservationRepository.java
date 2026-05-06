@@ -29,7 +29,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findByUserAndEvent(int userId, int eventId) throws SQLException {
-        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+        String sql = "SELECT r.id AS reservation_id, r.user_id, r.event_id, r.status, r.reserved_at, r.qr_code_checked, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
                 + "FROM evt_reservation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id "
@@ -48,7 +48,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(int reservationId) throws SQLException {
-        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+        String sql = "SELECT r.id AS reservation_id, r.user_id, r.event_id, r.status, r.reserved_at, r.qr_code_checked, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
                 + "FROM evt_reservation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id "
@@ -106,7 +106,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAcceptedByUser(int userId) throws SQLException {
-        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+        String sql = "SELECT r.id AS reservation_id, r.user_id, r.event_id, r.status, r.reserved_at, r.qr_code_checked, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
                 + "FROM evt_reservation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id "
@@ -128,7 +128,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByEvent(int eventId) throws SQLException {
-        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+        String sql = "SELECT r.id AS reservation_id, r.user_id, r.event_id, r.status, r.reserved_at, r.qr_code_checked, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
                 + "FROM evt_reservation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id "
@@ -152,7 +152,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         String normalizedSort = normalizeSortBy(sortBy);
         String direction = ascending ? "ASC" : "DESC";
 
-        String sql = "SELECT r.*, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
+        String sql = "SELECT r.id AS reservation_id, r.user_id, r.event_id, r.status, r.reserved_at, r.qr_code_checked, u.username, u.email, u.phone, e.title AS event_title, e.start_date, e.end_date "
                 + "FROM evt_reservation r "
                 + "JOIN `user` u ON u.id = r.user_id "
                 + "JOIN evt_event e ON e.id = r.event_id "
@@ -221,7 +221,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         Reservation row = new Reservation(
-                rs.getInt("id"),
+                rs.getInt("reservation_id"),
                 rs.getInt("user_id"),
                 rs.getInt("event_id"),
                 ReservationStatus.valueOf(rs.getString("status")),
