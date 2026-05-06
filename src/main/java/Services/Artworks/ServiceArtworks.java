@@ -23,7 +23,7 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
     @Override
     public void add(Artworks a) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
-        String req = "INSERT INTO artwork(title, description, price, imageurl, pdf_url, ai_summary, status, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String req = "INSERT INTO artwork(title, description, price, imageurl, pdf_url, ai_summary, status, category_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         PreparedStatement ps = cnx.prepareStatement(req);
         ps.setString(1, a.getTitle());
         ps.setString(2, a.getDescription());

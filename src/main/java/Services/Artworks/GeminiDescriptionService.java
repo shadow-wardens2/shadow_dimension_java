@@ -32,7 +32,11 @@ public class GeminiDescriptionService {
     private static final long   RETRY_DELAY_MS = 2000; // 2s, doubles each retry
 
     private static String getApiKey() {
-        return Utils.AppConfig.get("GEMINI_API_KEY");
+        String key = Utils.AppConfig.get("GEMINI_API_KEY");
+        if (key == null || key.isBlank() || key.contains("PLACEHOLDER")) {
+            return "AIzaSyBrYxGavTqAykLwNSki3a0SOTON_2tRBYk";
+        }
+        return key;
     }
 
     private static String getEndpoint() throws Exception {
