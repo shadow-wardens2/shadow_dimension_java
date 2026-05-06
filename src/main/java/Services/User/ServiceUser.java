@@ -37,11 +37,22 @@ public class ServiceUser implements InterfaceServiceUser {
 
     // DB connection and auxiliary email service.
     private final Connection cnx;
-    private final EmailService emailService = new EmailService();
-    private final SecureRandom secureRandom = new SecureRandom();
+    private final EmailService emailService;
+    private final SecureRandom secureRandom;
 
     public ServiceUser() {
-        cnx = ShadowDimensionsDB.getInstance().getConnection();
+        this(ShadowDimensionsDB.getInstance().getConnection(), new EmailService(), new SecureRandom(), true);
+    }
+
+    ServiceUser(Connection cnx, EmailService emailService, SecureRandom secureRandom, boolean initializeSchema) {
+        this.cnx = cnx;
+        this.emailService = emailService == null ? new EmailService() : emailService;
+        this.secureRandom = secureRandom == null ? new SecureRandom() : secureRandom;
+
+        if (!initializeSchema) {
+            return;
+        }
+
         if (cnx != null) {
             ensureUserColumns();
             ensureVerificationTable();
