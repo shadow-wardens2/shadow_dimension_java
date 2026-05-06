@@ -14,6 +14,10 @@ public class ServiceEvaluations {
         createTableIfNotExists();
     }
 
+    public ServiceEvaluations(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     private void createTableIfNotExists() {
         String sql = "CREATE TABLE IF NOT EXISTS evaluations (" +
                      "id INT AUTO_INCREMENT PRIMARY KEY," +

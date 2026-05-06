@@ -10,6 +10,10 @@ public class ServiceReservations {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 
+    public ServiceReservations(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     public boolean exists(int artworkId, String email) throws SQLException {
         String req = "SELECT COUNT(*) FROM reservations WHERE artwork_id = ? AND email = ?";
         PreparedStatement ps = cnx.prepareStatement(req);

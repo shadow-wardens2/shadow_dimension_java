@@ -19,6 +19,10 @@ public class ServiceCategories implements InterfaceServiceArtworks<Categories> {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 
+    public ServiceCategories(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     @Override
     public void add(Categories c) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");

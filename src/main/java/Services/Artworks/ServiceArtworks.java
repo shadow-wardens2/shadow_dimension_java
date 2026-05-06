@@ -20,6 +20,10 @@ public class ServiceArtworks implements InterfaceServiceArtworks<Artworks> {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 
+    public ServiceArtworks(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     @Override
     public void add(Artworks a) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
