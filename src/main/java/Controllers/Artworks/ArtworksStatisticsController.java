@@ -132,19 +132,23 @@ public class ArtworksStatisticsController {
     }
 
     private void generateAiAdvice(Categories emptiest, long minCount, Categories mostValuable, long maxValue) {
-        StringBuilder advice = new StringBuilder();
+        StringBuilder advice = new StringBuilder("👻 Shadow Ghost Insight: ");
         
-        if (emptiest != null && minCount < 3) {
-            advice.append("The realm of '").append(emptiest.getTitle()).append("' is fading with only ").append(minCount).append(" relics. It needs more manifestation to stabilize. ");
-        } else if (mostValuable != null) {
-            advice.append("The '").append(mostValuable.getTitle()).append("' realm currently holds the strongest ethereal resonance with a value of $").append(maxValue).append(". ");
+        if (emptiest != null) {
+            advice.append("The spectral void in '").append(emptiest.getTitle())
+                  .append("' is too vast—only ").append(minCount).append(" relics are manifested there. You should fill this emptiness to stabilize the realm. ");
         }
         
-        if (maxValue > 10000) {
-            advice.append("High concentration of value detected. Ensure these relics are well-guarded within the Shadow Vault.");
-        } else {
-            advice.append("The dimensional energies are flowing steadily. Continue your curation to expand the Shadow's reach.");
+        if (mostValuable != null) {
+            if (mostValuable.equals(emptiest)) {
+                advice.append("Surprisingly, this same realm is our most valuable source, yielding $").append(maxValue).append("! Imagine its power if fully populated. ");
+            } else {
+                advice.append("Behold! The '").append(mostValuable.getTitle())
+                      .append("' realm holds the strongest ethereal resonance, with a total value of $").append(maxValue).append(". ");
+            }
         }
+        
+        advice.append("The dimensional energies are flowing steadily through the ghost-lines... continue your curation.");
         
         lbAiSuggestion.setText(advice.toString());
     }
