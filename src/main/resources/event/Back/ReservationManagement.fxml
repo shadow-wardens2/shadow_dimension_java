@@ -21,6 +21,7 @@
                         <Pane HBox.hgrow="ALWAYS" />
                         <TextField fx:id="tfSearch" prefWidth="260.0" promptText="Search user/event/status..." />
                         <ComboBox fx:id="cbSort" prefWidth="180.0" />
+                        <Button mnemonicParsing="false" onAction="#handleExportPdf" styleClass="secondary-button" text="Export PDF" />
                     </children>
                 </HBox>
 
