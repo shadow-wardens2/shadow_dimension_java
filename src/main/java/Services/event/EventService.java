@@ -24,6 +24,10 @@ public class EventService implements InterfaceServiceProduit<Event> {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 
+    public EventService(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     @Override
     public void add(Event e) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
