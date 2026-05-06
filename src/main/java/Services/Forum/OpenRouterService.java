@@ -11,9 +11,17 @@ import java.net.URL;
 
 public class OpenRouterService {
 
-    private static final String API_KEY = System.getenv("OPENROUTER_API_KEY");
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final String MODEL = "openrouter/free";
+
+    private String getApiKey() {
+        Utils.AppConfig.loadDotEnv();
+        String key = Utils.AppConfig.get("OPENROUTER_API_KEY");
+        if (key == null || key.isBlank()) {
+            throw new RuntimeException("OPENROUTER_API_KEY is missing from .env file. Please add it.");
+        }
+        return key;
+    }
 
     /**
      * Sends the text to OpenRouter to correct spelling and grammar.
@@ -28,7 +36,7 @@ public class OpenRouterService {
             URL url = new URL(API_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", "Bearer " + API_KEY);
+            conn.setRequestProperty("Authorization", "Bearer " + getApiKey());
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("HTTP-Referer", "http://localhost/"); // OpenRouter recommendation
             conn.setRequestProperty("X-Title", "Shadow Dimensions Forum"); // OpenRouter recommendation

@@ -18,7 +18,15 @@ public class EditCommentController {
 
     @FXML
     public void initialize() {
-        if (lblError != null) lblError.setVisible(false);
+        clearError();
+    }
+
+    private void clearError() {
+        if (lblError != null) {
+            lblError.setText("");
+            lblError.setVisible(false);
+            lblError.setManaged(false);
+        }
     }
 
     public void setCommentaire(Commentaire commentaire) {
@@ -28,8 +36,11 @@ public class EditCommentController {
 
     @FXML
     void handleSave() {
+        clearError();
         String text = taContent.getText() == null ? "" : taContent.getText().trim();
         if (text.isEmpty()) { showError("Reply cannot be empty."); return; }
+        if (text.length() < 5) { showError("Reply must be at least 5 characters."); return; }
+        if (text.length() > 2000) { showError("Reply is too long (max 2000 characters)."); return; }
 
         commentaire.setContent(text);
         try {
@@ -54,6 +65,7 @@ public class EditCommentController {
         if (lblError != null) {
             lblError.setText(msg);
             lblError.setVisible(true);
+            lblError.setManaged(true);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
