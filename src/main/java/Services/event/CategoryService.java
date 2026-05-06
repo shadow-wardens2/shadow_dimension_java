@@ -21,6 +21,10 @@ public class CategoryService implements InterfaceServiceProduit<Category> {
         cnx = ShadowDimensionsDB.getInstance().getConnection();
     }
 
+    public CategoryService(Connection cnx) {
+        this.cnx = cnx;
+    }
+
     @Override
     public void add(Category c) throws SQLException {
         String req = "INSERT INTO evt_category(nom, description, type_tarification, prix, creator_type, created_at) VALUES (?, ?, ?, ?, ?, ?)";

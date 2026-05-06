@@ -29,7 +29,15 @@ public class EditPostController {
     @FXML
     public void initialize() {
         loadCategories();
-        if (lblError != null) lblError.setVisible(false);
+        clearError();
+    }
+
+    private void clearError() {
+        if (lblError != null) {
+            lblError.setText("");
+            lblError.setVisible(false);
+            lblError.setManaged(false);
+        }
     }
 
     private void loadCategories() {
@@ -58,13 +66,20 @@ public class EditPostController {
 
     @FXML
     void handleSave() {
+        clearError();
         String title   = tfTitle.getText() == null ? "" : tfTitle.getText().trim();
         String content = taContent.getText() == null ? "" : taContent.getText().trim();
         String cat     = cbCategory.getValue();
         String imgUrl  = tfImageUrl.getText() == null ? "" : tfImageUrl.getText().trim();
 
         if (title.isEmpty()) { showError("Title is required."); return; }
+        if (title.length() < 3) { showError("Title must be at least 3 characters."); return; }
+        if (title.length() > 100) { showError("Title is too long (max 100 characters)."); return; }
+        
         if (content.isEmpty()) { showError("Content is required."); return; }
+        if (content.length() < 10) { showError("Content must be at least 10 characters."); return; }
+        if (content.length() > 5000) { showError("Content is too long (max 5000 characters)."); return; }
+        
         if (cat == null) { showError("Please select a category."); return; }
 
         post.setTitle(title);
@@ -95,6 +110,7 @@ public class EditPostController {
         if (lblError != null) {
             lblError.setText(msg);
             lblError.setVisible(true);
+            lblError.setManaged(true);
         } else {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");

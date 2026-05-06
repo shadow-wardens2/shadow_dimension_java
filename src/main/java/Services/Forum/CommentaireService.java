@@ -56,7 +56,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
                 int remaining = 3 - strikeCount;
                 // Let the comment through but warn user (still filtered)
                 c.setContent(filteredContent);
-                String warningSql = "INSERT INTO forum_commentaire (content, post_id, author_id, created_at) VALUES (?, ?, ?, ?)";
+                String warningSql = "INSERT INTO forum_comment (content, post_id, author_id, created_at, is_visible) VALUES (?, ?, ?, ?, 1)";
                 PreparedStatement ps = cnx.prepareStatement(warningSql);
                 ps.setString(1, filteredContent);
                 ps.setInt(2, c.getPostId());
@@ -72,7 +72,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
             throw new SQLException("COMMENT_BAN: Your commenting rights have been revoked due to repeated use of prohibited language.");
         }
         
-        String sql = "INSERT INTO forum_commentaire (content, post_id, author_id, created_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO forum_comment (content, post_id, author_id, created_at, is_visible) VALUES (?, ?, ?, ?, 1)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, filteredContent);
         ps.setInt(2, c.getPostId());
@@ -128,7 +128,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
 
     @Override
     public void update(Commentaire c) throws SQLException {
-        String sql = "UPDATE forum_commentaire SET content=? WHERE id=?";
+        String sql = "UPDATE forum_comment SET content=? WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, Utils.ProfanityFilter.filter(c.getContent()));
         ps.setInt(2, c.getId());
@@ -137,7 +137,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
 
     @Override
     public void delete(Commentaire c) throws SQLException {
-        String sql = "DELETE FROM forum_commentaire WHERE id=?";
+        String sql = "DELETE FROM forum_comment WHERE id=?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, c.getId());
         ps.executeUpdate();
@@ -148,7 +148,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
         List<Commentaire> list = new ArrayList<>();
         String sql =
             "SELECT fc.*, COALESCE(u.username, CONCAT('user_', fc.author_id)) AS author_name " +
-            "FROM forum_commentaire fc " +
+            "FROM forum_comment fc " +
             "LEFT JOIN user u ON fc.author_id = u.id " +
             "ORDER BY fc.id ASC";
         Statement st = cnx.createStatement();
@@ -164,7 +164,7 @@ public class CommentaireService implements InterfaceServiceProduit<Commentaire> 
         List<Commentaire> list = new ArrayList<>();
         String sql =
             "SELECT fc.*, COALESCE(u.username, CONCAT('user_', fc.author_id)) AS author_name " +
-            "FROM forum_commentaire fc " +
+            "FROM forum_comment fc " +
             "LEFT JOIN user u ON fc.author_id = u.id " +
             "WHERE fc.post_id = ? " +
             "ORDER BY fc.id ASC";

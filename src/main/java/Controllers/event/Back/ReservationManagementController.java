@@ -4,6 +4,7 @@ import Entities.User.User;
 import Entities.event.Reservation;
 import Entities.event.ReservationStatus;
 import Services.event.ReservationService;
+import Utils.PdfExportUtil;
 import Utils.SessionManager;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -19,8 +20,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -139,32 +142,55 @@ public class ReservationManagementController implements Initializable {
             return;
         }
 
-        String sortBy;
-        boolean asc;
-        String selected = cbSort.getValue();
-        if ("Oldest".equals(selected)) {
-            sortBy = "id";
-            asc = true;
-        } else if ("User".equals(selected)) {
-            sortBy = "username";
-            asc = true;
-        } else if ("Event".equals(selected)) {
-            sortBy = "eventTitle";
-            asc = true;
-        } else if ("Status".equals(selected)) {
-            sortBy = "status";
-            asc = true;
-        } else {
-            sortBy = "id";
-            asc = false;
-        }
+        SortSettings sortSettings = resolveSortSettings();
 
-        List<Reservation> rows = reservationService.findBackOfficeReservations(tfSearch.getText(), sortBy, asc, currentPage, pageSize);
+        List<Reservation> rows = reservationService.findBackOfficeReservations(
+                tfSearch.getText(),
+                sortSettings.sortBy,
+                sortSettings.ascending,
+                currentPage,
+                pageSize
+        );
         reservationTable.setItems(FXCollections.observableArrayList(rows));
 
         int total = reservationService.countBackOfficeReservations(tfSearch.getText());
         int maxPage = Math.max(1, (int) Math.ceil((double) total / pageSize));
         lbPageInfo.setText("Page " + currentPage + " / " + maxPage + " (" + total + " rows)");
+    }
+
+    @FXML
+    private void handleExportPdf() {
+        if (!isAdmin()) {
+            showAlert(Alert.AlertType.ERROR, "Security", "Only admins can export reservations.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Reservations PDF");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("reservations-report.pdf");
+
+        java.io.File file = fileChooser.showSaveDialog(reservationTable.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        try {
+            SortSettings sortSettings = resolveSortSettings();
+            int total = reservationService.countBackOfficeReservations(tfSearch.getText());
+            int exportSize = Math.max(1, total);
+            List<Reservation> rows = reservationService.findBackOfficeReservations(
+                    tfSearch.getText(),
+                    sortSettings.sortBy,
+                    sortSettings.ascending,
+                    1,
+                    exportSize
+            );
+            PdfExportUtil.exportReservations(file.getAbsolutePath(), new ArrayList<>(rows));
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "PDF exporte avec succes.");
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'exporter le PDF: " + e.getMessage());
+        }
     }
 
     private void moderate(Reservation reservation, boolean approve) {
@@ -202,5 +228,39 @@ public class ReservationManagementController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private SortSettings resolveSortSettings() {
+        String sortBy;
+        boolean asc;
+        String selected = cbSort.getValue();
+        if ("Oldest".equals(selected)) {
+            sortBy = "id";
+            asc = true;
+        } else if ("User".equals(selected)) {
+            sortBy = "username";
+            asc = true;
+        } else if ("Event".equals(selected)) {
+            sortBy = "eventTitle";
+            asc = true;
+        } else if ("Status".equals(selected)) {
+            sortBy = "status";
+            asc = true;
+        } else {
+            sortBy = "id";
+            asc = false;
+        }
+
+        return new SortSettings(sortBy, asc);
+    }
+
+    private static final class SortSettings {
+        private final String sortBy;
+        private final boolean ascending;
+
+        private SortSettings(String sortBy, boolean ascending) {
+            this.sortBy = sortBy;
+            this.ascending = ascending;
+        }
     }
 }

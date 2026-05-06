@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS forum_post (
     created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS forum_commentaire (
+CREATE TABLE IF NOT EXISTS forum_comment (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     content     TEXT          NOT NULL,
     post_id     INT           NOT NULL,

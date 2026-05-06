@@ -249,8 +249,23 @@ public class FrontVaultController {
     }
 
     @FXML
-    private void navigateToManagement() {
-        loadPage("/Tutorials/TutorialsSelector.fxml");
+    private void navigateToArtworks() {
+        loadPage("/Artworks/ArtworksFront.fxml");
+    }
+
+    @FXML
+    private void navigateToEvents() {
+        loadPage("/event/Front/EventFront.fxml");
+    }
+
+    @FXML
+    private void navigateToTutorials() {
+        loadPage("/Tutorials/TutorialsFront.fxml");
+    }
+
+    @FXML
+    private void navigateToForum() {
+        loadPage("/Forum/ForumFront.fxml");
     }
 
     @FXML

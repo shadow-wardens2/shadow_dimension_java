@@ -7,6 +7,7 @@ import Utils.PdfExportUtil;
 import Utils.VoiceToTextUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
@@ -18,22 +19,19 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import javafx.stage.FileChooser;
@@ -41,29 +39,7 @@ import javafx.stage.FileChooser;
 public class EventController implements Initializable {
 
     @FXML
-    private TableView<Event> eventTable;
-    @FXML
-    private TableColumn<Event, Integer> colId;
-    @FXML
-    private TableColumn<Event, String> colTitle;
-    @FXML
-    private TableColumn<Event, String> colDescription;
-    @FXML
-    private TableColumn<Event, String> colLocation;
-    @FXML
-    private TableColumn<Event, Timestamp> colStartDate;
-    @FXML
-    private TableColumn<Event, Timestamp> colEndDate;
-    @FXML
-    private TableColumn<Event, Integer> colCapacity;
-    @FXML
-    private TableColumn<Event, String> colCategory;
-    @FXML
-    private TableColumn<Event, String> colStatus;
-    @FXML
-    private TableColumn<Event, String> colLocationType;
-    @FXML
-    private TableColumn<Event, Integer> colActions;
+    private TilePane eventTilePane;
     @FXML
     private TextField tfSearch;
     @FXML
@@ -75,88 +51,19 @@ public class EventController implements Initializable {
     private final ObservableList<Event> observableEvents = FXCollections.observableArrayList();
     private FilteredList<Event> filteredEvents;
     private SortedList<Event> sortedEvents;
+    private final Map<Event, Parent> cardCache = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        colLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
-        colStartDate.setCellValueFactory(new PropertyValueFactory<>("startDate"));
-        colEndDate.setCellValueFactory(new PropertyValueFactory<>("endDate"));
-        colCapacity.setCellValueFactory(new PropertyValueFactory<>("capacity"));
-        colCategory.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colLocationType.setCellValueFactory(new PropertyValueFactory<>("locationType"));
-
         setupSearchAndSort();
         loadEvents();
-
-        colActions.setCellFactory(param -> new TableCell<Event, Integer>() {
-            private final Button btnUpdate = new Button("Edit");
-            private final Button btnDelete = new Button("Delete");
-            private final Button btnWeather = new Button("Weather");
-            private final HBox pane = new HBox(10, btnUpdate, btnDelete, btnWeather);
-
-            {
-                btnUpdate.getStyleClass().add("edit-button");
-                btnDelete.getStyleClass().add("delete-button");
-                btnWeather.getStyleClass().add("secondary-button");
-
-                btnDelete.setOnAction(event -> {
-                    Event e = getTableView().getItems().get(getIndex());
-                    try {
-                        eventService.delete(e);
-                        loadEvents();
-                        showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement supprime avec succes.");
-                    } catch (SQLException ex) {
-                        showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
-                    }
-                });
-
-                btnUpdate.setOnAction(event -> {
-                    Event e = getTableView().getItems().get(getIndex());
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EditEvent.fxml"));
-                        Parent root = loader.load();
-                        EditEventController controller = loader.getController();
-                        controller.setEvent(e);
-                        Stage stage = new Stage();
-                        stage.setTitle("Edit Event");
-                        stage.setScene(new Scene(root));
-                        stage.showAndWait();
-                        loadEvents();
-                    } catch (IOException ex) {
-                        showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
-                    }
-                });
-
-                btnWeather.setOnAction(event -> {
-                    Event e = getTableView().getItems().get(getIndex());
-                    openWeather(e);
-                });
-            }
-
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    Event row = getTableView().getItems().get(getIndex());
-                    boolean outdoor = row != null && "outdoor".equalsIgnoreCase(row.getLocationType());
-                    btnWeather.setVisible(outdoor);
-                    btnWeather.setManaged(outdoor);
-                    setGraphic(pane);
-                }
-            }
-        });
+        sortedEvents.addListener((ListChangeListener<Event>) c -> refreshGrid());
+        refreshGrid();
     }
 
     private void setupSearchAndSort() {
         filteredEvents = new FilteredList<>(observableEvents, e -> true);
         sortedEvents = new SortedList<>(filteredEvents);
-        eventTable.setItems(sortedEvents);
 
         cbSort.setItems(FXCollections.observableArrayList(
                 "Newest first",
@@ -217,6 +124,63 @@ public class EventController implements Initializable {
         }
 
         sortedEvents.setComparator(comparator);
+    }
+
+    private void refreshGrid() {
+        if (eventTilePane == null) {
+            return;
+        }
+
+        eventTilePane.getChildren().clear();
+        for (Event event : sortedEvents) {
+            Parent card = cardCache.get(event);
+            if (card == null) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EventCard.fxml"));
+                    card = loader.load();
+                    EventCardController controller = loader.getController();
+                    controller.setEventData(event, this::editEvent, this::deleteEvent, this::openWeather);
+                    cardCache.put(event, card);
+                } catch (IOException e) {
+                    continue;
+                }
+            }
+            eventTilePane.getChildren().add(card);
+        }
+    }
+
+    private void editEvent(Event event) {
+        if (event == null) {
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/event/EditEvent.fxml"));
+            Parent root = loader.load();
+            EditEventController controller = loader.getController();
+            controller.setEvent(event);
+            Stage stage = new Stage();
+            stage.setTitle("Edit Event");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            loadEvents();
+        } catch (IOException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
+        }
+    }
+
+    private void deleteEvent(Event event) {
+        if (event == null) {
+            return;
+        }
+
+        try {
+            eventService.delete(event);
+            loadEvents();
+            showAlert(Alert.AlertType.INFORMATION, "Succes", "Evenement supprime avec succes.");
+        } catch (SQLException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", ex.getMessage());
+        }
     }
 
     @FXML
@@ -297,7 +261,7 @@ public class EventController implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
         fileChooser.setInitialFileName("events-report.pdf");
 
-        java.io.File file = fileChooser.showSaveDialog(eventTable.getScene().getWindow());
+        java.io.File file = fileChooser.showSaveDialog(tfSearch.getScene().getWindow());
         if (file == null) {
             return;
         }
@@ -313,6 +277,7 @@ public class EventController implements Initializable {
 
     private void loadEvents() {
         observableEvents.clear();
+        cardCache.clear();
         try {
             observableEvents.addAll(eventService.getAll());
             applyDynamicFilterAndSort();

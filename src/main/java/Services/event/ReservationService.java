@@ -9,7 +9,16 @@ import Repositories.event.ReservationRepository;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPCellEvent;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import java.io.FileOutputStream;
@@ -17,12 +26,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ReservationService {
@@ -149,15 +160,54 @@ public class ReservationService {
 
         Document document = new Document();
         try {
-            PdfWriter.getInstance(document, new FileOutputStream(outputPath.toFile()));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputPath.toFile()));
             document.open();
-            document.add(new Paragraph("Shadow Dimensions - Event Ticket"));
-            document.add(new Paragraph("Reservation ID: " + reservation.getId()));
-            document.add(new Paragraph("Event: " + reservation.getEventTitle()));
-            document.add(new Paragraph("User: " + safe(reservation.getUsername())));
-            document.add(new Paragraph("Reserved At: " + reservation.getReservedAt()));
-            document.add(new Paragraph("Status: " + reservation.getStatusLabel()));
-        } catch (DocumentException | IOException e) {
+            Event event = eventService.getById(reservation.getEventId());
+
+            PdfPTable wrapper = new PdfPTable(1);
+            wrapper.setWidthPercentage(80);
+            wrapper.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+            PdfPCell card = new PdfPCell();
+            card.setBorder(Rectangle.NO_BORDER);
+            card.setPadding(18f);
+            card.setCellEvent(new DashedBorder());
+
+            Image logo = loadLogo();
+            if (logo != null) {
+                logo.scaleToFit(90f, 90f);
+                logo.setAlignment(Element.ALIGN_LEFT);
+                card.addElement(logo);
+            }
+
+            Paragraph title = new Paragraph("Event Ticket", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18));
+            title.setSpacingBefore(4f);
+            title.setSpacingAfter(6f);
+            card.addElement(title);
+
+            PdfPTable accent = new PdfPTable(1);
+            accent.setWidthPercentage(100);
+            PdfPCell lineCell = new PdfPCell();
+            lineCell.setFixedHeight(3f);
+            lineCell.setBorder(Rectangle.NO_BORDER);
+            lineCell.setBackgroundColor(new java.awt.Color(126, 84, 255));
+            accent.addCell(lineCell);
+            card.addElement(accent);
+
+            PdfPTable details = buildTicketDetailsTable(reservation, event);
+            details.setSpacingBefore(10f);
+            card.addElement(details);
+
+            Image qr = loadQrImage(event);
+            if (qr != null) {
+                qr.scaleToFit(110f, 110f);
+                qr.setAlignment(Element.ALIGN_RIGHT);
+                card.addElement(qr);
+            }
+
+            wrapper.addCell(card);
+            document.add(wrapper);
+        } catch (DocumentException | IOException | SQLException e) {
             throw new EventModuleException("Unable to generate ticket PDF: " + e.getMessage(), e);
         } finally {
             document.close();
@@ -243,5 +293,99 @@ public class ReservationService {
             return "Event";
         }
         return value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n");
+    }
+
+    private PdfPTable buildTicketDetailsTable(Reservation reservation, Event event) {
+        PdfPTable details = new PdfPTable(new float[]{1.2f, 2.8f});
+        details.setWidthPercentage(100);
+
+        Font labelFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, new java.awt.Color(70, 70, 70));
+        Font valueFont = FontFactory.getFont(FontFactory.HELVETICA, 11, java.awt.Color.BLACK);
+
+        addDetailRow(details, "Reservation ID", String.valueOf(reservation.getId()), labelFont, valueFont);
+        addDetailRow(details, "Event", safe(reservation.getEventTitle()), labelFont, valueFont);
+        addDetailRow(details, "Attendee", safe(reservation.getUsername()), labelFont, valueFont);
+        addDetailRow(details, "Email", safe(reservation.getUserEmail()), labelFont, valueFont);
+        addDetailRow(details, "Phone", safe(reservation.getUserPhone()), labelFont, valueFont);
+        addDetailRow(details, "Reserved At", String.valueOf(reservation.getReservedAt()), labelFont, valueFont);
+
+        if (event != null) {
+            addDetailRow(details, "Location", safe(event.getLocation()), labelFont, valueFont);
+            addDetailRow(details, "Schedule", formatEventWindow(event.getStartDate(), event.getEndDate()), labelFont, valueFont);
+        }
+
+        addDetailRow(details, "Status", safe(reservation.getStatusLabel()), labelFont, valueFont);
+        return details;
+    }
+
+    private void addDetailRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+        PdfPCell labelCell = new PdfPCell(new Paragraph(label + ":", labelFont));
+        labelCell.setBorder(Rectangle.NO_BORDER);
+        labelCell.setPaddingBottom(6f);
+
+        PdfPCell valueCell = new PdfPCell(new Paragraph(value, valueFont));
+        valueCell.setBorder(Rectangle.NO_BORDER);
+        valueCell.setPaddingBottom(6f);
+
+        table.addCell(labelCell);
+        table.addCell(valueCell);
+    }
+
+    private String formatEventWindow(Timestamp start, Timestamp end) {
+        if (start == null && end == null) {
+            return "N/A";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ROOT);
+        String startText = start == null ? "N/A" : formatter.format(start.toInstant().atZone(ZoneId.systemDefault()));
+        String endText = end == null ? "N/A" : formatter.format(end.toInstant().atZone(ZoneId.systemDefault()));
+        return startText + " -> " + endText;
+    }
+
+    private Image loadLogo() {
+        try {
+            Path logoPath = Paths.get(System.getProperty("user.dir"), "assets", "images", "logo", "shadow-logo.png");
+            if (!Files.exists(logoPath)) {
+                return null;
+            }
+            return Image.getInstance(logoPath.toAbsolutePath().toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Image loadQrImage(Event event) {
+        if (event == null || event.getQrCodePath() == null || event.getQrCodePath().isBlank()) {
+            return null;
+        }
+
+        String rawPath = event.getQrCodePath().trim();
+        try {
+            Path resolved;
+            if (rawPath.startsWith("/uploads/")) {
+                resolved = Paths.get(System.getProperty("user.dir") + rawPath);
+            } else {
+                resolved = Paths.get(rawPath);
+            }
+            if (!Files.exists(resolved)) {
+                return null;
+            }
+            return Image.getInstance(resolved.toAbsolutePath().toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static final class DashedBorder implements PdfPCellEvent {
+        @Override
+        public void cellLayout(PdfPCell cell, Rectangle rect, PdfContentByte[] canvas) {
+            PdfContentByte cb = canvas[PdfPTable.LINECANVAS];
+            cb.saveState();
+            cb.setLineWidth(1f);
+            cb.setLineDash(4f, 3f);
+            cb.setColorStroke(new java.awt.Color(126, 84, 255));
+            cb.rectangle(rect.getLeft() + 1.5f, rect.getBottom() + 1.5f, rect.getWidth() - 3f, rect.getHeight() - 3f);
+            cb.stroke();
+            cb.restoreState();
+        }
     }
 }
