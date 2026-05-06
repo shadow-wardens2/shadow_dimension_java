@@ -64,6 +64,15 @@ public class HomePageController implements PageHost {
     @FXML
     private Button btnEventManagement;
 
+    @FXML
+    private Button btnForumManagement;
+
+    @FXML
+    private Button btnForumCategoryManagement;
+
+    @FXML
+    private Button btnForumStatistics;
+
     // Initial landing content + auth UI state.
     @FXML
     public void initialize() {
@@ -114,6 +123,21 @@ public class HomePageController implements PageHost {
     @FXML
     void openEventManagement(ActionEvent event) {
         loadPage("/event/EventSelector.fxml");
+    }
+
+    @FXML
+    void openForumManagement(ActionEvent event) {
+        loadPage("/Forum/ForumBack.fxml");
+    }
+
+    @FXML
+    void openForumCategoryManagement(ActionEvent event) {
+        loadPage("/Forum/CategoryBack.fxml");
+    }
+
+    @FXML
+    void openForumStatistics(ActionEvent event) {
+        loadPage("/Forum/ForumStatistics.fxml");
     }
 
     @FXML
@@ -170,6 +194,18 @@ public class HomePageController implements PageHost {
             btnUserManagement.setManaged(user.isAdmin());
             btnUserStatistics.setVisible(user.isAdmin());
             btnUserStatistics.setManaged(user.isAdmin());
+            if (btnForumManagement != null) {
+                btnForumManagement.setVisible(user.isAdmin());
+                btnForumManagement.setManaged(user.isAdmin());
+            }
+            if (btnForumCategoryManagement != null) {
+                btnForumCategoryManagement.setVisible(user.isAdmin());
+                btnForumCategoryManagement.setManaged(user.isAdmin());
+            }
+            if (btnForumStatistics != null) {
+                btnForumStatistics.setVisible(user.isAdmin());
+                btnForumStatistics.setManaged(user.isAdmin());
+            }
         } else {
             lbUserName.setText("Shadow Dweller");
             AvatarUtil.applyDiceBearAvatar(imgUserAvatar, lbUserAvatar, null, 40);
@@ -179,6 +215,18 @@ public class HomePageController implements PageHost {
             btnUserManagement.setManaged(false);
             btnUserStatistics.setVisible(false);
             btnUserStatistics.setManaged(false);
+            if (btnForumManagement != null) {
+                btnForumManagement.setVisible(false);
+                btnForumManagement.setManaged(false);
+            }
+            if (btnForumCategoryManagement != null) {
+                btnForumCategoryManagement.setVisible(false);
+                btnForumCategoryManagement.setManaged(false);
+            }
+            if (btnForumStatistics != null) {
+                btnForumStatistics.setVisible(false);
+                btnForumStatistics.setManaged(false);
+            }
         }
     }
 

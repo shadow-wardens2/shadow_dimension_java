@@ -40,6 +40,20 @@ public class EmailService {
         );
     }
 
+    public void sendBanWarning(String toEmail, String username) {
+        String safeName = (username == null || username.isBlank()) ? "Shadow Dweller" : username;
+        sendEmail(
+                toEmail,
+                "⚠️ Shadow Dimensions — Commenting Rights Revoked",
+                "Hello " + safeName + ",\n\n"
+                        + "This is an automated warning from the Shadow Dimensions moderation system.\n\n"
+                        + "Your account has been flagged for repeatedly using prohibited language in the forum.\n"
+                        + "After 3 violations, your ability to post comments has been permanently revoked.\n\n"
+                        + "If you believe this was a mistake, please contact a forum administrator.\n\n"
+                        + "— The Shadow Dimensions Wardens"
+        );
+    }
+
     private void sendEmail(String toEmail, String subject, String body) {
         String host = getOrDefault("MAIL_SMTP_HOST", "smtp.gmail.com");
         String port = getOrDefault("MAIL_SMTP_PORT", "587");
