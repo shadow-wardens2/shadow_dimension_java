@@ -11,16 +11,22 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class EventAiAssistantService {
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final String MODEL = "openai/gpt-4o-mini";
+    private static final String IMAGE_PROMPT_MODEL = "google/gemini-2.0-flash-001";
+    private static final String POLLINATIONS_BASE_URL = "https://gen.pollinations.ai/image/";
 
     private final EventService eventService;
     private final CategoryService categoryService;
@@ -168,6 +174,37 @@ public class EventAiAssistantService {
         return url.toString();
     }
 
+    public String generateEventImagePath(String title, String description) {
+        String apiKey = resolveApiKey();
+        if (apiKey == null || apiKey.isBlank()) {
+            return "AI key missing. Set OPENROUTER_API_KEY (or JVM property openrouter.api.key), then try again.";
+        }
+
+        String visualPrompt = generateVisualPrompt(title, description, apiKey);
+        if (visualPrompt.startsWith("AI image error")) {
+            return visualPrompt;
+        }
+
+        try {
+            PollinationsResult result = fetchPollinationsImage(visualPrompt, true);
+            if (result.statusCode == 401 || result.statusCode == 403) {
+                result = fetchPollinationsImage(visualPrompt, false);
+            }
+
+            if (result.statusCode < 200 || result.statusCode >= 300) {
+                return "AI image error (HTTP " + result.statusCode + ").";
+            }
+
+            if (result.imageBytes == null || result.imageBytes.length == 0) {
+                return "AI image error: empty image content.";
+            }
+
+            return saveImageToUploads(result.imageBytes);
+        } catch (IOException | InterruptedException e) {
+            return "AI image error: " + e.getMessage();
+        }
+    }
+
     private String buildDataContext() throws SQLException {
         List<Event> events = eventService.getAll();
         List<Category> categories = categoryService.getAll();
@@ -221,6 +258,121 @@ public class EventAiAssistantService {
         }
 
         return null;
+    }
+
+    private String generateVisualPrompt(String title, String description, String apiKey) {
+        String safeTitle = title == null ? "" : title.trim();
+        String safeDescription = description == null ? "" : description.trim();
+        String aiPrompt = "Generate a short, vivid, English visual description (max 15 words) "
+                + "for an image representing an event in a fantasy/sci-fi setting. "
+                + "Title: '" + safeTitle + "'. Description: '" + safeDescription + "'. "
+                + "Return ONLY the visual description, no other text.";
+
+        String payload = "{" +
+                "\"model\":\"" + escapeJson(IMAGE_PROMPT_MODEL) + "\"," +
+                "\"messages\":[" +
+                "{\"role\":\"user\",\"content\":\"" + escapeJson(aiPrompt) + "\"}" +
+                "]}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(OPENROUTER_URL))
+                .timeout(Duration.ofSeconds(45))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .header("HTTP-Referer", "https://shadowdimensions.local")
+                .header("X-Title", "ShadowDimensions Event Image Generator")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return "AI image error (HTTP " + response.statusCode() + ").";
+            }
+
+            String content = extractAssistantContent(response.body());
+            if (content == null || content.isBlank()) {
+                content = "mysterious shadow event";
+            }
+
+            return sanitizePrompt(content);
+        } catch (IOException | InterruptedException e) {
+            return "AI image error: " + e.getMessage();
+        }
+    }
+
+    private String sanitizePrompt(String prompt) {
+        if (prompt == null) {
+            return "mysterious shadow event";
+        }
+        String cleaned = prompt.replace("\n", " ").replace("\r", " ")
+                .replace("\"", "").replace("'", "").trim();
+        return cleaned.isBlank() ? "mysterious shadow event" : cleaned;
+    }
+
+    private String buildPollinationsImageUrlFromPrompt(String prompt, boolean includeApiKey) {
+        String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
+        long seed = ThreadLocalRandom.current().nextLong(1, 1_000_000);
+        StringBuilder url = new StringBuilder(POLLINATIONS_BASE_URL)
+                .append(encodedPrompt)
+                .append("?model=flux&seed=")
+                .append(seed)
+                .append("&width=1024&height=1024&nologo=true");
+
+        if (includeApiKey) {
+            String apiKey = AppConfig.get("POLLINATIONS_API_KEY");
+            if (apiKey != null && !apiKey.isBlank()) {
+                url.append("&api_key=").append(URLEncoder.encode(apiKey.trim(), StandardCharsets.UTF_8));
+            }
+        }
+
+        return url.toString();
+    }
+
+    private PollinationsResult fetchPollinationsImage(String prompt, boolean includeApiKey)
+            throws IOException, InterruptedException {
+        String imageUrl = buildPollinationsImageUrlFromPrompt(prompt, includeApiKey);
+
+        HttpRequest.Builder imageRequest = HttpRequest.newBuilder()
+                .uri(URI.create(imageUrl))
+                .timeout(Duration.ofSeconds(60))
+                .header("User-Agent", "ShadowDimensions/1.0")
+                .header("Accept", "image/*")
+                .GET();
+
+        if (includeApiKey) {
+            String pollinationsKey = AppConfig.get("POLLINATIONS_API_KEY");
+            if (pollinationsKey != null && !pollinationsKey.isBlank()) {
+                imageRequest.header("Authorization", "Bearer " + pollinationsKey.trim());
+            }
+        }
+
+        HttpResponse<byte[]> imageResponse = httpClient.send(imageRequest.build(), HttpResponse.BodyHandlers.ofByteArray());
+        return new PollinationsResult(imageResponse.statusCode(), imageResponse.body());
+    }
+
+    private static final class PollinationsResult {
+        private final int statusCode;
+        private final byte[] imageBytes;
+
+        private PollinationsResult(int statusCode, byte[] imageBytes) {
+            this.statusCode = statusCode;
+            this.imageBytes = imageBytes;
+        }
+    }
+
+    private String saveImageToUploads(byte[] imageBytes) throws IOException {
+        Path targetDir = Paths.get("uploads", "events");
+        if (!Files.exists(targetDir)) {
+            Files.createDirectories(targetDir);
+        }
+
+        String fileName = "ai_event_" + System.currentTimeMillis() + "_"
+                + ThreadLocalRandom.current().nextInt(1000, 9999) + ".jpg";
+        Path targetPath = targetDir.resolve(fileName);
+        Files.write(targetPath, imageBytes);
+
+        return "/uploads/events/" + fileName;
     }
 
     private String clean(String value) {

@@ -169,7 +169,13 @@ public class EventDetailsFrontController {
         }
 
         try {
-            Image image = new Image(imageUrl, true);
+            Image image;
+            if (imageUrl.startsWith("/uploads/")) {
+                String absolutePath = System.getProperty("user.dir") + imageUrl;
+                image = new Image(new java.io.File(absolutePath).toURI().toString(), true);
+            } else {
+                image = new Image(imageUrl, true);
+            }
             eventImageView.setImage(image);
             lbImageStatus.setText("");
         } catch (Exception e) {

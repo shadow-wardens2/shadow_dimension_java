@@ -120,8 +120,7 @@ public class AddEventController {
 
                     taDescription.setText(generatedDescription);
 
-                    String imageUrl = aiAssistantService.buildPollinationsImageUrl(title, generatedDescription);
-                    tfImage.setText(imageUrl);
+                    generateAndSetImage(title, generatedDescription);
                 }));
     }
 
@@ -140,10 +139,46 @@ public class AddEventController {
         btnGenerateImage.setText("Generating...");
 
         CompletableFuture
-                .supplyAsync(() -> aiAssistantService.buildPollinationsImageUrl(title, description))
+                .supplyAsync(() -> aiAssistantService.generateEventImagePath(title, description))
                 .thenAccept(url -> Platform.runLater(() -> {
                     btnGenerateImage.setDisable(false);
                     btnGenerateImage.setText(previousText);
+
+                    if (url == null || url.isBlank()) {
+                        showAlert(Alert.AlertType.WARNING, "AI", "No image was generated.");
+                        return;
+                    }
+
+                    if (url.startsWith("AI key missing") || url.startsWith("AI image error")) {
+                        showAlert(Alert.AlertType.WARNING, "AI", url);
+                        return;
+                    }
+
+                    tfImage.setText(url);
+                }));
+    }
+
+    private void generateAndSetImage(String title, String description) {
+        btnGenerateImage.setDisable(true);
+        String previousText = btnGenerateImage.getText();
+        btnGenerateImage.setText("Generating...");
+
+        CompletableFuture
+                .supplyAsync(() -> aiAssistantService.generateEventImagePath(title, description))
+                .thenAccept(url -> Platform.runLater(() -> {
+                    btnGenerateImage.setDisable(false);
+                    btnGenerateImage.setText(previousText);
+
+                    if (url == null || url.isBlank()) {
+                        showAlert(Alert.AlertType.WARNING, "AI", "No image was generated.");
+                        return;
+                    }
+
+                    if (url.startsWith("AI key missing") || url.startsWith("AI image error")) {
+                        showAlert(Alert.AlertType.WARNING, "AI", url);
+                        return;
+                    }
+
                     tfImage.setText(url);
                 }));
     }
