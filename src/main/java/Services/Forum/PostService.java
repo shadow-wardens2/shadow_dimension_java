@@ -70,12 +70,12 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "SELECT p.*, " +
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
-            "  (SELECT COUNT(*) FROM forum_commentaire c WHERE c.post_id = p.id) AS comment_count, " +
-            "  COALESCE(fv.vote_type, 0) AS current_user_vote " +
+            "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
             "LEFT JOIN forum_category fc ON p.category_id = fc.id " +
-            "LEFT JOIN forum_vote fv ON p.id = fv.post_id AND fv.user_id = ? " +
+            "LEFT JOIN forum_post_reaction fv ON p.id = fv.post_id AND fv.user_id = ? " +
             whereClause +
             "ORDER BY p.id DESC";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -99,12 +99,12 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "SELECT p.*, " +
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
-            "  (SELECT COUNT(*) FROM forum_commentaire c WHERE c.post_id = p.id) AS comment_count, " +
-            "  COALESCE(fv.vote_type, 0) AS current_user_vote " +
+            "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
             "LEFT JOIN forum_category fc ON p.category_id = fc.id " +
-            "LEFT JOIN forum_vote fv ON p.id = fv.post_id AND fv.user_id = ? " +
+            "LEFT JOIN forum_post_reaction fv ON p.id = fv.post_id AND fv.user_id = ? " +
             "WHERE fc.name = ? " + hiddenFilter +
             "ORDER BY p.id DESC";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -129,12 +129,12 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "SELECT p.*, " +
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
-            "  (SELECT COUNT(*) FROM forum_commentaire c WHERE c.post_id = p.id) AS comment_count, " +
-            "  COALESCE(fv.vote_type, 0) AS current_user_vote " +
+            "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
             "LEFT JOIN forum_category fc ON p.category_id = fc.id " +
-            "LEFT JOIN forum_vote fv ON p.id = fv.post_id AND fv.user_id = ? " +
+            "LEFT JOIN forum_post_reaction fv ON p.id = fv.post_id AND fv.user_id = ? " +
             "WHERE (p.author_id = ? OR EXISTS (SELECT 1 FROM forum_post_share fps WHERE fps.post_id = p.id AND fps.user_id = ?)) " + hiddenFilter +
             "ORDER BY p.id DESC";
         PreparedStatement ps = cnx.prepareStatement(sql);
@@ -165,12 +165,12 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "SELECT p.*, " +
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
-            "  (SELECT COUNT(*) FROM forum_commentaire c WHERE c.post_id = p.id) AS comment_count, " +
-            "  COALESCE(fv.vote_type, 0) AS current_user_vote " +
+            "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
             "LEFT JOIN forum_category fc ON p.category_id = fc.id " +
-            "LEFT JOIN forum_vote fv ON p.id = fv.post_id AND fv.user_id = ? " +
+            "LEFT JOIN forum_post_reaction fv ON p.id = fv.post_id AND fv.user_id = ? " +
             "WHERE p.id = ?";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setInt(1, userId);
@@ -193,41 +193,43 @@ public class PostService implements InterfaceServiceProduit<Post> {
     private void handleVote(int postId, int targetVote) throws SQLException {
         if (!SessionManager.isLoggedIn()) return;
         int userId = SessionManager.getCurrentUser().getId();
+        
+        String targetType = targetVote == 1 ? "like" : "dislike";
 
         // Check if vote exists
-        PreparedStatement psCheck = cnx.prepareStatement("SELECT vote_type FROM forum_vote WHERE post_id=? AND user_id=?");
+        PreparedStatement psCheck = cnx.prepareStatement("SELECT type FROM forum_post_reaction WHERE post_id=? AND user_id=?");
         psCheck.setInt(1, postId);
         psCheck.setInt(2, userId);
         ResultSet rs = psCheck.executeQuery();
 
         if (rs.next()) {
-            int currentVote = rs.getInt("vote_type");
-            if (currentVote == targetVote) {
+            String currentType = rs.getString("type");
+            if (targetType.equals(currentType)) {
                 // Remove vote (unvote)
-                PreparedStatement psDel = cnx.prepareStatement("DELETE FROM forum_vote WHERE post_id=? AND user_id=?");
+                PreparedStatement psDel = cnx.prepareStatement("DELETE FROM forum_post_reaction WHERE post_id=? AND user_id=?");
                 psDel.setInt(1, postId);
                 psDel.setInt(2, userId);
                 psDel.executeUpdate();
             } else {
                 // Switch vote
-                PreparedStatement psUpd = cnx.prepareStatement("UPDATE forum_vote SET vote_type=? WHERE post_id=? AND user_id=?");
-                psUpd.setInt(1, targetVote);
+                PreparedStatement psUpd = cnx.prepareStatement("UPDATE forum_post_reaction SET type=? WHERE post_id=? AND user_id=?");
+                psUpd.setString(1, targetType);
                 psUpd.setInt(2, postId);
                 psUpd.setInt(3, userId);
                 psUpd.executeUpdate();
             }
         } else {
             // New vote
-            PreparedStatement psIns = cnx.prepareStatement("INSERT INTO forum_vote (post_id, user_id, vote_type) VALUES (?, ?, ?)");
+            PreparedStatement psIns = cnx.prepareStatement("INSERT INTO forum_post_reaction (post_id, user_id, type, created_at) VALUES (?, ?, ?, NOW())");
             psIns.setInt(1, postId);
             psIns.setInt(2, userId);
-            psIns.setInt(3, targetVote);
+            psIns.setString(3, targetType);
             psIns.executeUpdate();
         }
 
         // Recalculate total votes
         PreparedStatement psRecalc = cnx.prepareStatement(
-            "UPDATE forum_post p SET votes = COALESCE((SELECT SUM(vote_type) FROM forum_vote WHERE post_id = p.id), 0) WHERE p.id = ?"
+            "UPDATE forum_post p SET votes = COALESCE((SELECT SUM(CASE WHEN type = 'like' THEN 1 WHEN type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction WHERE post_id = p.id), 0) WHERE p.id = ?"
         );
         psRecalc.setInt(1, postId);
         psRecalc.executeUpdate();
