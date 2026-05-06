@@ -6,7 +6,8 @@ public enum EventReclamationStatus {
     IN_PROGRESS,
     ESCALATED,
     RESOLVED,
-    REJECTED, CLOSED;
+    REJECTED,
+    CLOSED;
 
     public static EventReclamationStatus fromDatabase(String raw) {
         if (raw == null || raw.isBlank()) {
