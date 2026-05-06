@@ -99,6 +99,13 @@ public class ForumPostDetailController {
                 lblLockedMessage.setManaged(false);
             }
         }
+
+        if (btnReport != null) {
+            boolean loggedIn = SessionManager.isLoggedIn();
+            boolean isAuthor = loggedIn && SessionManager.getCurrentUser().getId() == post.getAuthorId();
+            btnReport.setVisible(loggedIn && !isAuthor);
+            btnReport.setManaged(loggedIn && !isAuthor);
+        }
         
         if (lblTitle != null)    lblTitle.setText((post.isLocked() ? "🔒 " : "") + post.getTitle());
         if (lblCategory != null) {
@@ -233,6 +240,14 @@ public class ForumPostDetailController {
         String text = taNewComment.getText() == null ? "" : taNewComment.getText().trim();
         if (text.isEmpty()) {
             showError("Comment cannot be empty.");
+            return;
+        }
+        if (text.length() < 5) {
+            showError("Comment must be at least 5 characters long.");
+            return;
+        }
+        if (text.length() > 2000) {
+            showError("Comment is too long (max 2000 characters).");
             return;
         }
         Commentaire c = new Commentaire();
@@ -429,6 +444,15 @@ public class ForumPostDetailController {
     void handleReport() {
         if (post == null || !SessionManager.isLoggedIn()) return;
         int userId = SessionManager.getCurrentUser().getId();
+
+        if (post.getAuthorId() == userId) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Action Denied");
+            alert.setHeaderText(null);
+            alert.setContentText("You cannot report your own scroll.");
+            alert.showAndWait();
+            return;
+        }
 
         try {
             if (reportService.hasUserReportedPost(post.getId(), userId)) {

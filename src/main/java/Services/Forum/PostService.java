@@ -21,8 +21,8 @@ public class PostService implements InterfaceServiceProduit<Post> {
 
     @Override
     public void add(Post p) throws SQLException {
-        String sql = "INSERT INTO forum_post (title, content, category_id, image, votes, is_locked, status, is_hidden, author_id, created_at) " +
-                     "VALUES (?, ?, ?, ?, 0, 0, 'published', 0, ?, ?)";
+        String sql = "INSERT INTO forum_post (title, content, category_id, image, is_locked, status, is_hidden, author_id, created_at) " +
+                     "VALUES (?, ?, ?, ?, 0, 'published', 0, ?, ?)";
         PreparedStatement ps = cnx.prepareStatement(sql);
         ps.setString(1, Utils.ProfanityFilter.filter(p.getTitle()));
         ps.setString(2, Utils.ProfanityFilter.filter(p.getContent()));
@@ -71,6 +71,7 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
             "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE((SELECT SUM(CASE WHEN r.type = 'like' THEN 1 WHEN r.type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction r WHERE r.post_id = p.id), 0) AS votes, " +
             "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
@@ -100,6 +101,7 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
             "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE((SELECT SUM(CASE WHEN r.type = 'like' THEN 1 WHEN r.type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction r WHERE r.post_id = p.id), 0) AS votes, " +
             "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
@@ -130,6 +132,7 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
             "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE((SELECT SUM(CASE WHEN r.type = 'like' THEN 1 WHEN r.type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction r WHERE r.post_id = p.id), 0) AS votes, " +
             "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
@@ -166,6 +169,7 @@ public class PostService implements InterfaceServiceProduit<Post> {
             "  COALESCE(u.username, CONCAT('user_', p.author_id)) AS author_name, " +
             "  fc.name AS category_name, " +
             "  (SELECT COUNT(*) FROM forum_comment c WHERE c.post_id = p.id) AS comment_count, " +
+            "  COALESCE((SELECT SUM(CASE WHEN r.type = 'like' THEN 1 WHEN r.type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction r WHERE r.post_id = p.id), 0) AS votes, " +
             "  COALESCE(CASE WHEN fv.type = 'like' THEN 1 WHEN fv.type = 'dislike' THEN -1 ELSE 0 END, 0) AS current_user_vote " +
             "FROM forum_post p " +
             "LEFT JOIN user u ON p.author_id = u.id " +
@@ -227,12 +231,7 @@ public class PostService implements InterfaceServiceProduit<Post> {
             psIns.executeUpdate();
         }
 
-        // Recalculate total votes
-        PreparedStatement psRecalc = cnx.prepareStatement(
-            "UPDATE forum_post p SET votes = COALESCE((SELECT SUM(CASE WHEN type = 'like' THEN 1 WHEN type = 'dislike' THEN -1 ELSE 0 END) FROM forum_post_reaction WHERE post_id = p.id), 0) WHERE p.id = ?"
-        );
-        psRecalc.setInt(1, postId);
-        psRecalc.executeUpdate();
+        // Recalculate total votes removed since we now calculate it dynamically in SELECT queries
     }
 
     public void toggleHidden(int postId, boolean hidden) throws SQLException {
