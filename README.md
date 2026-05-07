@@ -37,9 +37,15 @@ Manage and explore events across the dimensions.
 - **Dynamic Environment**: Real-time weather integration (Open-Meteo) to sync event conditions with reality.
 - **Reclamation System**: Track and resolve event-related issues with a robust status workflow.
 
-### 🏛️ 5. Dark Forum & Tutorials
-- **Knowledge Base**: Interactive tutorials to master the dimensions.
-- **Community Hub**: A dedicated forum for souls to interact and share lore.
+### 🏛️ 5. Dark Forum
+The sanctuary for community interaction and collective wisdom.
+- **Community Hub**: A dedicated forum for souls to interact, share strategies, and expand the dimension's lore.
+- **Threaded Lore**: Organized discussions on artifacts, events, and mystical discoveries.
+
+### 📚 6. Shadow Tutorials
+Master the intricacies of the dimensions with guided wisdom.
+- **Knowledge Base**: Interactive tutorials designed to help souls master every feature of the platform.
+- **Step-by-Step Rites**: Detailed guides for complex operations within the marketplace and gallery.
 
 ---
 

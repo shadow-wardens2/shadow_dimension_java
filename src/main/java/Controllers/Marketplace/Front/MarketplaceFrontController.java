@@ -139,14 +139,7 @@ public class MarketplaceFrontController {
         }
     }
 
-    @FXML
-    void navigateToManagement() {
-        if (SessionManager.isLoggedIn()) {
-            loadPage("/Marketplace/Back/MarketplaceManagement.fxml");
-        } else {
-            loadPage("/User/ConnectSoul.fxml");
-        }
-    }
+
 
     @FXML
     void handleOpenDashboard() {
@@ -170,12 +163,37 @@ public class MarketplaceFrontController {
 
     @FXML
     void navigateToHome() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/HomeFront.fxml"));
-            rootNode.getScene().setRoot(loader.load());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadPage("/HomeFront.fxml");
+    }
+
+    @FXML
+    void navigateToMarketplace() {
+        loadPage("/Marketplace/Front/MarketplaceFront.fxml");
+    }
+
+    @FXML
+    void navigateToArtworks() {
+        loadPage("/Artworks/ArtworksFront.fxml");
+    }
+
+    @FXML
+    void navigateToEvents() {
+        loadPage("/event/Front/EventFront.fxml");
+    }
+
+    @FXML
+    void navigateToVault() {
+        loadPage("/User/VaultFront.fxml");
+    }
+
+    @FXML
+    void navigateToTutorials() {
+        loadPage("/Tutorials/TutorialsFront.fxml");
+    }
+
+    @FXML
+    void navigateToForum() {
+        loadPage("/Forum/ForumFront.fxml");
     }
 
     @FXML

@@ -7,24 +7,24 @@
 <AnchorPane fx:id="rootNode" prefHeight="900.0" prefWidth="1440.0" styleClass="root" stylesheets="@../../style.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Marketplace.Front.MarketplaceFrontController">
     
     <!-- Navigation Header -->
-    <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" style="-fx-background-color: -fx-surface;">
+    <HBox alignment="CENTER" prefHeight="80.0" spacing="40.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" style="-fx-background-color: #0c0c0e;">
         <padding>
             <Insets left="60.0" right="60.0" />
         </padding>
-        <Label onMouseClicked="#navigateToHome" styleClass="label-sigil" text="SHADOW DIMENSIONS" style="-fx-cursor: hand;" />
-        <Region HBox.hgrow="ALWAYS" />
-        <HBox spacing="30.0" alignment="CENTER">
-            <Label onMouseClicked="#navigateToHome" styleClass="body-md" text="Home" style="-fx-cursor: hand;" />
-            <Label styleClass="body-md" text="Marketplace" style="-fx-text-fill: -fx-primary;" />
-            <Label onMouseClicked="#navigateToManagement" styleClass="body-md" text="Management" style="-fx-cursor: hand;" />
-            <Label styleClass="body-md" text="Chronicles" />
+        <HBox spacing="35.0" alignment="CENTER">
+            <Label onMouseClicked="#navigateToHome" styleClass="nav-link" text="Home" />
+            <Label onMouseClicked="#navigateToMarketplace" styleClass="nav-link" text="Marketplace" style="-fx-text-fill: #ffffff; -fx-font-weight: bold;" />
+            <Label onMouseClicked="#navigateToArtworks" styleClass="nav-link" text="Artworks" />
+            <Label onMouseClicked="#navigateToEvents" styleClass="nav-link" text="Events" />
+            <Label onMouseClicked="#navigateToVault" styleClass="nav-link" text="My Vault" />
+            <Label onMouseClicked="#navigateToTutorials" styleClass="nav-link" text="Tutorials" />
+            <Label onMouseClicked="#navigateToForum" styleClass="nav-link" text="Forum" />
         </HBox>
         <Region HBox.hgrow="ALWAYS" />
         <HBox spacing="20.0" alignment="CENTER">
-            <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Dashboard" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
-            <Button onAction="#handleOpenCart" styleClass="secondary-button" text="View Cart" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
-            <Button styleClass="ethereal-button" text="Enter the Night" />
-            <Button fx:id="btnLogout" onAction="#handleLogout" styleClass="secondary-button" text="Logout" visible="false" managed="false" style="-fx-border-radius: 30; -fx-background-radius: 30;" />
+            <Button fx:id="btnDashboard" onAction="#handleOpenDashboard" styleClass="secondary-button" text="Admin" visible="false" managed="false" />
+            <Button onAction="#handleOpenCart" styleClass="secondary-button" text="Cart" />
+            <Button fx:id="btnLogout" onAction="#handleLogout" styleClass="secondary-button" text="Logout" visible="false" managed="false" />
         </HBox>
     </HBox>
 
