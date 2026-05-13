@@ -141,14 +141,14 @@ public class EventReclamationFrontController implements Initializable {
 
             showAiResponseDialog(created);
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Reclamation", e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Complaint", e.getMessage());
         }
     }
 
     private void showAiResponseDialog(EventReclamation reclamation) {
         Alert dialog = new Alert(Alert.AlertType.INFORMATION);
         dialog.setTitle("AI Response Generated");
-        dialog.setHeaderText("Your Reclamation - AI Analysis");
+        dialog.setHeaderText("Your Complaint - AI Analysis");
         dialog.setContentText("AI Response:\n\n" + (reclamation.getAiResponse() != null ? reclamation.getAiResponse() : "No response available"));
         dialog.getDialogPane().setStyle("-fx-font-size: 12;");
 
@@ -173,7 +173,7 @@ public class EventReclamationFrontController implements Initializable {
         try {
             reclamationService.escalate(reclamation.getId(), user);
             loadMyRows();
-            showAlert(Alert.AlertType.INFORMATION, "Escalated", "Your reclamation has been escalated to admin. They will review and respond shortly.");
+            showAlert(Alert.AlertType.INFORMATION, "Escalated", "Your complaint has been escalated to admin. They will review and respond shortly.");
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Escalation", e.getMessage());
         }
@@ -208,9 +208,9 @@ public class EventReclamationFrontController implements Initializable {
 
         if (!cbEvent.getItems().isEmpty()) {
             cbEvent.getSelectionModel().selectFirst();
-            lbHint.setText("Only accepted reservations can be reclaimed.");
+            lbHint.setText("Only accepted reservations can be used to submit a complaint.");
         } else {
-            lbHint.setText("No accepted reservations available for reclamation.");
+            lbHint.setText("No accepted reservations available for complaints.");
         }
     }
 
@@ -230,7 +230,7 @@ public class EventReclamationFrontController implements Initializable {
         try {
             reclamationService.escalate(reclamation.getId(), user);
             loadMyRows();
-            showAlert(Alert.AlertType.INFORMATION, "Escalation", "Reclamation escalated.");
+            showAlert(Alert.AlertType.INFORMATION, "Escalation", "Complaint escalated.");
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Escalation", e.getMessage());
         }

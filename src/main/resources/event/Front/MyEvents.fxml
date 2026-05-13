@@ -15,7 +15,7 @@
                 <Button mnemonicParsing="false" onAction="#handleBackHome" styleClass="secondary-button" text="Home" />
                 <Button mnemonicParsing="false" onAction="#handleBackToEvents" styleClass="secondary-button" text="Events" />
                 <Button disable="true" mnemonicParsing="false" styleClass="glow-button" text="My Events" />
-                <Button mnemonicParsing="false" onAction="#handleOpenReclamations" styleClass="secondary-button" text="Reclamations" />
+                <Button mnemonicParsing="false" onAction="#handleOpenReclamations" styleClass="secondary-button" text="Complaints" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>

@@ -38,25 +38,25 @@ public class EventReclamationService {
         String cleanSubject = subject == null ? "" : subject.trim();
         String cleanMessage = message == null ? "" : message.trim();
         if (userId <= 0 || eventId <= 0 || cleanSubject.isBlank() || cleanMessage.isBlank()) {
-            throw new EventModuleException("Invalid reclamation payload.");
+            throw new EventModuleException("Invalid complaint payload.");
         }
         if (cleanSubject.length() < 3) {
-            throw new EventModuleException("Reclamation subject must be at least 3 characters.");
+            throw new EventModuleException("Complaint subject must be at least 3 characters.");
         }
         if (cleanMessage.length() < 10) {
-            throw new EventModuleException("Reclamation message must be at least 10 characters.");
+            throw new EventModuleException("Complaint message must be at least 10 characters.");
         }
 
         try {
             Reservation reservation = reservationRepository.findByUserAndEvent(userId, eventId)
-                    .orElseThrow(() -> new EventModuleException("Only users with reservations can reclaim this event."));
+                    .orElseThrow(() -> new EventModuleException("Only users with reservations can submit a complaint for this event."));
             if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                throw new EventModuleException("Only ACCEPTED reservations can open reclamations.");
+                throw new EventModuleException("Only ACCEPTED reservations can open complaints.");
             }
 
             Optional<EventReclamation> existing = reclamationRepository.findOpenByUserAndEvent(userId, eventId);
             if (existing.isPresent()) {
-                throw new EventModuleException("You already have an active reclamation for this event.");
+                throw new EventModuleException("You already have an active complaint for this event.");
             }
 
             EventReclamation reclamation = new EventReclamation();
@@ -72,7 +72,7 @@ public class EventReclamationService {
 
             return reclamationRepository.create(reclamation);
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to create reclamation: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to create complaint: " + e.getMessage(), e);
         }
     }
 
@@ -83,7 +83,7 @@ public class EventReclamationService {
         try {
             return reclamationRepository.findByUser(userId);
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to load your reclamations: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to load your complaints: " + e.getMessage(), e);
         }
     }
 
@@ -93,19 +93,19 @@ public class EventReclamationService {
         }
         try {
             EventReclamation row = reclamationRepository.findById(reclamationId)
-                    .orElseThrow(() -> new EventModuleException("Reclamation not found."));
+                    .orElseThrow(() -> new EventModuleException("Complaint not found."));
             if (row.getUserId() != actor.getId()) {
-                throw new EventModuleException("Only reclamation owner can escalate.");
+                throw new EventModuleException("Only the complaint owner can escalate it.");
             }
             if (!row.canEscalate()) {
-                throw new EventModuleException("This reclamation cannot be escalated from current state.");
+                throw new EventModuleException("This complaint cannot be escalated from the current state.");
             }
 
             reclamationRepository.escalate(reclamationId);
             return reclamationRepository.findById(reclamationId)
-                    .orElseThrow(() -> new EventModuleException("Reclamation not found after escalation."));
+                    .orElseThrow(() -> new EventModuleException("Complaint not found after escalation."));
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to escalate reclamation: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to escalate complaint: " + e.getMessage(), e);
         }
     }
 
@@ -115,7 +115,7 @@ public class EventReclamationService {
             throw new EventModuleException("Status is required.");
         }
         if (targetStatus == EventReclamationStatus.OPEN || targetStatus == EventReclamationStatus.ESCALATED) {
-            throw new EventModuleException("Admin response must move reclamation to IN_PROGRESS, RESOLVED, or REJECTED.");
+            throw new EventModuleException("Admin response must move the complaint to IN_PROGRESS, RESOLVED, or REJECTED.");
         }
 
         String cleanResponse = response == null ? "" : response.trim();
@@ -125,17 +125,17 @@ public class EventReclamationService {
 
         try {
             EventReclamation existing = reclamationRepository.findById(reclamationId)
-                    .orElseThrow(() -> new EventModuleException("Reclamation not found."));
+                    .orElseThrow(() -> new EventModuleException("Complaint not found."));
 
             if (existing.getStatus() == EventReclamationStatus.RESOLVED || existing.getStatus() == EventReclamationStatus.REJECTED) {
-                throw new EventModuleException("Resolved/rejected reclamations cannot be changed.");
+                throw new EventModuleException("Resolved or rejected complaints cannot be changed.");
             }
 
             reclamationRepository.adminRespond(reclamationId, targetStatus, cleanResponse);
             return reclamationRepository.findById(reclamationId)
-                    .orElseThrow(() -> new EventModuleException("Reclamation not found after update."));
+                    .orElseThrow(() -> new EventModuleException("Complaint not found after update."));
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to update reclamation: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to update complaint: " + e.getMessage(), e);
         }
     }
 
@@ -147,7 +147,7 @@ public class EventReclamationService {
             int offset = (safePage - 1) * safePageSize;
             return reclamationRepository.findForBackOffice(search, status, sortBy, ascending, offset, safePageSize);
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to load reclamations: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to load complaints: " + e.getMessage(), e);
         }
     }
 
@@ -156,7 +156,7 @@ public class EventReclamationService {
         try {
             return reclamationRepository.countForBackOffice(search, status);
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to count reclamations: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to count complaints: " + e.getMessage(), e);
         }
     }
 
@@ -165,14 +165,14 @@ public class EventReclamationService {
             return "Please provide a respectful resolution response and explain the next step clearly.";
         }
 
-        String prompt = "Suggest a short admin response for this event reclamation. "
+        String prompt = "Suggest a short admin response for this event complaint. "
                 + "Status=" + reclamation.getStatusLabel() + ", Event='" + safe(reclamation.getEventTitle()) + "', "
             + "Subject='" + safe(reclamation.getSubject()) + "', Message='" + safe(reclamation.getMessage()) + "'. "
                 + "Keep it under 70 words and include one concrete next action.";
 
         String raw = aiAssistantService.askQuestion(prompt);
         if (raw == null || raw.isBlank() || raw.startsWith("AI key missing") || raw.startsWith("AI service error") || raw.startsWith("Failed to call AI service")) {
-            return "Thank you for your report. We started handling this reclamation and will update you with a concrete resolution step shortly.";
+            return "Thank you for your report. We started handling this complaint and will update you with a concrete resolution step shortly.";
         }
         return raw.trim();
     }
@@ -180,22 +180,22 @@ public class EventReclamationService {
     public void deleteReclamation(int reclamationId, User actor) {
         enforceAdmin(actor);
         if (reclamationId <= 0) {
-            throw new EventModuleException("Invalid reclamation ID.");
+            throw new EventModuleException("Invalid complaint ID.");
         }
         try {
             reclamationRepository.deleteById(reclamationId);
         } catch (SQLException e) {
-            throw new EventModuleException("Unable to delete reclamation: " + e.getMessage(), e);
+            throw new EventModuleException("Unable to delete complaint: " + e.getMessage(), e);
         }
     }
 
     private String buildAiSummaryFallback(String subject, String message, String eventTitle) {
-        String prompt = "Summarize this event reclamation in one sentence for admins. Event='" + safe(eventTitle)
+        String prompt = "Summarize this event complaint in one sentence for admins. Event='" + safe(eventTitle)
                 + "', Subject='" + safe(subject) + "', Message='" + safe(message) + "'.";
         String raw = aiAssistantService.askQuestion(prompt);
         if (raw == null || raw.isBlank() || raw.startsWith("AI key missing") || raw.startsWith("AI service error") || raw.startsWith("Failed to call AI service")) {
             String cut = message.length() > 120 ? message.substring(0, 120) + "..." : message;
-            return "Reclamation summary: " + cut;
+            return "Complaint summary: " + cut;
         }
         return raw.trim();
     }

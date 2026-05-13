@@ -18,21 +18,21 @@
                 <Button mnemonicParsing="false" onAction="#handleBackHome" styleClass="secondary-button" text="Home" />
                 <Button mnemonicParsing="false" onAction="#handleBackEvents" styleClass="secondary-button" text="Events" />
                 <Button mnemonicParsing="false" onAction="#handleBackMyEvents" styleClass="secondary-button" text="My Events" />
-                <Button disable="true" mnemonicParsing="false" styleClass="glow-button" text="Reclamations" />
+                <Button disable="true" mnemonicParsing="false" styleClass="glow-button" text="Complaints" />
                 <Region HBox.hgrow="ALWAYS" />
             </children>
         </HBox>
 
         <VBox spacing="8.0" styleClass="artifact-card">
             <children>
-                <Label styleClass="headline" text="Create Event Reclamation" />
-                <Label fx:id="lbHint" styleClass="subheadline" text="Only accepted reservations can be reclaimed." />
+                <Label styleClass="headline" text="Create Event Complaint" />
+                <Label fx:id="lbHint" styleClass="subheadline" text="Only accepted reservations can be used to submit a complaint." />
                 <ComboBox fx:id="cbEvent" prefWidth="520.0" promptText="Select accepted event" />
                 <TextField fx:id="tfSubject" prefWidth="520.0" promptText="Subject" />
                 <TextArea fx:id="taClaim" prefHeight="110.0" promptText="Describe the issue clearly and include key details..." wrapText="true" />
                 <HBox spacing="10.0">
                     <children>
-                        <Button onAction="#handleSubmit" styleClass="glow-button" text="Submit Reclamation" />
+                        <Button onAction="#handleSubmit" styleClass="glow-button" text="Submit Complaint" />
                     </children>
                 </HBox>
             </children>
@@ -40,7 +40,7 @@
 
         <VBox spacing="8.0" styleClass="artifact-card" VBox.vgrow="ALWAYS">
             <children>
-                <Label styleClass="headline" text="My Reclamations" />
+                <Label styleClass="headline" text="My Complaints" />
                 <TableView fx:id="reclamationTable" prefHeight="360.0" styleClass="table-view" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="colId" prefWidth="65.0" text="ID" />

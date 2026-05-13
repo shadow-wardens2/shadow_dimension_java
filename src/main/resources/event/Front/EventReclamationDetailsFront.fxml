@@ -20,29 +20,29 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="← Back to Reclamations" />
+                  <Button mnemonicParsing="false" onAction="#handleBack" styleClass="secondary-button" text="&lt; Back to Complaints" />
                   <Region HBox.hgrow="ALWAYS" />
                   <Label fx:id="lblStatus" styleClass="auth-chip" text="STATUS" />
                </children>
             </HBox>
-            
+
             <VBox spacing="12.0" styleClass="panel-card" VBox.vgrow="ALWAYS">
                <children>
                   <HBox alignment="CENTER_LEFT">
                      <children>
-                        <Label fx:id="lblSubject" styleClass="headline" text="Reclamation Subject" />
+                        <Label fx:id="lblSubject" styleClass="headline" text="Complaint Subject" />
                         <Pane HBox.hgrow="ALWAYS" />
                         <Label fx:id="lblDate" styleClass="subheadline" text="Date" />
                      </children>
                   </HBox>
                   <Label fx:id="lblEventTitle" styleClass="bento-subtitle" text="Event: Title" />
-                  
+
                   <Label styleClass="title-lg" text="Your Message" />
                   <TextArea fx:id="taMessage" editable="false" prefHeight="100.0" styleClass="text-area" wrapText="true" />
-                  
+
                   <Label styleClass="title-lg" text="AI Analysis" />
                   <TextArea fx:id="taAiResponse" editable="false" prefHeight="100.0" styleClass="text-area" wrapText="true" />
-                  
+
                   <Label styleClass="title-lg" text="Admin Response" />
                   <TextArea fx:id="taAdminResponse" editable="false" prefHeight="100.0" styleClass="text-area" wrapText="true" />
                </children>

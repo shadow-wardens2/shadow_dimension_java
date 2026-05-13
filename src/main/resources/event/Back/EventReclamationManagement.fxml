@@ -21,7 +21,7 @@
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="10.0">
                             <children>
-                                <Label styleClass="headline" text="Event Reclamation Moderation" />
+                                <Label styleClass="headline" text="Event Complaint Moderation" />
                                 <Pane HBox.hgrow="ALWAYS" />
                                 <TextField fx:id="tfSearch" prefWidth="240.0" promptText="Search user/event/status..." />
                                 <ComboBox fx:id="cbStatus" prefWidth="150.0" />

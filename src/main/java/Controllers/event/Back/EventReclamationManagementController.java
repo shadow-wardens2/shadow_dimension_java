@@ -64,7 +64,7 @@ public class EventReclamationManagementController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (!isAdmin()) {
-            showAlert(Alert.AlertType.ERROR, "Security", "Only admins can access reclamation moderation.");
+            showAlert(Alert.AlertType.ERROR, "Security", "Only admins can access complaint moderation.");
             return;
         }
 
@@ -151,7 +151,7 @@ public class EventReclamationManagementController implements Initializable {
     private void handleSuggestAiResponse() {
         EventReclamation selected = reclamationTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Selection", "Select a reclamation first.");
+            showAlert(Alert.AlertType.WARNING, "Selection", "Select a complaint first.");
             return;
         }
         taResponse.setText(reclamationService.buildAiAdminReplySuggestion(selected));
@@ -161,7 +161,7 @@ public class EventReclamationManagementController implements Initializable {
     private void handleApplyDecision() {
         EventReclamation selected = reclamationTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Selection", "Select a reclamation first.");
+            showAlert(Alert.AlertType.WARNING, "Selection", "Select a complaint first.");
             return;
         }
 
@@ -170,7 +170,7 @@ public class EventReclamationManagementController implements Initializable {
             EventReclamationStatus status = EventReclamationStatus.valueOf(cbAction.getValue());
             reclamationService.adminRespond(selected.getId(), status, taResponse.getText(), actor);
             loadRows();
-            showAlert(Alert.AlertType.INFORMATION, "Moderation", "Reclamation updated.");
+            showAlert(Alert.AlertType.INFORMATION, "Moderation", "Complaint updated.");
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Moderation", e.getMessage());
         }
@@ -179,21 +179,21 @@ public class EventReclamationManagementController implements Initializable {
     @FXML
     private void handleDeleteReclamation(EventReclamation reclamation) {
         if (reclamation == null) {
-            showAlert(Alert.AlertType.WARNING, "Selection", "Invalid reclamation.");
+            showAlert(Alert.AlertType.WARNING, "Selection", "Invalid complaint.");
             return;
         }
 
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Delete Reclamation");
+        confirmation.setTitle("Delete Complaint");
         confirmation.setHeaderText("Confirm Deletion");
-        confirmation.setContentText("Are you sure you want to delete reclamation #" + reclamation.getId() + " from user " + reclamation.getUsername() + "?");
+        confirmation.setContentText("Are you sure you want to delete complaint #" + reclamation.getId() + " from user " + reclamation.getUsername() + "?");
 
         if (confirmation.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             User actor = SessionManager.getCurrentUser();
             try {
                 reclamationService.deleteReclamation(reclamation.getId(), actor);
                 loadRows();
-                showAlert(Alert.AlertType.INFORMATION, "Deletion", "Reclamation deleted successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Deletion", "Complaint deleted successfully.");
             } catch (Exception e) {
                 showAlert(Alert.AlertType.ERROR, "Deletion", e.getMessage());
             }
