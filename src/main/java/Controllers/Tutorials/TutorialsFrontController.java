@@ -84,40 +84,65 @@ public class TutorialsFrontController implements Initializable {
             lbCalculatedRank.setText("CALCULATED RANK: " + rank);
         }
 
-        new Thread(() -> {
+            if (allFormations == null || allFormations.isEmpty()) {
+                System.err.println("CRITICAL: No formations were loaded from the database! Check your DB connection.");
+            } else {
+                System.out.println("Loaded " + allFormations.size() + " formations for matching.");
+            }
+            
+            new Thread(() -> {
             String fullAiResponse = aiService.getPersonalizedRecommendation();
             System.out.println("AI RESPONSE: " + fullAiResponse);
             Platform.runLater(() -> {
+                // Split by ||| and handle multiple lines/spaces
                 String[] recommendations = fullAiResponse.split("\\|\\|\\|");
 
-                if (recommendations.length > 0 && recommendations[0].contains("|")) {
-                    String oracleChoice = recommendations[0].split("\\|")[0].replace("TITLE:", "").trim();
-                    lbOracleFormation.setText(oracleChoice.replace("[", "").replace("]", ""));
-                }
-
-                int count = 0;
-                for (String rec : recommendations) {
-                    if (count >= 5 || !rec.contains("|"))
-                        break;
-
-                    String[] parts = rec.split("\\|");
-                    String titlePart = parts[0].replace("TITLE:", "").trim();
-                    String reasonPart = parts[1].replace("REASON:", "").trim();
-
-                    // Find the formation object by title
-                    Formation matched = allFormations.stream()
-                            .filter(f -> f.getTitre().equalsIgnoreCase(titlePart) || titlePart.contains(f.getTitre()))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (matched != null) {
-                        hbAiRecommendations.getChildren().add(createAiRecommendationCard(matched, reasonPart));
-                        count++;
+                if (recommendations.length > 0) {
+                    String firstRec = recommendations[0].trim();
+                    if (firstRec.contains("|")) {
+                        String oracleChoice = firstRec.split("\\|")[0].replace("TITLE:", "").replace("AI RESPONSE:", "").trim();
+                        lbOracleFormation.setText(oracleChoice.replace("[", "").replace("]", ""));
                     }
                 }
 
-                // Fallback
+                int displayedCount = 0;
+                for (String rec : recommendations) {
+                    rec = rec.trim();
+                    if (displayedCount >= 5 || !rec.contains("|"))
+                        continue;
+
+                    String[] parts = rec.split("\\|");
+                    if (parts.length < 2) continue;
+
+                    String titlePart = parts[0].replace("TITLE:", "").replace("AI RESPONSE:", "").trim().toLowerCase();
+                    // Remove brackets
+                    titlePart = titlePart.replace("[", "").replace("]", "").trim();
+                    String reasonPart = parts[1].replace("REASON:", "").trim();
+
+                    System.out.println("Trying to match AI recommendation: '" + titlePart + "'");
+
+                    // Find the formation object by title - more flexible matching
+                    Formation matched = null;
+                    for (Formation f : allFormations) {
+                        String fTitle = f.getTitre().toLowerCase();
+                        if (fTitle.equals(titlePart) || titlePart.contains(fTitle) || fTitle.contains(titlePart)) {
+                            matched = f;
+                            System.out.println("Match found: " + f.getTitre());
+                            break;
+                        }
+                    }
+
+                    if (matched != null) {
+                        hbAiRecommendations.getChildren().add(createAiRecommendationCard(matched, reasonPart));
+                        displayedCount++;
+                    } else {
+                        System.out.println("No match found for: " + titlePart);
+                    }
+                }
+
+                // Fallback if no matches found
                 if (hbAiRecommendations.getChildren().isEmpty()) {
+                    System.out.println("No AI matches found, showing fallback.");
                     for (int i = 0; i < Math.min(5, allFormations.size()); i++) {
                         hbAiRecommendations.getChildren().add(createAiRecommendationCard(allFormations.get(i),
                                 "The shadows hide many secrets... explore this path."));

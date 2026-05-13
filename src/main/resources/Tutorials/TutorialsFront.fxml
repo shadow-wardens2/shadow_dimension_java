@@ -18,7 +18,7 @@
 
     <VBox spacing="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
         <!-- Header / Navigation -->
-        <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" style="-fx-background-color: rgba(16, 13, 20, 0.8); -fx-backdrop-filter: blur(20px);">
+        <HBox alignment="CENTER_LEFT" prefHeight="80.0" spacing="40.0" style="-fx-background-color: rgba(16, 13, 20, 0.8);">
             <padding>
                 <Insets left="60.0" right="60.0" />
             </padding>

@@ -33,13 +33,20 @@ public class FormationRecommendationsController {
                 vbLoading.setVisible(false);
                 vbResult.setVisible(true);
 
-                if (fullResponse.contains("\n")) {
-                    String[] parts = fullResponse.split("\n", 2);
-                    lbRecommendationTitle.setText(parts[0].trim().replace("[", "").replace("]", ""));
-                    lbReasoning.setText(parts[1].trim());
+                // Handle multiple recommendations separated by |||
+                String[] recommendations = fullResponse.split("\\|\\|\\|");
+                String firstRec = recommendations[0].trim();
+
+                if (firstRec.contains("|")) {
+                    String[] parts = firstRec.split("\\|");
+                    String title = parts[0].replace("TITLE:", "").replace("AI RESPONSE:", "").trim();
+                    String reason = parts[1].replace("REASON:", "").trim();
+
+                    lbRecommendationTitle.setText(title.replace("[", "").replace("]", ""));
+                    lbReasoning.setText(reason);
                 } else {
                     lbRecommendationTitle.setText("A Path Emerges");
-                    lbReasoning.setText(fullResponse);
+                    lbReasoning.setText(firstRec);
                 }
             });
         }).start();

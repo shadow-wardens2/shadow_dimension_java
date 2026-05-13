@@ -3,6 +3,9 @@ package Services.Tutorials;
 import Entities.Tutorials.Formation;
 import Entities.User.User;
 import Utils.SessionManager;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,6 +23,7 @@ public class FormationAiService {
 
     private final ServiceFormation formationService;
     private final HttpClient httpClient;
+    private final Gson gson = new Gson();
 
     public FormationAiService() {
         this.formationService = new ServiceFormation();
@@ -55,16 +59,14 @@ public class FormationAiService {
         List<Integer> startedIds = progressService.getStartedFormations(user.getId());
 
         String rank = "Neophyte";
-        if (totalPassed >= 3)
-            rank = "Adept";
-        if (totalPassed >= 10)
-            rank = "Shadow Master";
+        if (totalPassed >= 3) rank = "Adept";
+        if (totalPassed >= 10) rank = "Shadow Master";
 
         StringBuilder sb = new StringBuilder();
         sb.append("User: ").append(user.getFullName()).append("\n");
         sb.append("Current Rank: ").append(rank).append("\n");
 
-        sb.append("\nCONQUERED PATHS (Do NOT recommend these, user finished them):\n");
+        sb.append("\nCONQUERED PATHS (Do NOT recommend these):\n");
         for (Formation f : allFormations) {
             long totalQuizzes = quizService.getAll().stream()
                     .filter(q -> q.getFormation() != null && q.getFormation().getId() == f.getId()).count();
@@ -78,23 +80,14 @@ public class FormationAiService {
             }
         }
 
-        sb.append("\nCURRENTLY STUDYING (Encourage finishing these):\n");
+        sb.append("\nCURRENTLY STUDYING:\n");
         for (Formation f : allFormations) {
             if (startedIds.contains(f.getId())) {
-                // Only if not already finished
-                long totalQuizzes = quizService.getAll().stream()
-                        .filter(q -> q.getFormation() != null && q.getFormation().getId() == f.getId()).count();
-                long passedQuizzes = quizService.getAll().stream()
-                        .filter(q -> q.getFormation() != null && q.getFormation().getId() == f.getId())
-                        .filter(q -> progressService.isQuizCompleted(user.getId(), q.getId()))
-                        .count();
-                if (passedQuizzes < totalQuizzes) {
-                    sb.append("- ").append(f.getTitre()).append("\n");
-                }
+                sb.append("- ").append(f.getTitre()).append("\n");
             }
         }
 
-        sb.append("\nAVAILABLE FORMATIONS TO PICK FROM:\n");
+        sb.append("\nAVAILABLE FORMATIONS:\n");
         for (Formation f : allFormations) {
             sb.append("- ").append(f.getTitre()).append(" (Level: ").append(f.getNiveau()).append(")\n");
         }
@@ -104,95 +97,60 @@ public class FormationAiService {
 
     private String callAi(String context) throws IOException, InterruptedException {
         String apiKey = resolveApiKey();
+        if (apiKey == null) return "Error: API Key not found.";
 
-        String systemPrompt = "You are the Shadow Dimensions Mentor. "
-                + "Return exactly 5 formation recommendations from the 'AVAILABLE FORMATIONS' list. "
-                + "IMPORTANT: Never recommend formations listed under 'CONQUERED PATHS'. "
-                + "Use the User's Current Rank and 'CURRENTLY STUDYING' list to personalize the choices. "
-                + "If they started a formation but didn't finish it, encourage them to complete their trial. "
-                + "For each, provide the [TITRE] followed by a mysterious, dark-themed reason WHY this fits their current progress. "
-                + "Format your response EXACTLY as follows for each item, separated by '|||':\n"
-                + "TITLE: [Formation Title] | REASON: [Your mysterious 1-sentence reasoning]\n";
+        String systemPrompt = "You are the Shadow Dimensions Mentor. Return exactly 5 recommendations. "
+                + "Format: TITLE: [Title] | REASON: [Reason] ||| ...";
 
-        String payload = "{" +
-                "\"model\":\"" + MODEL + "\"," +
-                "\"messages\":[" +
-                "{\"role\":\"system\",\"content\":\"" + escapeJson(systemPrompt) + "\"}," +
-                "{\"role\":\"user\",\"content\":\"" + escapeJson("CONTEXT:\n" + context) + "\"}" +
-                "]}";
+        JsonObject payload = new JsonObject();
+        payload.addProperty("model", MODEL);
+        
+        JsonArray messages = new JsonArray();
+        JsonObject systemMsg = new JsonObject();
+        systemMsg.addProperty("role", "system");
+        systemMsg.addProperty("content", systemPrompt);
+        messages.add(systemMsg);
+        
+        JsonObject userMsg = new JsonObject();
+        userMsg.addProperty("role", "user");
+        userMsg.addProperty("content", "CONTEXT:\n" + context);
+        messages.add(userMsg);
+        
+        payload.add("messages", messages);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(OPENROUTER_URL))
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .header("HTTP-Referer", "https://shadowdimensions.local")
-                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload)))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            return "Error from Oracle API: " + response.statusCode();
-        }
-
-        return extractContent(response.body());
-    }
-
-    private String extractContent(String json) {
-        try {
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").matcher(json);
-            if (m.find()) {
-                return m.group(1).replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "Could not parse Oracle's whisper.";
+        if (response.statusCode() != 200) return "Error: " + response.statusCode();
+        
+        JsonObject root = gson.fromJson(response.body(), JsonObject.class);
+        return root.getAsJsonArray("choices").get(0).getAsJsonObject().get("message").getAsJsonObject().get("content").getAsString();
     }
 
     private String resolveApiKey() {
         String key = System.getenv("OPENROUTER_API_KEY");
         if (key != null && !key.isBlank()) return key.trim();
 
-        key = System.getProperty("openrouter.api.key");
-        if (key != null && !key.isBlank()) return key.trim();
-
-        String[] possiblePaths = { ".env", "api_key.txt", "../.env", "../../.env", "shadow_dimension_java/.env" };
-        for (String path : possiblePaths) {
+        String[] paths = { ".env", "api_key.txt", "src/main/resources/.env" };
+        for (String path : paths) {
             java.io.File file = new java.io.File(path);
             if (file.exists()) {
                 try {
-                    key = java.nio.file.Files.readAllLines(file.toPath()).stream()
-                            .filter(l -> l.contains("OPENROUTER_API_KEY=") || (!path.equals(".env") && l.startsWith("sk-or")))
-                            .map(l -> {
-                                if (l.contains("OPENROUTER_API_KEY=")) {
-                                    String k = l.substring(l.indexOf("OPENROUTER_API_KEY=") + "OPENROUTER_API_KEY=".length()).trim();
-                                    if (k.startsWith("\"") && k.endsWith("\"")) k = k.substring(1, k.length() - 1);
-                                    if (k.startsWith("'") && k.endsWith("'")) k = k.substring(1, k.length() - 1);
-                                    return k;
-                                }
-                                return l.trim();
-                            })
-                            .filter(k -> k.startsWith("sk-or"))
-                            .findFirst()
-                            .orElse(null);
-                            
-                    if (key != null && !key.isBlank()) {
-                        System.out.println("Shadow Oracle: Successfully loaded API key from " + file.getAbsolutePath());
-                        return key;
+                    List<String> lines = java.nio.file.Files.readAllLines(file.toPath());
+                    for (String line : lines) {
+                        if (line.contains("OPENROUTER_API_KEY=")) {
+                            return line.split("=")[1].replace("\"", "").replace("'", "").trim();
+                        }
                     }
-                } catch (java.io.IOException e) {
-                    System.err.println("Shadow Oracle: Could not read " + path);
-                }
+                } catch (IOException ignored) {}
             }
         }
-        System.err.println("Shadow Oracle: API Key not found.");
         return null;
-    }
-    private String escapeJson(String value) {
-        return value.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
     }
 }
