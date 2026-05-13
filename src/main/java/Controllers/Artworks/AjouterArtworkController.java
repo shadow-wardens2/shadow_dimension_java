@@ -109,11 +109,18 @@ public class AjouterArtworkController implements Initializable {
     @FXML
     private void handleGenerateDescription(ActionEvent event) {
         String imageUrl = txtImage.getText() == null ? "" : txtImage.getText().trim();
-        String title = txtTitle.getText() == null ? "" : txtTitle.getText().trim();
 
-        if (imageUrl.isEmpty() && title.isEmpty()) {
+        if (imageUrl.isEmpty()) {
             showAlert("Données manquantes",
                       "Veuillez saisir un titre ou une URL d'image pour générer une description.");
+            return;
+        }
+
+        if (!imageUrl.toLowerCase().startsWith("http://") &&
+            !imageUrl.toLowerCase().startsWith("https://") &&
+            !imageUrl.startsWith("data:")) {
+            showAlert("URL invalide",
+                      "La description IA doit analyser une image. Utilisez une URL directe qui commence par http:// ou https://.");
             return;
         }
 
@@ -126,11 +133,7 @@ public class AjouterArtworkController implements Initializable {
         Task<String> task = new Task<>() {
             @Override
             protected String call() throws Exception {
-                if (!imageUrl.isEmpty()) {
-                    return geminiService.generateDescriptionFromUrl(imageUrl);
-                } else {
-                    return geminiService.generateDescriptionFromTitle(title);
-                }
+                return geminiService.generateVisualDescriptionFromUrl(imageUrl);
             }
         };
 

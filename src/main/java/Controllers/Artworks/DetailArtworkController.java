@@ -23,9 +23,9 @@ import javafx.stage.FileChooser;
 import javafx.scene.control.TextArea;
 import javafx.scene.paint.Color;
 import java.io.File;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -251,23 +251,7 @@ public class DetailArtworkController {
 
     @FXML
     private void handleAnalyzePdf(ActionEvent event) {
-        File selectedFile = null;
-        
-        // Try to use the PDF URL from the database first
-        if (artwork.getPdfUrl() != null && !artwork.getPdfUrl().isEmpty()) {
-            String rawPath = artwork.getPdfUrl();
-            File dbFile;
-            if (rawPath.startsWith("/uploads/")) {
-                // Resolve relative project path
-                dbFile = new File(System.getProperty("user.dir") + rawPath);
-            } else {
-                dbFile = new File(rawPath);
-            }
-            
-            if (dbFile.exists()) {
-                selectedFile = dbFile;
-            }
-        }
+        File selectedFile = resolveArtworkPdfFile();
 
         // Fallback to FileChooser if not in DB or file doesn't exist locally
         if (selectedFile == null) {
@@ -314,6 +298,36 @@ public class DetailArtworkController {
                 });
             }
         }).start();
+    }
+
+    private File resolveArtworkPdfFile() {
+        if (artwork == null || artwork.getPdfUrl() == null || artwork.getPdfUrl().isBlank()) {
+            return null;
+        }
+
+        String rawPath = artwork.getPdfUrl().trim().replace("\\", "/");
+        String relativePath = rawPath.startsWith("/") ? rawPath.substring(1) : rawPath;
+        Path projectRoot = Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize();
+
+        Path[] candidates = new Path[] {
+                Paths.get(rawPath),
+                projectRoot.resolve(relativePath),
+                projectRoot.resolve("uploads/pdfs").resolve(relativePath),
+                projectRoot.resolve("uploads").resolve(relativePath),
+                projectRoot.resolve("target/classes").resolve(relativePath)
+        };
+
+        for (Path candidate : candidates) {
+            try {
+                File file = candidate.normalize().toFile();
+                if (file.exists() && file.isFile()) {
+                    return file;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return null;
     }
 
     private void showSuccessAlert(String title, String content) {
