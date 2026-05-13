@@ -87,7 +87,7 @@ public class ManagementCommandeController {
             totalLbl.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
             
             Label statusLbl = new Label(c.getStatus());
-            if ("CANCEL_REQUESTED".equals(c.getStatus())) {
+            if ("cancellation_requested".equals(c.getStatus())) {
                 statusLbl.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 4;");
                 statusLbl.setText("⚠ CANCEL REQUESTED");
             } else {
@@ -98,19 +98,32 @@ public class ManagementCommandeController {
             deleteBtn.setStyle("-fx-background-color: rgba(239, 68, 68, 0.2); -fx-text-fill: #ef4444; -fx-background-radius: 6; -fx-cursor: hand;");
             deleteBtn.setOnAction(e -> deleteOrder(c));
 
-            if ("CANCEL_REQUESTED".equals(c.getStatus())) {
+            if ("cancellation_requested".equals(c.getStatus())) {
                 Button approveBtn = new Button("Approve Cancel");
                 approveBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;");
                 approveBtn.setOnAction(e -> {
                     try {
-                        serviceCommande.updateStatus(c.getId(), "CANCELLED");
+                        serviceCommande.updateStatus(c.getId(), "cancelled");
                         setupData();
                         refreshList();
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
                 });
-                row.getChildren().addAll(info, spacer, totalLbl, statusLbl, approveBtn, deleteBtn);
+
+                Button rejectBtn = new Button("Reject Cancel");
+                rejectBtn.setStyle("-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;");
+                rejectBtn.setOnAction(e -> {
+                    try {
+                        serviceCommande.updateStatus(c.getId(), "paid"); // Revert to paid
+                        setupData();
+                        refreshList();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+
+                row.getChildren().addAll(info, spacer, totalLbl, statusLbl, approveBtn, rejectBtn, deleteBtn);
             } else {
                 row.getChildren().addAll(info, spacer, totalLbl, statusLbl, deleteBtn);
             }
