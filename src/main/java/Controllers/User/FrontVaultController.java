@@ -189,7 +189,7 @@ public class FrontVaultController {
                     setGraphic(null);
                 } else {
                     Commande c = getTableView().getItems().get(getIndex());
-                    if ("CANCEL_REQUESTED".equals(c.getStatus()) || "CANCELLED".equals(c.getStatus())) {
+                    if ("cancellation_requested".equals(c.getStatus()) || "cancelled".equals(c.getStatus())) {
                         setGraphic(new Label(c.getStatus().replace("_", " ")));
                     } else {
                         setGraphic(btnCancel);
@@ -211,7 +211,7 @@ public class FrontVaultController {
 
     private void handleCancelRequest(Commande c) {
         try {
-            serviceCommande.updateStatus(c.getId(), "CANCEL_REQUESTED");
+            serviceCommande.updateStatus(c.getId(), "cancellation_requested");
             showAlert(Alert.AlertType.INFORMATION, "Cancellation Requested", "The admin has been notified of your cancellation request.");
             loadUserOrders(c.getUserId());
 
