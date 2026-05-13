@@ -83,10 +83,25 @@ public class EventService implements InterfaceServiceProduit<Event> {
     @Override
     public void delete(Event e) throws SQLException {
         if (cnx == null) throw new SQLException("Database connection is null");
-        String req = "DELETE FROM evt_event WHERE id=?";
-        PreparedStatement ps = cnx.prepareStatement(req);
-        ps.setInt(1, e.getId());
-        ps.executeUpdate();
+        boolean originalAutoCommit = cnx.getAutoCommit();
+        try {
+            cnx.setAutoCommit(false);
+            deleteEventChildren("DELETE FROM evt_reclamation WHERE event_id=?", e.getId());
+            deleteEventChildren("DELETE FROM evt_review WHERE event_id=?", e.getId());
+            deleteEventChildren("DELETE FROM evt_reservation WHERE event_id=?", e.getId());
+
+            String req = "DELETE FROM evt_event WHERE id=?";
+            try (PreparedStatement ps = cnx.prepareStatement(req)) {
+                ps.setInt(1, e.getId());
+                ps.executeUpdate();
+            }
+            cnx.commit();
+        } catch (SQLException ex) {
+            cnx.rollback();
+            throw ex;
+        } finally {
+            cnx.setAutoCommit(originalAutoCommit);
+        }
     }
 
     @Override
@@ -124,6 +139,13 @@ public class EventService implements InterfaceServiceProduit<Event> {
             counts.put(rs.getString("category_name"), rs.getInt("total"));
         }
         return counts;
+    }
+
+    private void deleteEventChildren(String sql, int eventId) throws SQLException {
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, eventId);
+            ps.executeUpdate();
+        }
     }
 
     private Event mapEvent(ResultSet rs) throws SQLException {

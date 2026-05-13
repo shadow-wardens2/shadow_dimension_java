@@ -15,12 +15,17 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class EventServiceTest {
 
     private Connection connection;
     private PreparedStatement preparedStatement;
+    private PreparedStatement reclamationDeleteStatement;
+    private PreparedStatement reviewDeleteStatement;
+    private PreparedStatement reservationDeleteStatement;
+    private PreparedStatement eventDeleteStatement;
     private Statement statement;
     private ResultSet resultSet;
     private EventService eventService;
@@ -29,11 +34,16 @@ class EventServiceTest {
     void setUp() throws Exception {
         connection = mock(Connection.class);
         preparedStatement = mock(PreparedStatement.class);
+        reclamationDeleteStatement = mock(PreparedStatement.class);
+        reviewDeleteStatement = mock(PreparedStatement.class);
+        reservationDeleteStatement = mock(PreparedStatement.class);
+        eventDeleteStatement = mock(PreparedStatement.class);
         statement = mock(Statement.class);
         resultSet = mock(ResultSet.class);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(connection.createStatement()).thenReturn(statement);
+        when(connection.getAutoCommit()).thenReturn(true);
         
         eventService = new EventService(connection);
     }
@@ -108,11 +118,29 @@ class EventServiceTest {
         Event event = new Event();
         event.setId(7);
 
+        when(connection.prepareStatement(eq("DELETE FROM evt_reclamation WHERE event_id=?"))).thenReturn(reclamationDeleteStatement);
+        when(connection.prepareStatement(eq("DELETE FROM evt_review WHERE event_id=?"))).thenReturn(reviewDeleteStatement);
+        when(connection.prepareStatement(eq("DELETE FROM evt_reservation WHERE event_id=?"))).thenReturn(reservationDeleteStatement);
+        when(connection.prepareStatement(eq("DELETE FROM evt_event WHERE id=?"))).thenReturn(eventDeleteStatement);
+
         eventService.delete(event);
 
-        verify(connection).prepareStatement("DELETE FROM evt_event WHERE id=?");
-        verify(preparedStatement).setInt(1, 7);
-        verify(preparedStatement).executeUpdate();
+        InOrder inOrder = inOrder(connection, reclamationDeleteStatement, reviewDeleteStatement, reservationDeleteStatement, eventDeleteStatement);
+        inOrder.verify(connection).setAutoCommit(false);
+        inOrder.verify(connection).prepareStatement("DELETE FROM evt_reclamation WHERE event_id=?");
+        inOrder.verify(reclamationDeleteStatement).setInt(1, 7);
+        inOrder.verify(reclamationDeleteStatement).executeUpdate();
+        inOrder.verify(connection).prepareStatement("DELETE FROM evt_review WHERE event_id=?");
+        inOrder.verify(reviewDeleteStatement).setInt(1, 7);
+        inOrder.verify(reviewDeleteStatement).executeUpdate();
+        inOrder.verify(connection).prepareStatement("DELETE FROM evt_reservation WHERE event_id=?");
+        inOrder.verify(reservationDeleteStatement).setInt(1, 7);
+        inOrder.verify(reservationDeleteStatement).executeUpdate();
+        inOrder.verify(connection).prepareStatement("DELETE FROM evt_event WHERE id=?");
+        inOrder.verify(eventDeleteStatement).setInt(1, 7);
+        inOrder.verify(eventDeleteStatement).executeUpdate();
+        inOrder.verify(connection).commit();
+        verify(connection).setAutoCommit(true);
     }
 
     @Test
